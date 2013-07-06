@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
-public class RunRooScriptTest extends E2ERunner {
+public class RunRooScriptTest extends E2ETest {
 
     @Before
     public void init() throws Exception {

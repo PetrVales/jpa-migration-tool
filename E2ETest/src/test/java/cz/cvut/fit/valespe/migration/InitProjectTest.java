@@ -8,7 +8,7 @@ import java.io.File;
 
 import static org.junit.Assert.assertTrue;
 
-public class InitProjectTest extends E2ERunner {
+public class InitProjectTest extends E2ETest {
 
     @Before
     public void init() throws Exception {
@@ -41,4 +41,5 @@ public class InitProjectTest extends E2ERunner {
     public void clean() throws Exception {
         removeFiles();
     }
+
 }

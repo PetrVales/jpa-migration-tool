@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({RunRooScriptTest.class, InitProjectTest.class})
+@Suite.SuiteClasses({RunRooScriptTest.class, InitProjectTest.class, InitMigrationTest.class})
 public class TestSuite extends TestCase {
 
 

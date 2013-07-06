@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 
-public class E2ERunner {
+public class E2ETest {
 
     protected File testDirectory;
 
@@ -26,7 +26,7 @@ public class E2ERunner {
     }
 
     private void copyScript(String scriptName) throws IOException {
-        InputStream script = E2ERunner.class.getResourceAsStream(scriptName);
+        InputStream script = E2ETest.class.getResourceAsStream(scriptName);
         File scriptFile = new File(testDirectory, scriptName);
         if (scriptFile.createNewFile()) {
             FileOutputStream stream = new FileOutputStream(scriptFile);
@@ -41,12 +41,16 @@ public class E2ERunner {
         processBuilder.directory(testDirectory);
         Process process = processBuilder.start();
         if (process.waitFor() != 0) {
-            throw new IllegalStateException("Script fail.");
+            throw new IllegalStateException("Script failed.");
         }
     }
 
-    protected  void removeFiles() throws IOException {
+    protected void removeFiles() throws IOException {
         FileUtils.deleteDirectory(testDirectory);
+    }
+
+    protected String getFileContent(File file) throws IOException {
+        return IOUtils.toString(new FileInputStream(file));
     }
 
 }
