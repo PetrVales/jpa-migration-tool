@@ -7,7 +7,7 @@
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <name>migration-setup</name>
     <organization>
-        <name>Your project/company name goes here (used in copyright and vendor information in the manifest)</name>
+        <name>JPA Migration</name>
     </organization>
     <licenses>
         <license>
@@ -16,8 +16,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <description>An add-on created by Spring Roo's addon creator feature.</description>
-    <url>http://www.some.company</url>
+    <description>JPA Migration - setup command.</description>
     <properties>
         <roo.version>1.2.4.RELEASE</roo.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -102,6 +101,23 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.1</version>
+        </dependency>
+        <!-- Liquibase -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.9.5</version>
         </dependency>
     </dependencies>
     <scm>
@@ -227,9 +243,9 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <parseJavaDoc>false</parseJavaDoc>
-                </configuration>
+                <!--<configuration>-->
+                    <!--<parseJavaDoc>false</parseJavaDoc>-->
+                <!--</configuration>-->
             </plugin>
         </plugins>
     </build>
