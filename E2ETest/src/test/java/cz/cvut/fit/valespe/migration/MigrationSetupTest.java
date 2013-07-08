@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
-public class InitMigrationTest extends E2ETest {
+public class MigrationSetupTest extends E2ETest {
 
     @Before
     public void init() throws Exception {
