@@ -15,7 +15,7 @@ import java.util.Map;
 @Suite.SuiteClasses({RunRooScriptTest.class, InitProjectTest.class, MigrationSetupTest.class})
 public class TestSuite extends TestCase {
 
-    private static Map<String, File> ADDONS = new HashMap<String, File>();
+    private static Map<String, File> ADD_ONS = new HashMap<String, File>();
 
     private static String UNINSTALL_SCRIPT = "uninstallAddon";
     private static String INSTALL_SCRIPT = "startAddon";
@@ -25,12 +25,12 @@ public class TestSuite extends TestCase {
 
     // FIXME this is ugly, but i have no better idea... feel free to improve
     static {
-        ADDONS.put("cz.cvut.valespe.migration.setup", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/migrationSetup"));
+        ADD_ONS.put("cz.cvut.valespe.migration.setup", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/migrationSetup"));
     }
 
     @BeforeClass
     public static void beforeTests() throws IOException, InterruptedException {
-        for (Map.Entry<String, File> entry : ADDONS.entrySet()) {
+        for (Map.Entry<String, File> entry : ADD_ONS.entrySet()) {
             mvnClean(entry.getValue());
             mvnPackage(entry.getValue());
             rooUninstall(entry.getKey());
@@ -112,7 +112,7 @@ public class TestSuite extends TestCase {
 
     @AfterClass
     public static void afterTests() throws IOException, InterruptedException {
-        for (Map.Entry<String, File> entry : ADDONS.entrySet()) {
+        for (Map.Entry<String, File> entry : ADD_ONS.entrySet()) {
             rooUninstall(entry.getKey());
         }
     }
