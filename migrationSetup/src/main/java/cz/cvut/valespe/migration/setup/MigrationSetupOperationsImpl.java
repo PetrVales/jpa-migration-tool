@@ -35,7 +35,7 @@ public class MigrationSetupOperationsImpl implements MigrationSetupOperations {
 
     @Override
     public boolean doesMigrationFileExist() {
-        return fileManager.getInputStream(getMigrationXmlPath()) != null;
+        return fileManager.exists(getMigrationXmlPath());
     }
 
     private String getMigrationXmlPath() {

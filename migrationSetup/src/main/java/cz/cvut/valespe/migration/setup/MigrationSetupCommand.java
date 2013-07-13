@@ -18,6 +18,8 @@ public class MigrationSetupCommand implements CommandMarker {
     @CliAvailabilityIndicator({ "migration setup" })
     public boolean isCommandAvailable() {
         return projectOperations.isFocusedProjectAvailable() && !operations.doesMigrationFileExist();
+//        return projectOperations.isFocusedProjectAvailable();
+//        return true;
     }
     
     @CliCommand(value = "migration setup", help = "Creates migration.xml file")
