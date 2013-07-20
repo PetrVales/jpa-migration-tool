@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({RunRooScriptTest.class, InitProjectTest.class, MigrationSetupTest.class})
+@Suite.SuiteClasses({RunRooScriptTest.class, InitProjectTest.class, MigrationSetupTest.class, NewClassTest.class})
 public class TestSuite extends TestCase {
 
     private static Map<String, File> ADD_ONS = new HashMap<String, File>();
@@ -26,6 +26,7 @@ public class TestSuite extends TestCase {
     // FIXME this is ugly, but i have no better idea... feel free to improve
     static {
         ADD_ONS.put("cz.cvut.valespe.migration.setup", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/migrationSetup"));
+        ADD_ONS.put("cz.cvut.valespe.migration.newclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/newClass"));
     }
 
     @BeforeClass
