@@ -1,4 +1,4 @@
 project --topLevelPackage cz.cvut
 migration setup
-migrate newClass --class ~.Order
+migrate new class --class ~.Order --table order
 exit
