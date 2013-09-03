@@ -1,0 +1,7 @@
+project --topLevelPackage cz.cvut
+migration setup
+migrate new class --class ~.Order --table order
+migrate new property --class ~.Order --property orderTotal --propertyType java.lang.Integer --column order_total --columnType integer
+migrate new property --class ~.Order --property otherProperty --propertyType java.lang.Integer --column other_property --columnType integer
+migrate remove property --class ~.Order --property orderTotal
+exit
