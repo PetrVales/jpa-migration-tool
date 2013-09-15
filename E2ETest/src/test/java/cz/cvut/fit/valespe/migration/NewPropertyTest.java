@@ -17,11 +17,12 @@ public class NewPropertyTest extends E2ETest {
     }
 
     @Test
-    public void createsOrderJavaClass() throws IOException {
+    public void createsOrderTotalPropertyInClass() throws IOException {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
 
         assertTrue(orderClassContent.contains("private Integer orderTotal"));
+        assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
     }
 
     @Test

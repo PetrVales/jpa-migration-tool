@@ -75,11 +75,14 @@ public class NewpropertyOperationsImpl implements NewpropertyOperations {
     }
 
     @Override
-    public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, ClassOrInterfaceTypeDetails classType) {
+    public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType) {
         final String physicalTypeIdentifier = classType.getDeclaredByMetadataId();
-        final FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, propertyType, propertyName);
+        final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName);
         if (columnName != null) {
             fieldDetails.setColumn(columnName);
+        }
+        if (columnType != null) {
+            fieldDetails.setColumnDefinition(columnType);
         }
 
         insertField(fieldDetails);
@@ -90,8 +93,7 @@ public class NewpropertyOperationsImpl implements NewpropertyOperations {
         fieldDetails.decorateAnnotationsList(annotations);
         fieldDetails.setAnnotations(annotations);
 
-        int modifier = Modifier.PRIVATE;
-        fieldDetails.setModifiers(modifier);
+        fieldDetails.setModifiers(Modifier.PRIVATE);
 
         final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
         typeManagementService.addField(fieldBuilder.build());

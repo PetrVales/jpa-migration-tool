@@ -12,7 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ RunRooScriptTest.class, InitProjectTest.class, MigrationSetupTest.class, NewClassTest.class, NewPropertyTest.class, RemoveClassTest.class, RemovePropertyTest.class })
+@Suite.SuiteClasses({ RunRooScriptTest.class, InitProjectTest.class, MigrationSetupTest.class, NewClassTest.class,
+        NewPropertyTest.class, RemoveClassTest.class, RemovePropertyTest.class, NewPropertyTest.class, MovePropertyTest.class })
 public class TestSuite extends TestCase {
 
     private static Map<String, File> ADD_ONS = new HashMap<String, File>();
@@ -30,6 +31,7 @@ public class TestSuite extends TestCase {
         ADD_ONS.put("cz.cvut.valespe.migration.newproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/newProperty"));
         ADD_ONS.put("cz.cvut.valespe.migration.removeclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeClass"));
         ADD_ONS.put("cz.cvut.valespe.migration.removeproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeProperty"));
+//        ADD_ONS.put("cz.cvut.valespe.migration.moveproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/moveProperty"));
     }
 
     @BeforeClass
