@@ -1,107 +1,84 @@
 package cz.cvut.valespe.migration.moveproperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.DependencyScope;
-import org.springframework.roo.project.DependencyType;
-import org.springframework.roo.project.Repository;
+import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-/**
- * Implementation of operations this add-on offers.
- *
- * @since 1.1
- */
-@Component // Use these Apache Felix annotations to register your commands class in the Roo container
+import java.io.InputStream;
+
+@Component
 @Service
 public class MovepropertyOperationsImpl implements MovepropertyOperations {
-    
-    /**
-     * Use ProjectOperations to install new dependencies, plugins, properties, etc into the project configuration
-     */
-    @Reference private ProjectOperations projectOperations;
 
-    /**
-     * Use TypeLocationService to find types which are annotated with a given annotation in the project
-     */
-    @Reference private TypeLocationService typeLocationService;
-    
-    /**
-     * Use TypeManagementService to change types
-     */
-    @Reference private TypeManagementService typeManagementService;
+    private static final String MIGRATION_XML = "migration.xml";
+    private static final String CHANGE_SET = "changeSet";
+    private static final String ADD_COLUMN = "addColumn";
+    private static final String DROP_COLUMN = "dropColumn";
 
-    /** {@inheritDoc} */
-    public boolean isCommandAvailable() {
-        // Check if a project has been created
-        return projectOperations.isFocusedProjectAvailable();
+    @Reference private PathResolver pathResolver;
+    @Reference private FileManager fileManager;
+
+    @Override
+    public void moveColumn(String columnName, String columnType, String fromTable, String fromSchema, String fromCatalog, String toTable, String toSchema, String toCatalog) {
+        Validate.notNull(toTable, "Table name required");
+
+        final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
+        final InputStream inputStream = fileManager.getInputStream(migrationPath);
+
+        final Document migration = XmlUtils.readXml(inputStream);
+        final Element root = migration.getDocumentElement();
+        final Element databaseChangeLogElement = XmlUtils.findFirstElement("/databaseChangeLog", root);
+        Validate.notNull(databaseChangeLogElement, "No databaseChangeLog element found");
+
+        Element changeSetElement = migration.createElement(CHANGE_SET);
+        databaseChangeLogElement.appendChild(changeSetElement);
+        addColumn(columnName, columnType, toTable, toSchema, toCatalog, migration, changeSetElement);
+        moveData();
+        dropColumn(columnName, fromTable, fromSchema, fromCatalog, migration, changeSetElement);
+
+        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
+                XmlUtils.nodeToString(migration), false);
     }
 
-    /** {@inheritDoc} */
-    public void annotateType(JavaType javaType) {
-        // Use Roo's Assert type for null checks
-        Validate.notNull(javaType, "Java type required");
+    private void addColumn(String columnName, String columnType, String table, String schema, String catalog, Document migration, Element changeSetElement) {
+        Element addColumnElement = migration.createElement(ADD_COLUMN);
+        Element columnElement = migration.createElement("column");
+        setAttribute(columnElement, "name", columnName);
+        setAttribute(columnElement, "type", columnType);
+        addColumnElement.appendChild(columnElement);
+        setAttribute(addColumnElement, "tableName", table);
+        setAttribute(addColumnElement, "schemaName", schema);
+        setAttribute(addColumnElement, "catalogName", catalog);
+        changeSetElement.appendChild(addColumnElement);
+    }
 
-        // Obtain ClassOrInterfaceTypeDetails for this java type
-        ClassOrInterfaceTypeDetails existing = typeLocationService.getTypeDetails(javaType);
 
-        // Test if the annotation already exists on the target type
-        if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), new JavaType(RooMoveproperty.class.getName())) == null) {
-            ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
-            
-            // Create JavaType instance for the add-ons trigger annotation
-            JavaType rooRooMoveproperty = new JavaType(RooMoveproperty.class.getName());
+    private void moveData() {
 
-            // Create Annotation metadata
-            AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRooMoveproperty);
-            
-            // Add annotation to target type
-            classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
-            
-            // Save changes to disk
-            typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+        // TODO how is this part defined?
+
+    }
+
+    private void dropColumn(String columnName, String table, String schema, String catalog, Document migration, Element changeSetElement) {
+        Element createTableElement = migration.createElement(DROP_COLUMN);
+        setAttribute(createTableElement, "tableName", table);
+        setAttribute(createTableElement, "schemaName", schema);
+        setAttribute(createTableElement, "catalogName", catalog);
+        setAttribute(createTableElement, "columnName", columnName);
+        changeSetElement.appendChild(createTableElement);
+    }
+
+    private void setAttribute(Element element, String attribute, String value) {
+        if (value != null && !value.isEmpty()) {
+            element.setAttribute(attribute, value);
         }
     }
 
-    /** {@inheritDoc} */
-    public void annotateAll() {
-        // Use the TypeLocationService to scan project for all types with a specific annotation
-        for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
-            annotateType(type);
-        }
-    }
-    
-    /** {@inheritDoc} */
-    public void setup() {
-        // Install the add-on Google code repository needed to get the annotation 
-        projectOperations.addRepository("", new Repository("Moveproperty Roo add-on repository", "Moveproperty Roo add-on repository", "https://move-property.googlecode.com/svn/repo"));
-        
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        
-        // Install the dependency on the add-on jar (
-        dependencies.add(new Dependency("cz.cvut.valespe.migration.moveproperty", "cz.cvut.valespe.migration.moveproperty", "0.1.0.BUILD-SNAPSHOT", DependencyType.JAR, DependencyScope.PROVIDED));
-        
-        // Install dependencies defined in external XML file
-        for (Element dependencyElement : XmlUtils.findElements("/configuration/batch/dependencies/dependency", XmlUtils.getConfiguration(getClass()))) {
-            dependencies.add(new Dependency(dependencyElement));
-        }
-
-        // Add all new dependencies to pom.xml
-        projectOperations.addDependencies("", dependencies);
-    }
 }

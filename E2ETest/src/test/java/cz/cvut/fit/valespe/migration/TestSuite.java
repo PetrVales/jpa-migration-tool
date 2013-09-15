@@ -13,13 +13,13 @@ import java.util.Map;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        RunRooScriptTest.class,
-        InitProjectTest.class,
-        MigrationSetupTest.class,
-        NewClassTest.class,
-        NewPropertyTest.class,
-        RemoveClassTest.class,
-        RemovePropertyTest.class,
+//        RunRooScriptTest.class,
+//        InitProjectTest.class,
+//        MigrationSetupTest.class,
+//        NewClassTest.class,
+//        NewPropertyTest.class,
+//        RemoveClassTest.class,
+//        RemovePropertyTest.class,
         MovePropertyTest.class
 })
 public class TestSuite extends TestCase {

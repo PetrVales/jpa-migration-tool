@@ -1,33 +1,17 @@
 package cz.cvut.valespe.migration.moveproperty;
 
-import org.springframework.roo.model.JavaType;
-
-/**
- * Interface of operations this add-on offers. Typically used by a command type or an external add-on.
- *
- * @since 1.1
- */
 public interface MovepropertyOperations {
 
     /**
-     * Indicate commands should be available
-     * 
-     * @return true if it should be available, otherwise false
+     *
+     * @param columnName
+     * @param columnType
+     * @param fromTable
+     * @param fromSchema
+     * @param fromCatalog
+     * @param toTable
+     * @param toSchema
+     * @param toCatalog
      */
-    boolean isCommandAvailable();
-
-    /**
-     * Annotate the provided Java type with the trigger of this add-on
-     */
-    void annotateType(JavaType type);
-    
-    /**
-     * Annotate all Java types with the trigger of this add-on
-     */
-    void annotateAll();
-    
-    /**
-     * Setup all add-on artifacts (dependencies in this case)
-     */
-    void setup();
+    void moveColumn(String columnName, String columnType, String fromTable, String fromSchema, String fromCatalog, String toTable, String toSchema, String toCatalog);
 }

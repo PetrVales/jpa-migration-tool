@@ -31,6 +31,7 @@ public class MovepropertyCommands implements CommandMarker {
     
     @Reference private NewpropertyOperations newpropertyOperations;
     @Reference private RemovepropertyOperations removepropertyOperations;
+    @Reference private MovepropertyOperations movepropertyOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
     
@@ -44,8 +45,6 @@ public class MovepropertyCommands implements CommandMarker {
             @CliOption(key = "from", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType fromType,
             @CliOption(key = "to", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType toType,
             @CliOption(key = "property", mandatory = true, help = "The name of the field to add") final JavaSymbolName propertyName) {
-
-
         final ClassOrInterfaceTypeDetails fromTypeDetails = typeLocationService.getTypeDetails(fromType);
         Validate.notNull(fromTypeDetails, "The type specified, '%s', doesn't exist", fromType);
         final ClassOrInterfaceTypeDetails toTypeDetails = typeLocationService.getTypeDetails(toType);
@@ -56,35 +55,27 @@ public class MovepropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
         newpropertyOperations.addFieldToClass(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toTypeDetails);
-        createColumn(columnName.getValue(), columnType.getValue(), toTypeDetails);
+        moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails);
         removepropertyOperations.deleteFieldFromClass(propertyName, fromTypeDetails);
-        dropColumn(columnName.getValue(), fromTypeDetails);
     }
 
-    private void createColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
-        AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        newpropertyOperations.createColumn(
-                table == null ? "" : table.getValue(),
-                schema == null ? "" : schema.getValue(),
-                catalog == null ? "" : catalog.getValue(),
-                columnName, columnType
-        );
-    }
-
-    private void dropColumn(String columnName, ClassOrInterfaceTypeDetails javaTypeDetails) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
-        AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        removepropertyOperations.dropColumn(
-                table == null ? "" : table.getValue(),
-                schema == null ? "" : schema.getValue(),
-                catalog == null ? "" : catalog.getValue(),
-                columnName
-        );
+    private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails) {
+        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
+        AnnotationAttributeValue<String> fromSchema = fromEntity.getAttribute("schema");
+        AnnotationAttributeValue<String> fromCatalog = fromEntity.getAttribute("catalog");
+        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
+        AnnotationAttributeValue<String> toSchema = toEntity.getAttribute("schema");
+        AnnotationAttributeValue<String> toCatalog = toEntity.getAttribute("catalog");
+        movepropertyOperations.moveColumn(
+                columnName, columnType,
+                fromTable == null ? "" : fromTable.getValue(),
+                fromSchema == null ? "" : fromSchema.getValue(),
+                fromCatalog == null ? "" : fromCatalog.getValue(),
+                toTable == null ? "" : toTable.getValue(),
+                toSchema == null ? "" : toSchema.getValue(),
+                toCatalog == null ? "" : toCatalog.getValue());
     }
     
 }
