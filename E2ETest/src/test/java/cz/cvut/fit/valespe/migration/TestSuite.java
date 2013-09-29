@@ -20,7 +20,8 @@ import java.util.Map;
 //        NewPropertyTest.class,
 //        RemoveClassTest.class,
 //        RemovePropertyTest.class,
-        MovePropertyTest.class
+//        MovePropertyTest.class,
+        MergeClassTest.class
 })
 public class TestSuite extends TestCase {
 
@@ -40,6 +41,7 @@ public class TestSuite extends TestCase {
         ADD_ONS.put("cz.cvut.valespe.migration.removeclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeClass"));
         ADD_ONS.put("cz.cvut.valespe.migration.removeproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeProperty"));
         ADD_ONS.put("cz.cvut.valespe.migration.moveproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/moveProperty"));
+        ADD_ONS.put("cz.cvut.valespe.migration.mergeclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/mergeClass"));
     }
 
     @BeforeClass
