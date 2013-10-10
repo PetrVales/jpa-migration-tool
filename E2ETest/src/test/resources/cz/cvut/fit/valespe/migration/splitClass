@@ -1,0 +1,8 @@
+project --topLevelPackage cz.cvut
+migration setup
+migrate new class --class ~.Original --table original
+migrate new property --class ~.Original --property a --propertyType java.lang.Integer --column a --columnType integer
+migrate new property --class ~.Original --property b --propertyType java.lang.Integer --column b --columnType integer
+migrate new property --class ~.Original --property common --propertyType java.lang.Integer --column common --columnType integer
+migrate split class --class ~.Original --classA ~.A --tableA a_table --propertiesA a,common --classB ~.B --tableB b_table --propertiesB b,common
+exit

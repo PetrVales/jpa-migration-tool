@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.util.Collection;
 
 public class E2ETest {
 
@@ -16,7 +17,7 @@ public class E2ETest {
     }
 
     private void createTestDirectory() throws IOException {
-        testDirectory = File.createTempFile("temp", Long.toString(System.nanoTime()));
+        testDirectory = File.createTempFile("tmp", Long.toString(System.nanoTime()));
         if(!(testDirectory.delete())) {
             throw new IOException("Could not delete temp file: " + testDirectory.getAbsolutePath());
         }
@@ -41,7 +42,7 @@ public class E2ETest {
         processBuilder.directory(testDirectory);
         Process process = processBuilder.start();
         if (process.waitFor() != 0) {
-            throw new IllegalStateException("Script failed.");
+            throw new IllegalStateException("Script " + scriptName + " failed.");
         }
     }
 
@@ -51,6 +52,36 @@ public class E2ETest {
 
     protected String getFileContent(File file) throws IOException {
         return IOUtils.toString(new FileInputStream(file));
+    }
+
+    protected void logDirectoryStructure() {
+        logDirecotoryContent(testDirectory, 0);
+    }
+
+    protected void logFileContents() throws IOException {
+        logFileContents(testDirectory);
+    }
+
+    private void logDirecotoryContent(File dir, int offset) {
+        Collection<File> files = FileUtils.listFiles(dir, null, true);
+        for (File file : files) {
+//            for (int i = 0; i < offset; i++)
+//                System.out.println("|  ");
+//            System.out.println("+--" + file.getName() + (file.isDirectory() ? "/" : ""));
+//            if (file.isDirectory())
+//                logDirecotoryContent(file, offset + 1);
+            System.out.println("-" + file.getName());
+        }
+    }
+
+    private void logFileContents(File dir) throws IOException {
+        String[] extensions = {"aj", "xml", "java", "roo"};
+        Collection<File> files = FileUtils.listFiles(dir, extensions, true);
+        for (File file : files) {
+            System.out.println("*****\t" + file.getName() + "\t*****");
+            System.out.println(getFileContent(file));
+            System.out.println();
+        }
     }
 
 }
