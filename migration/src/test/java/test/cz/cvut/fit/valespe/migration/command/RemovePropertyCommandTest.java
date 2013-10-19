@@ -35,7 +35,7 @@ public class RemovePropertyCommandTest {
     private RemovePropertyCommands removePropertyCommands = new RemovePropertyCommands(removePropertyOperations, projectOperations, migrationSetupOperations, typeLocationService);
 
     @Test
-    public void commandNewClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
+    public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
 
@@ -43,14 +43,14 @@ public class RemovePropertyCommandTest {
     }
 
     @Test
-    public void commandNewClassIsNotAvailableWhenProjectDoesNotExist() {
+    public void commandRemovePropertyIsNotAvailableWhenProjectDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(false);
 
         assertFalse(removePropertyCommands.isCommandAvailable());
     }
 
     @Test
-    public void commandNewClassIsNotAvailableWhenMigrationFileDoesNotExist() {
+    public void commandRemovePropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
 
@@ -58,7 +58,7 @@ public class RemovePropertyCommandTest {
     }
 
     @Test
-    public void commandAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
+    public void commandRemovePropertyToClassAndGeneratesMigrationChangeSet() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
         AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);

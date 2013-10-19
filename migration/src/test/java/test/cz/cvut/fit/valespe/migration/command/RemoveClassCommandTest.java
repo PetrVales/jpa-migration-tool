@@ -32,7 +32,7 @@ public class RemoveClassCommandTest {
             new RemoveClassCommands(removeClassOperations, projectOperations, migrationSetupOperations, typeLocationService);
 
     @Test
-    public void commandNewClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
+    public void commandRemoveClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
 
@@ -40,14 +40,14 @@ public class RemoveClassCommandTest {
     }
 
     @Test
-    public void commandNewClassIsNotAvailableWhenProjectDoesNotExist() {
+    public void commandRemoveClassIsNotAvailableWhenProjectDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(false);
 
         assertFalse(removeClassCommand.isCommandAvailable());
     }
 
     @Test
-    public void commandNewClassIsNotAvailableWhenMigrationFileDoesNotExist() {
+    public void commandRemoveClassIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
 
@@ -55,7 +55,7 @@ public class RemoveClassCommandTest {
     }
 
     @Test
-    public void commandRemovesClassAndGeneratesMigrationChangeSet() {
+    public void commandRemoveClassRemovesClassAndGeneratesMigrationChangeSet() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
         AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);

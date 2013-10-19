@@ -50,7 +50,7 @@ public class NewClassCommandsTest {
     }
 
     @Test
-    public void commandGeneratesClassFileAndChangeSetRecord() {
+    public void commandNewClassGeneratesClassFileAndChangeSetRecord() {
         newclassCommands.newClass(CLASS, TABLE, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
 
         verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE, SCHEMA, CATALOG);
@@ -58,7 +58,7 @@ public class NewClassCommandsTest {
     }
 
     @Test
-    public void commandUseClassNameWhenTableNameIsNotSpecify() {
+    public void commandNewClassUseClassNameWhenTableNameIsNotSpecify() {
         newclassCommands.newClass(CLASS, null, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
 
         verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, null, SCHEMA, CATALOG);

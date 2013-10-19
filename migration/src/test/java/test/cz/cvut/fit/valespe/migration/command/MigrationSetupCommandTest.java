@@ -17,7 +17,7 @@ public class MigrationSetupCommandTest {
     MigrationSetupCommand command = new MigrationSetupCommand(projectOperations, migrationSetupOperations);
 
     @Test
-    public void commandIsAvailableWhenProjectIsCreatedAndMigrationFileDoesntExist() {
+    public void commandMigrationSetupIsAvailableWhenProjectIsCreatedAndMigrationFileDoesntExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
 
@@ -25,14 +25,14 @@ public class MigrationSetupCommandTest {
     }
 
     @Test
-    public void commandIsNotAvailableWhenProjectIsNotCreated() {
+    public void commandMigrationSetupIsNotAvailableWhenProjectIsNotCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(false);
 
         assertFalse(command.isCommandAvailable());
     }
 
     @Test
-    public void commandIsNotAvailableWhenMigrationFileDoesExist() {
+    public void commandMigrationSetupIsNotAvailableWhenMigrationFileDoesExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
         when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
 
@@ -40,7 +40,7 @@ public class MigrationSetupCommandTest {
     }
 
     @Test
-    public void commandCreatesMigrationFile() {
+    public void commandMigrationSetupCreatesMigrationFile() {
         command.initMigration();
 
         verify(migrationSetupOperations, times(1)).createMigrationFile();
