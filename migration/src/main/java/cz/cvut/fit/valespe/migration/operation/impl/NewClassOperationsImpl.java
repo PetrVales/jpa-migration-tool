@@ -35,10 +35,7 @@ public class NewClassOperationsImpl implements NewClassOperations {
     private static final String CHANGE_SET = "changeSet";
     private static final String CREATE_TABLE = "createTable";
     public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
-    private static final AnnotationMetadataBuilder MIGRATION_ENTITY_BUILDER =
-            new AnnotationMetadataBuilder(MIGRATION_ENTITY);
-    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
-            ROO_JAVA_BEAN);
+    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
     @Reference private PathResolver pathResolver;
     @Reference private FileManager fileManager;

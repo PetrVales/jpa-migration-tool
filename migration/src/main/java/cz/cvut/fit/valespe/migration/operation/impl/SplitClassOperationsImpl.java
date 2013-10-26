@@ -1,5 +1,6 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
+import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.SplitClassOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,9 +44,8 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
     @Reference private PathResolver pathResolver;
     @Reference private FileManager fileManager;
 
-    public static final JavaType MIGRATION_ENTITY = new JavaType("cz.cvut.valespe.migration.newclass.MigrationEntity");
-    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
-            ROO_JAVA_BEAN);
+    public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
+    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
     @Override
     public void createClass(JavaType original, JavaType target, List<FieldMetadata> propertiesA, String table, String schema, String catalog, String tablespace) {
@@ -67,7 +67,6 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
         builder.setAnnotations(createAnnotations(target.getSimpleTypeName(), table, schema, catalog));
 
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
-
     }
 
     private Collection<? extends FieldMetadataBuilder> getDeclaredFields(List<FieldMetadata> fields) {

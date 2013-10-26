@@ -1,5 +1,6 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
+import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,9 +29,8 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 @Service
 public class MergeClassOperationsImpl implements MergeClassOperations {
 
-    public static final JavaType MIGRATION_ENTITY = new JavaType("cz.cvut.valespe.migration.newclass.MigrationEntity");
-    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
-            ROO_JAVA_BEAN);
+    public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
+    private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;

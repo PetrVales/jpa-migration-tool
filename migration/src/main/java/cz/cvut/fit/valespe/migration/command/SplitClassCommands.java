@@ -1,5 +1,6 @@
 package cz.cvut.fit.valespe.migration.command;
 
+import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
 import cz.cvut.fit.valespe.migration.operation.SplitClassOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -8,6 +9,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -20,13 +22,23 @@ import java.util.List;
 @Service
 public class SplitClassCommands implements CommandMarker {
     
-    @Reference private SplitClassOperations operations;
+    @Reference private SplitClassOperations splitClassOperations;
+    @Reference private ProjectOperations projectOperations;
+    @Reference private MigrationSetupOperations migrationSetupOperations;
     @Reference private TypeLocationService typeLocationService;
-    
+
+    public SplitClassCommands() { }
+
+    public SplitClassCommands(SplitClassOperations splitClassOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+        this.splitClassOperations = splitClassOperations;
+        this.projectOperations = projectOperations;
+        this.migrationSetupOperations = migrationSetupOperations;
+        this.typeLocationService = typeLocationService;
+    }
+
     @CliAvailabilityIndicator({ "migrate split class" })
     public boolean isCommandAvailable() {
-//        return operations.isCommandAvailable();
-        return true;
+        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
     }
 
 //    migrate split class --class ~.Original --classA ~.A --tableA a_table --propertiesA a common --classB ~.B --tableB b_table --propertiesB b common
@@ -62,10 +74,10 @@ public class SplitClassCommands implements CommandMarker {
             }
         }
 
-        operations.createClass(target, targetA, propertiesA, tableA, schema, catalog, tablespace);
-        operations.createClass(target, targetB, propertiesB, tableB, schema, catalog, tablespace);
-        operations.createTable(propertiesA, tableA, schema, catalog, tablespace);
-        operations.createTable(propertiesB, tableB, schema, catalog, tablespace);
-        operations.removeClass(target);
+        splitClassOperations.createClass(target, targetA, propertiesA, tableA, schema, catalog, tablespace);
+        splitClassOperations.createClass(target, targetB, propertiesB, tableB, schema, catalog, tablespace);
+        splitClassOperations.createTable(propertiesA, tableA, schema, catalog, tablespace);
+        splitClassOperations.createTable(propertiesB, tableB, schema, catalog, tablespace);
+        splitClassOperations.removeClass(target);
     }
 }
