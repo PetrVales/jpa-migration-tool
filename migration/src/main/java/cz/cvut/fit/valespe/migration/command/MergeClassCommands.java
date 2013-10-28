@@ -1,6 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
+import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -17,14 +18,24 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class MergeClassCommands implements CommandMarker {
-    
-    @Reference private MergeClassOperations operations;
+
+    @Reference private MergeClassOperations mergeClassOperations;
     @Reference private ProjectOperations projectOperations;
+    @Reference private MigrationSetupOperations migrationSetupOperations;
     @Reference private TypeLocationService typeLocationService;
-    
+
+    public MergeClassCommands() { }
+
+    public MergeClassCommands(MergeClassOperations mergeClassOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+        this.mergeClassOperations = mergeClassOperations;
+        this.projectOperations = projectOperations;
+        this.migrationSetupOperations = migrationSetupOperations;
+        this.typeLocationService = typeLocationService;
+    }
+
     @CliAvailabilityIndicator({ "migrate merge class" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate merge class", help = "Merge two classes into one and generate migration")
@@ -41,13 +52,13 @@ public class MergeClassCommands implements CommandMarker {
         Validate.notNull(classATypeDetails, "The specified type, '%s', doesn't exist", classA.getSimpleTypeName());
         Validate.notNull(classBTypeDetails, "The specified type, '%s', doesn't exist", classB.getSimpleTypeName());
 
-        operations.mergeClasses(target, classA, classB, table, schema, catalog, tablespace);
+        mergeClassOperations.mergeClasses(target, classA, classB, table, schema, catalog, tablespace);
         mergeTables(target);
     }
 
     private void mergeTables(JavaType target) {
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
-        operations.createTable(targetTypeDetails);
+        mergeClassOperations.createTable(targetTypeDetails);
     }
 
 }

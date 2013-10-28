@@ -37,8 +37,8 @@ public class SplitClassCommandsTest extends MigrationTest {
     private static final JavaType PROPERTY_TYPE = new JavaType("test.Type");
     private static final String COLUMN_TYPE = "column-type";
 
-    private static final JavaType A_CLASS = new JavaType("test.Class");
-    private static final JavaType B_CLASS = new JavaType("test.Class");
+    private static final JavaType A_CLASS = new JavaType("test.AClass");
+    private static final JavaType B_CLASS = new JavaType("test.BClass");
     private static final String A_TABLE = "aTable";
     private static final String B_TABLE = "bTable";
     private static final String A_PROPERTIES = COMMON_PROPERTY_NAME + "," + A_PROPERTY_NAME;
