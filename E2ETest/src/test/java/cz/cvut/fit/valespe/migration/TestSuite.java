@@ -20,6 +20,7 @@ import java.util.Map;
         NewPropertyTest.class,
         AddIdTest.class,
         AddStringField.class,
+        AddIntegerField.class,
         NewPropertyOneToManyTest.class,
         RemoveClassTest.class,
         RemovePropertyTest.class,

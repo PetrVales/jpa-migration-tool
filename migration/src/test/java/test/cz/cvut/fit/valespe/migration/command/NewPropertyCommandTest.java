@@ -36,6 +36,9 @@ public class NewPropertyCommandTest {
     private static final JavaType STRING_PROPERTY_TYPE = new JavaType("java.lang.String");
     private static final String STRING_COLUMN_TYPE = "varchar2(255)";
 
+    private static final JavaType INTEGER_PROPERTY_TYPE = new JavaType("java.lang.Integer");
+    private static final String INTEGER_COLUMN_TYPE = "integer";
+
     private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
@@ -93,6 +96,16 @@ public class NewPropertyCommandTest {
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, classOrInterfaceTypeDetails);
         verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE);
+    }
+
+    @Test
+    public void addIntegerCommandTest() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
+
+        newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE);
     }
 
     private ClassOrInterfaceTypeDetails mockClassWithTable() {
