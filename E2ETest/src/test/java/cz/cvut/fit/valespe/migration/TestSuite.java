@@ -21,6 +21,7 @@ import java.util.Map;
         AddIdTest.class,
         AddStringField.class,
         AddIntegerField.class,
+        AddBooleanField.class,
         NewPropertyOneToManyTest.class,
         RemoveClassTest.class,
         RemovePropertyTest.class,

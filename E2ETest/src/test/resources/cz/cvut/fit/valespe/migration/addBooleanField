@@ -1,0 +1,5 @@
+project --topLevelPackage cz.cvut
+migration setup
+migrate new class --class ~.Order --table order
+migrate add boolean --field shipped --class ~.Order --column shipped-column
+exit

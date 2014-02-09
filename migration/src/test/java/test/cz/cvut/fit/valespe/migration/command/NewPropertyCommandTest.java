@@ -39,6 +39,9 @@ public class NewPropertyCommandTest {
     private static final JavaType INTEGER_PROPERTY_TYPE = new JavaType("java.lang.Integer");
     private static final String INTEGER_COLUMN_TYPE = "integer";
 
+    private static final JavaType BOOLEAN_PROPERTY_TYPE = new JavaType("java.lang.Boolean");
+    private static final String BOOLEAN_COLUMN_TYPE = "boolean";
+
     private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
@@ -106,6 +109,16 @@ public class NewPropertyCommandTest {
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
         verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE);
+    }
+
+    @Test
+    public void addBooleanCommandTest() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
+
+        newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
     }
 
     private ClassOrInterfaceTypeDetails mockClassWithTable() {
