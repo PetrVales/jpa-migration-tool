@@ -18,5 +18,29 @@ public interface NewPropertyOperations {
      * @param columnName
      * @param classType
      */
-    void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType);
+    void addFieldToClass(
+            JavaSymbolName propertyName,
+            JavaType propertyType,
+            String columnName,
+            String columnType,
+            ClassOrInterfaceTypeDetails classType
+    );
+
+    /**
+     * Add field with given name and type to class of given class
+     * @param propertyName
+     * @param propertyType
+     * @param columnName
+     * @param classType
+     * @id
+     */
+    void addFieldToClass(
+            JavaSymbolName propertyName,
+            JavaType propertyType,
+            String columnName,
+            String columnType,
+            ClassOrInterfaceTypeDetails classType,
+            boolean id
+    );
+
 }

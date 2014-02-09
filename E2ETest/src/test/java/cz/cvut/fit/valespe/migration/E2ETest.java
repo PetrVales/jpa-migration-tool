@@ -2,6 +2,9 @@ package cz.cvut.fit.valespe.migration;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Rule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 import java.io.*;
 import java.util.Collection;
@@ -9,6 +12,28 @@ import java.util.Collection;
 public class E2ETest {
 
     protected File testDirectory;
+
+    @Rule
+    public TestWatcher watchman = new TestWatcher() {
+        @Override
+        protected void failed(Throwable e, Description description) {
+            try {
+                logDirectoryStructure();
+                logFileContents();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void succeeded(Description description) {
+            try {
+                removeFiles();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     protected void runTestScript(String scriptName) throws IOException, InterruptedException {
         createTestDirectory();

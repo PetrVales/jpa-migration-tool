@@ -60,6 +60,17 @@ public class NewPropertyCommands implements CommandMarker {
         addColumn(columnName, columnType, javaTypeDetails);
     }
 
+    @CliCommand(value = "migrate add id", help = "Some helpful description")
+    public void addId(
+            @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName
+    ) {
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
+        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+
+        newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails);
+        addColumn("id", "bigint", javaTypeDetails);
+    }
+
     private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");

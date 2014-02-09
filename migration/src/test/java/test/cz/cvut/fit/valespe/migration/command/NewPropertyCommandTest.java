@@ -28,6 +28,11 @@ public class NewPropertyCommandTest {
     private static final String SCHEMA = "schema";
     private static final String CATALOG = "catalog";
 
+    private static final JavaSymbolName ID_PROPERTY = new JavaSymbolName("id");
+    private static final JavaType ID_PROPERTY_TYPE = new JavaType("java.lang.Long");
+    private static final String ID_COLUMN_NAME = "id";
+    private static final String ID_COLUMN_TYPE = "bigint";
+
     private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
@@ -59,6 +64,25 @@ public class NewPropertyCommandTest {
 
     @Test
     public void commandNewPropertyAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
+
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
+    }
+
+    @Test
+    public void addIdCommandTest() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
+
+        newPropertyCommands.addId(CLASS);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE);
+    }
+
+    private ClassOrInterfaceTypeDetails mockClassWithTable() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
         AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
@@ -72,11 +96,7 @@ public class NewPropertyCommandTest {
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(annotationMetadata);
         when(typeLocationService.getTypeDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
-
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE);
-
-        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
+        return classOrInterfaceTypeDetails;
     }
 
 }

@@ -18,6 +18,8 @@ import java.util.Map;
         MigrationSetupTest.class,
         NewClassTest.class,
         NewPropertyTest.class,
+        AddIdTest.class,
+        NewPropertyOneToManyTest.class,
         RemoveClassTest.class,
         RemovePropertyTest.class,
         MovePropertyTest.class,
@@ -34,16 +36,8 @@ public class TestSuite extends TestCase {
     private static String ADD_ON_URL = "{addonUrl}";
     private static File INSTALL_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
 
-    // FIXME this is ugly to hardwire project locations, but i have no better idea... feel free to improve
+    // FIXME this is ugly to hardwire project locations, but i have no better idea...
     static {
-//        ADD_ONS.put("cz.cvut.valespe.migration.setup", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/migrationSetup"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.newclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/newClass"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.newproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/newProperty"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.removeclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeClass"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.removeproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/removeProperty"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.moveproperty", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/moveProperty"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.mergeclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/mergeClass"));
-//        ADD_ONS.put("cz.cvut.valespe.migration.splitclass", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/splitClass"));
         ADD_ONS.put("cz.cvut.fit.valespe.migration", new File("/home/petr/workspace/diplomka/jpa-refactoring-tool/migration"));
     }
 

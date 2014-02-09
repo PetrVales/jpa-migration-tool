@@ -85,6 +85,11 @@ public class NewPropertyOperationsImpl implements NewPropertyOperations {
 
     @Override
     public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType) {
+        addFieldToClass(propertyName, propertyType, columnName, columnType, classType, false);
+    }
+
+    @Override
+    public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType, boolean id) {
         final String physicalTypeIdentifier = classType.getDeclaredByMetadataId();
         final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName);
         if (columnName != null) {
