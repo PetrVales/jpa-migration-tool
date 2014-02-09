@@ -71,6 +71,19 @@ public class NewPropertyCommands implements CommandMarker {
         addColumn("id", "bigint", javaTypeDetails);
     }
 
+    @CliCommand(value = "migrate add string", help = "Some helpful description")
+    public void addString(
+            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
+            @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName
+    ) {
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
+        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+
+        newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
+        addColumn(columnName, "varchar2(255)", javaTypeDetails);
+    }
+
     private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");

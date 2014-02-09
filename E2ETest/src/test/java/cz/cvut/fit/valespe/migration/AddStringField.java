@@ -8,11 +8,11 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
-public class AddIdTest extends E2ETest {
+public class AddStringField extends E2ETest {
 
     @Before
     public void init() throws Exception {
-        runTestScript("addId");
+        runTestScript("addStringField");
     }
 
     @Test
@@ -20,9 +20,8 @@ public class AddIdTest extends E2ETest {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
 
-        assertTrue(orderClassContent.contains("private Long id"));
-        assertTrue(orderClassContent.contains("@Column(name = \"id\", columnDefinition = \"bigint\")"));
-        assertTrue(orderClassContent.contains("@Id"));
+        assertTrue(orderClassContent.contains("private String name"));
+        assertTrue(orderClassContent.contains("@Column(name = \"name-column\", columnDefinition = \"varchar2(255)\")"));
     }
 
     @Test
@@ -30,8 +29,8 @@ public class AddIdTest extends E2ETest {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order_Roo_JavaBean.aj");
         String orderClassContent = getFileContent(orderClass);
 
-        assertTrue(orderClassContent.contains("public Long Order.getId()"));
-        assertTrue(orderClassContent.contains("public void Order.setId(Long id)"));
+        assertTrue(orderClassContent.contains("public String Order.getName()"));
+        assertTrue(orderClassContent.contains("public void Order.setName(String name)"));
     }
 
     @Test
@@ -40,8 +39,8 @@ public class AddIdTest extends E2ETest {
         String migrationContent = getFileContent(migration);
 
         assertTrue(migrationContent.contains("addColumn"));
-        assertTrue(migrationContent.contains("name=\"id\""));
-        assertTrue(migrationContent.contains("type=\"bigint\""));
+        assertTrue(migrationContent.contains("name=\"name-column\""));
+        assertTrue(migrationContent.contains("type=\"varchar2(255)\""));
     }
 
 }
