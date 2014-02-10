@@ -67,7 +67,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails);
+        newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
         addColumn("id", "bigint", javaTypeDetails);
     }
 

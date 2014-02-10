@@ -98,6 +98,7 @@ public class NewPropertyOperationsImpl implements NewPropertyOperations {
         if (columnType != null) {
             fieldDetails.setColumnDefinition(columnType);
         }
+        fieldDetails.setId(id);
 
         insertField(fieldDetails);
     }

@@ -87,7 +87,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addId(CLASS);
 
-        verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails, true);
         verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE);
     }
 
