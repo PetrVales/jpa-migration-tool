@@ -1,7 +1,7 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.SplitClassCommands;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.SplitClassOperations;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,14 +49,14 @@ public class SplitClassCommandsTest extends MigrationTest {
 
     private SplitClassOperations splitClassOperations = mock(SplitClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private SplitClassCommands splitClassCommands = new SplitClassCommands(splitClassOperations, projectOperations, migrationSetupOperations, typeLocationService);
+    private SplitClassCommands splitClassCommands = new SplitClassCommands(splitClassOperations, projectOperations, liquibaseOperations, typeLocationService);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(splitClassCommands.isCommandAvailable());
     }
@@ -71,7 +71,7 @@ public class SplitClassCommandsTest extends MigrationTest {
     @Test
     public void commandRemovePropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(splitClassCommands.isCommandAvailable());
     }

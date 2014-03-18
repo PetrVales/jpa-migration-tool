@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.RemoveClassOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -26,25 +26,25 @@ public class RemoveClassCommands implements CommandMarker {
     
     @Reference private RemoveClassOperations removeClassOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
     @Reference private TypeLocationService typeLocationService;
+    @Reference private LiquibaseOperations liquibaseOperations;
 
     public RemoveClassCommands() { }
 
     public RemoveClassCommands(
             RemoveClassOperations removeClassOperations,
             ProjectOperations projectOperations,
-            MigrationSetupOperations migrationSetupOperations,
-            TypeLocationService typeLocationService) {
+            TypeLocationService typeLocationService,
+            LiquibaseOperations liquibaseOperations) {
         this.removeClassOperations = removeClassOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
         this.typeLocationService = typeLocationService;
+        this.liquibaseOperations = liquibaseOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate remove class" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate remove class", help = "Remove class and its aspects and make record in migration.xml")
@@ -61,7 +61,7 @@ public class RemoveClassCommands implements CommandMarker {
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
         AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
         AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        removeClassOperations.dropTable(
+        liquibaseOperations.dropTable(
                 table == null ? "" : table.getValue(),
                 schema == null ? "" : schema.getValue(),
                 catalog == null ? "" : catalog.getValue(),

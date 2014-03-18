@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
@@ -34,24 +34,24 @@ public class MovePropertyCommands implements CommandMarker {
     @Reference private NewPropertyOperations newpropertyOperations;
     @Reference private RemovePropertyOperations removepropertyOperations;
     @Reference private MovePropertyOperations movePropertyOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
+    @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
 
     public MovePropertyCommands() { }
 
-    public MovePropertyCommands(NewPropertyOperations newpropertyOperations, RemovePropertyOperations removepropertyOperations, MovePropertyOperations movePropertyOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
+    public MovePropertyCommands(NewPropertyOperations newpropertyOperations, RemovePropertyOperations removepropertyOperations, MovePropertyOperations movePropertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
         this.newpropertyOperations = newpropertyOperations;
         this.removepropertyOperations = removepropertyOperations;
         this.movePropertyOperations = movePropertyOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
+        this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
         this.projectOperations = projectOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate move property" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate move property", help = "Some helpful description")

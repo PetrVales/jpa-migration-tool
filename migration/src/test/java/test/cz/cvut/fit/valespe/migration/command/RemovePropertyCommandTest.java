@@ -2,7 +2,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.RemovePropertyCommands;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -30,14 +30,14 @@ public class RemovePropertyCommandTest {
 
     private RemovePropertyOperations removePropertyOperations = mock(RemovePropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private RemovePropertyCommands removePropertyCommands = new RemovePropertyCommands(removePropertyOperations, projectOperations, migrationSetupOperations, typeLocationService);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
+    private RemovePropertyCommands removePropertyCommands = new RemovePropertyCommands(removePropertyOperations, projectOperations, typeLocationService, liquibaseOperations);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(removePropertyCommands.isCommandAvailable());
     }
@@ -52,7 +52,7 @@ public class RemovePropertyCommandTest {
     @Test
     public void commandRemovePropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(removePropertyCommands.isCommandAvailable());
     }
@@ -83,7 +83,7 @@ public class RemovePropertyCommandTest {
         removePropertyCommands.removeProperty(CLASS, PROPERTY);
 
         verify(removePropertyOperations, times(1)).removeFieldFromClass(PROPERTY, classOrInterfaceTypeDetails);
-        verify(removePropertyOperations, times(1)).dropColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME);
+        verify(liquibaseOperations, times(1)).dropColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME);
     }
 
 }

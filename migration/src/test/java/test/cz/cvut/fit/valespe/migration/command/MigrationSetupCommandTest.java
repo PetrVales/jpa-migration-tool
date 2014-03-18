@@ -1,8 +1,7 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.MigrationSetupCommand;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
-import org.junit.Before;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import org.junit.Test;
 import org.springframework.roo.project.ProjectOperations;
 
@@ -13,13 +12,13 @@ import static org.mockito.Mockito.*;
 public class MigrationSetupCommandTest {
 
     ProjectOperations projectOperations = mock(ProjectOperations.class);
-    MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
-    MigrationSetupCommand command = new MigrationSetupCommand(projectOperations, migrationSetupOperations);
+    LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
+    MigrationSetupCommand command = new MigrationSetupCommand(projectOperations, liquibaseOperations);
 
     @Test
     public void commandMigrationSetupIsAvailableWhenProjectIsCreatedAndMigrationFileDoesntExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertTrue(command.isCommandAvailable());
     }
@@ -34,7 +33,7 @@ public class MigrationSetupCommandTest {
     @Test
     public void commandMigrationSetupIsNotAvailableWhenMigrationFileDoesExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertFalse(command.isCommandAvailable());
     }
@@ -43,7 +42,7 @@ public class MigrationSetupCommandTest {
     public void commandMigrationSetupCreatesMigrationFile() {
         command.initMigration();
 
-        verify(migrationSetupOperations, times(1)).createMigrationFile();
+        verify(liquibaseOperations, times(1)).createMigrationFile();
     }
 
 }

@@ -31,9 +31,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 @Service
 public class NewClassOperationsImpl implements NewClassOperations {
 
-    private static final String MIGRATION_XML = "migration.xml";
-    private static final String CHANGE_SET = "changeSet";
-    private static final String CREATE_TABLE = "createTable";
     public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
     private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
@@ -97,37 +94,5 @@ public class NewClassOperationsImpl implements NewClassOperations {
 
         return entityAnnotationBuilder;
     }
-
-    @Override
-    public void createTable(String table, String schema, String catalog, String tablespace) {
-        Validate.notNull(table, "Table name required");
-
-        final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
-        final InputStream inputStream = fileManager.getInputStream(migrationPath);
-
-        final Document migration = XmlUtils.readXml(inputStream);
-        final Element root = migration.getDocumentElement();
-        final Element databaseChangeLogElement = XmlUtils.findFirstElement("/databaseChangeLog", root);
-        Validate.notNull(databaseChangeLogElement, "No databaseChangeLog element found");
-
-        Element changeSetElement = migration.createElement(CHANGE_SET);
-        databaseChangeLogElement.appendChild(changeSetElement);
-        Element createTableElement = migration.createElement(CREATE_TABLE);
-        setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "tablespace", tablespace);
-        changeSetElement.appendChild(createTableElement);
-
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
-    }
-
-    private void setAttribute(Element element, String attribute, String value) {
-        if (value != null && !value.isEmpty()) {
-            element.setAttribute(attribute, value);
-        }
-    }
-
 
 }

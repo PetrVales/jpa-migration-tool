@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -30,20 +30,20 @@ public class NewPropertyCommands implements CommandMarker {
     @Reference private NewPropertyOperations newPropertyOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
+    @Reference private LiquibaseOperations liquibaseOperations;
 
     public NewPropertyCommands() {}
 
-    public NewPropertyCommands(NewPropertyOperations newPropertyOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+    public NewPropertyCommands(NewPropertyOperations newPropertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
         this.newPropertyOperations = newPropertyOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
         this.typeLocationService = typeLocationService;
+        this.liquibaseOperations = liquibaseOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate new property" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate new property", help = "Some helpful description")
@@ -115,7 +115,7 @@ public class NewPropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
         AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
         AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        newPropertyOperations.createColumn(
+        liquibaseOperations.createColumn(
                 table == null ? "" : table.getValue(),
                 schema == null ? "" : schema.getValue(),
                 catalog == null ? "" : catalog.getValue(),

@@ -10,12 +10,4 @@ public interface RemoveClassOperations {
      */
     void removeClass(JavaType target);
 
-    /**
-     * Create drop table record in migration.xml
-     * @param table
-     * @param schema
-     * @param catalog
-     * @param cascade
-     */
-    void dropTable(String table, String schema, String catalog, boolean cascade);
 }

@@ -1,8 +1,8 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.MergeClassCommands;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -26,14 +26,14 @@ public class MergeClassCommandsTest extends MigrationTest {
 
     private MergeClassOperations mergeClassOperations = mock(MergeClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private MergeClassCommands mergeClassCommands = new MergeClassCommands(mergeClassOperations, projectOperations, migrationSetupOperations, typeLocationService);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
+    private MergeClassCommands mergeClassCommands = new MergeClassCommands(mergeClassOperations, projectOperations, liquibaseOperations, typeLocationService);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(mergeClassCommands.isCommandAvailable());
     }
@@ -48,7 +48,7 @@ public class MergeClassCommandsTest extends MigrationTest {
     @Test
     public void commandRemovePropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(mergeClassCommands.isCommandAvailable());
     }

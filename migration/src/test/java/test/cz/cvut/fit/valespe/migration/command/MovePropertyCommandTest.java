@@ -2,7 +2,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.MovePropertyCommands;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
@@ -40,15 +40,15 @@ public class MovePropertyCommandTest {
     private NewPropertyOperations newpropertyOperations = mock(NewPropertyOperations.class);
     private RemovePropertyOperations removepropertyOperations = mock(RemovePropertyOperations.class);
     private MovePropertyOperations movePropertyOperations = mock(MovePropertyOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(newpropertyOperations, removepropertyOperations, movePropertyOperations, migrationSetupOperations, typeLocationService, projectOperations);
+    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(newpropertyOperations, removepropertyOperations, movePropertyOperations, liquibaseOperations, typeLocationService, projectOperations);
 
     @Test
     public void commandMovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(movePropertyCommands.isCommandAvailable());
     }
@@ -63,7 +63,7 @@ public class MovePropertyCommandTest {
     @Test
     public void commandMovePropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(movePropertyCommands.isCommandAvailable());
     }

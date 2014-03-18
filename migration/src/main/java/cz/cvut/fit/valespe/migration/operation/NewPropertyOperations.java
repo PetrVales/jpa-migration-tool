@@ -7,11 +7,6 @@ import org.springframework.roo.model.JavaType;
 public interface NewPropertyOperations {
 
     /**
-     * creates migration record in migration file
-     */
-    void createColumn(String table, String schema, String catalog, String columnName, String columnType);
-
-    /**
      * Add field with given name and type to class of given class
      * @param propertyName
      * @param propertyType

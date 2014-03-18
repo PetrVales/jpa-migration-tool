@@ -1,7 +1,7 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.NewClassCommands;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.NewClassOperations;
 import org.junit.Test;
 import org.springframework.roo.model.JavaType;
@@ -23,13 +23,13 @@ public class NewClassCommandsTest {
 
     private NewClassOperations newclassOperations = mock(NewClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
-    private NewClassCommands newclassCommands = new NewClassCommands(newclassOperations, projectOperations, migrationSetupOperations);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
+    private NewClassCommands newclassCommands = new NewClassCommands(newclassOperations, projectOperations, liquibaseOperations);
 
     @Test
     public void commandNewClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(newclassCommands.isCommandAvailable());
     }
@@ -44,7 +44,7 @@ public class NewClassCommandsTest {
     @Test
     public void commandNewClassIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(newclassCommands.isCommandAvailable());
     }
@@ -54,7 +54,7 @@ public class NewClassCommandsTest {
         newclassCommands.newClass(CLASS, TABLE, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
 
         verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE, SCHEMA, CATALOG);
-        verify(newclassOperations, times(1)).createTable(TABLE, SCHEMA, CATALOG, TABLESPACE);
+        verify(liquibaseOperations, times(1)).createTable(TABLE, SCHEMA, CATALOG, TABLESPACE);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class NewClassCommandsTest {
         newclassCommands.newClass(CLASS, null, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
 
         verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, null, SCHEMA, CATALOG);
-        verify(newclassOperations, times(1)).createTable(CLASS_NAME, SCHEMA, CATALOG, TABLESPACE);
+        verify(liquibaseOperations, times(1)).createTable(CLASS_NAME, SCHEMA, CATALOG, TABLESPACE);
     }
 
 }

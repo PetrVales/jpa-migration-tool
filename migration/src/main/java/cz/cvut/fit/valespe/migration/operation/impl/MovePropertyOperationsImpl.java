@@ -21,6 +21,7 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
     private static final String MIGRATION_XML = "migration.xml";
     private static final String CHANGE_SET = "changeSet";
     private static final String ADD_COLUMN = "addColumn";
+    private static final String SQL = "sql";
     private static final String DROP_COLUMN = "dropColumn";
 
     @Reference private PathResolver pathResolver;
@@ -48,7 +49,7 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
         Element changeSetElement = migration.createElement(CHANGE_SET);
         databaseChangeLogElement.appendChild(changeSetElement);
         addColumn(columnName, columnType, toTable, toSchema, toCatalog, migration, changeSetElement);
-        moveData();
+//        moveData(fromTable, toTable, columnName, where, migration, changeSetElement);
         dropColumn(columnName, fromTable, fromSchema, fromCatalog, migration, changeSetElement);
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
@@ -68,9 +69,10 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
     }
 
 
-    private void moveData() {
-
-        // TODO how is this part defined?
+    private void moveData(String tableFrom, String tableTo, String columnName, String where, Document migration, Element changeSetElement) {
+        Element sqlElement = migration.createElement(SQL);
+        sqlElement.setTextContent("UPDATE " + tableTo + " SET " + columnName + "(SELECT " + columnName + " FROM " + tableFrom + " WHERE " + where + ")");
+        changeSetElement.appendChild(sqlElement);
 
     }
 

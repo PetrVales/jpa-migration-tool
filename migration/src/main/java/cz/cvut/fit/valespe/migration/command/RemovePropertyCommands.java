@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -29,21 +29,21 @@ public class RemovePropertyCommands implements CommandMarker {
     
     @Reference private RemovePropertyOperations removePropertyOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
     @Reference private TypeLocationService typeLocationService;
+    @Reference private LiquibaseOperations liquibaseOperations;
 
     public RemovePropertyCommands() { }
 
-    public RemovePropertyCommands(RemovePropertyOperations removePropertyOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+    public RemovePropertyCommands(RemovePropertyOperations removePropertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
         this.removePropertyOperations = removePropertyOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
         this.typeLocationService = typeLocationService;
+        this.liquibaseOperations = liquibaseOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate remove property" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate remove property", help = "Some helpful description")
@@ -66,7 +66,7 @@ public class RemovePropertyCommands implements CommandMarker {
         FieldMetadata declaredField = javaTypeDetails.getDeclaredField(propertyName);
         AnnotationMetadata column = declaredField.getAnnotation(COLUMN_ANNOTATION);
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
-        removePropertyOperations.dropColumn(
+        liquibaseOperations.dropColumn(
                 table == null ? "" : table.getValue(),
                 schema == null ? "" : schema.getValue(),
                 catalog == null ? "" : catalog.getValue(),

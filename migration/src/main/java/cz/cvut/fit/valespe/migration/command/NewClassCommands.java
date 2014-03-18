@@ -1,6 +1,6 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.NewClassOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -18,19 +18,19 @@ public class NewClassCommands implements CommandMarker {
     
     @Reference private NewClassOperations newclassOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
+    @Reference private LiquibaseOperations liquibaseOperations;
 
     public NewClassCommands() { }
 
-    public NewClassCommands(NewClassOperations newclassOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations) {
+    public NewClassCommands(NewClassOperations newclassOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations) {
         this.newclassOperations = newclassOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
+        this.liquibaseOperations = liquibaseOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate new class" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
 
     @CliCommand(value = "migrate new class", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA and DB migration script in SRC_MAIN_RESOURCES")
@@ -42,7 +42,7 @@ public class NewClassCommands implements CommandMarker {
             @CliOption(key = "tablespace", mandatory = false, help = "The JPA table catalog name to use for this entity") final String tablespace,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName) {
         newclassOperations.createEntity(className, entityName, table, schema, catalog);
-        newclassOperations.createTable(getTableName(className, table), schema, catalog, tablespace);
+        liquibaseOperations.createTable(getTableName(className, table), schema, catalog, tablespace);
     }
 
     private String getTableName(JavaType className, String table) {

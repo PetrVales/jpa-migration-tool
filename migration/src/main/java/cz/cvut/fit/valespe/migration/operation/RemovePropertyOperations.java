@@ -12,13 +12,4 @@ public interface RemovePropertyOperations {
      */
     void removeFieldFromClass(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails);
 
-    /**
-     * Create dropColumn record in migration.xml
-     * @param table
-     * @param schema
-     * @param catalog
-     * @param columnName
-     */
-    void dropColumn(String table, String schema, String catalog, String columnName);
-
 }

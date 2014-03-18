@@ -1,6 +1,6 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.SplitClassOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -24,21 +24,21 @@ public class SplitClassCommands implements CommandMarker {
     
     @Reference private SplitClassOperations splitClassOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
     @Reference private TypeLocationService typeLocationService;
+    @Reference private LiquibaseOperations liquibaseOperations;
 
     public SplitClassCommands() { }
 
-    public SplitClassCommands(SplitClassOperations splitClassOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+    public SplitClassCommands(SplitClassOperations splitClassOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
         this.splitClassOperations = splitClassOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
+        this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
     }
 
     @CliAvailabilityIndicator({ "migrate split class" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
 
 //    migrate split class --class ~.Original --classA ~.A --tableA a_table --propertiesA a common --classB ~.B --tableB b_table --propertiesB b common

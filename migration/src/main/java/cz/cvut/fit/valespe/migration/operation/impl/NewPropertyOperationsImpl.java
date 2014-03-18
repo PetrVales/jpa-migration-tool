@@ -30,57 +30,14 @@ import java.util.List;
 @Service
 public class NewPropertyOperationsImpl implements NewPropertyOperations {
 
-    private static final String MIGRATION_XML = "migration.xml";
-    private static final String CHANGE_SET = "changeSet";
-    private static final String ADD_COLUMN = "addColumn";
-
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
-    @Reference private PathResolver pathResolver;
-    @Reference private FileManager fileManager;
 
     public NewPropertyOperationsImpl() { }
 
-    public NewPropertyOperationsImpl(TypeManagementService typeManagementService, TypeLocationService typeLocationService, PathResolver pathResolver, FileManager fileManager) {
+    public NewPropertyOperationsImpl(TypeManagementService typeManagementService, TypeLocationService typeLocationService) {
         this.typeManagementService = typeManagementService;
         this.typeLocationService = typeLocationService;
-        this.pathResolver = pathResolver;
-        this.fileManager = fileManager;
-    }
-
-    @Override
-    public void createColumn(String table, String schema, String catalog, String columnName, String columnType) {
-        Validate.notNull(table, "Table name required");
-
-        final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
-        final InputStream inputStream = fileManager.getInputStream(migrationPath);
-
-        final Document migration = XmlUtils.readXml(inputStream);
-        final Element root = migration.getDocumentElement();
-        final Element databaseChangeLogElement = XmlUtils.findFirstElement("/databaseChangeLog", root);
-        Validate.notNull(databaseChangeLogElement, "No databaseChangeLog element found");
-
-        Element changeSetElement = migration.createElement(CHANGE_SET);
-        databaseChangeLogElement.appendChild(changeSetElement);
-        Element addColumnElement = migration.createElement(ADD_COLUMN);
-        Element columnElement = migration.createElement("column");
-        setAttribute(columnElement, "name", columnName);
-        setAttribute(columnElement, "type", columnType);
-        addColumnElement.appendChild(columnElement);
-        setAttribute(addColumnElement, "tableName", table);
-        setAttribute(addColumnElement, "schemaName", schema);
-        setAttribute(addColumnElement, "catalogName", catalog);
-        changeSetElement.appendChild(addColumnElement);
-
-
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
-    }
-
-    private void setAttribute(Element element, String attribute, String value) {
-        if (value != null && !value.isEmpty()) {
-            element.setAttribute(attribute, value);
-        }
     }
 
     @Override

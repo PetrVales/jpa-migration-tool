@@ -26,20 +26,12 @@ import java.util.List;
 @Service
 public class RemovePropertyOperationsImpl implements RemovePropertyOperations {
 
-    private static final String MIGRATION_XML = "migration.xml";
-    private static final String CHANGE_SET = "changeSet";
-    private static final String DROP_COLUMN = "dropColumn";
-
     @Reference private TypeManagementService typeManagementService;
-    @Reference private FileManager fileManager;
-    @Reference private PathResolver pathResolver;
 
     public RemovePropertyOperationsImpl() { }
 
-    public RemovePropertyOperationsImpl(TypeManagementService typeManagementService, FileManager fileManager, PathResolver pathResolver) {
+    public RemovePropertyOperationsImpl(TypeManagementService typeManagementService) {
         this.typeManagementService = typeManagementService;
-        this.fileManager = fileManager;
-        this.pathResolver = pathResolver;
     }
 
     @Override
@@ -57,37 +49,6 @@ public class RemovePropertyOperationsImpl implements RemovePropertyOperations {
         builder.setDeclaredFields(fieldsBuilders);
 
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
-    }
-
-    @Override
-    public void dropColumn(String table, String schema, String catalog, String columnName) {
-        Validate.notNull(table, "Table name required");
-
-        final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
-        final InputStream inputStream = fileManager.getInputStream(migrationPath);
-
-        final Document migration = XmlUtils.readXml(inputStream);
-        final Element root = migration.getDocumentElement();
-        final Element databaseChangeLogElement = XmlUtils.findFirstElement("/databaseChangeLog", root);
-        Validate.notNull(databaseChangeLogElement, "No databaseChangeLog element found");
-
-        Element changeSetElement = migration.createElement(CHANGE_SET);
-        databaseChangeLogElement.appendChild(changeSetElement);
-        Element createTableElement = migration.createElement(DROP_COLUMN);
-        setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "columnName", columnName);
-        changeSetElement.appendChild(createTableElement);
-
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
-    }
-
-    private void setAttribute(Element element, String attribute, String value) {
-        if (value != null && !value.isEmpty()) {
-            element.setAttribute(attribute, value);
-        }
     }
 
 }

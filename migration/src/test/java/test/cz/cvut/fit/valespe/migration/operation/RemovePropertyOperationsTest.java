@@ -30,30 +30,9 @@ public class RemovePropertyOperationsTest {
     private static final JavaSymbolName PROPERTY_NOT_TO_REMOVE = new JavaSymbolName("propertyNotToRemove");
     private static final JavaType PROPERTY_TYPE = new JavaType("test.Type");
     private static final String PHYSICAL_TYPE_IDENTIFIER = "MID:" + PhysicalTypeIdentifier.class.getName() + "#?";
-    private static final String MIGRATION_XML = "migration.xml";
-    private static final String MOCKED_MIGRATION_PATH = "migration-path";
-    private static final String TABLE = "table-name";
-    private static final String SCHEMA= "schema-name";
-    private static final String CATALOG = "catalog-name";
-    private static final String COLUMN_NAME = "column-name";
-    private static final String MIGRATION_FILE_CONTENT_BEFORE =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                    "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
-                    "\n" +
-                    "</databaseChangeLog>\n";
-    private static final String MIGRATION_FILE_CONTENT_AFTER =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                    "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
-                    "\n" +
-                    "<changeSet>\n" +
-                    "        <dropColumn catalogName=\"catalog-name\" columnName=\"column-name\" schemaName=\"schema-name\" tableName=\"table-name\"/>\n" +
-                    "    </changeSet>\n" +
-                    "</databaseChangeLog>\n";
 
     private TypeManagementService typeManagementService = mock(TypeManagementService.class);
-    private FileManager fileManager = mock(FileManager.class);
-    private PathResolver pathResolver = mock(PathResolver.class);
-    private RemovePropertyOperations removePropertyOperations = new RemovePropertyOperationsImpl(typeManagementService, fileManager, pathResolver);
+    private RemovePropertyOperations removePropertyOperations = new RemovePropertyOperationsImpl(typeManagementService);
 
     @Test
     public void removeFieldFromClass() {
@@ -81,16 +60,6 @@ public class RemovePropertyOperationsTest {
 
         assertEquals(1, argument.getValue().getDeclaredFields().size());
         assertEquals(PROPERTY_NOT_TO_REMOVE, argument.getValue().getDeclaredFields().get(0).getFieldName());
-    }
-
-    @Test
-    public void dropColumn() {
-        when(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML)).thenReturn(MOCKED_MIGRATION_PATH);
-        when(fileManager.getInputStream(MOCKED_MIGRATION_PATH)).thenReturn(new StringBufferInputStream(MIGRATION_FILE_CONTENT_BEFORE));
-
-        removePropertyOperations.dropColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME);
-
-        verify(fileManager, times(1)).createOrUpdateTextFileIfRequired(MOCKED_MIGRATION_PATH,  MIGRATION_FILE_CONTENT_AFTER, false);
     }
 
 }

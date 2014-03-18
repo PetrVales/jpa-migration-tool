@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,21 +21,21 @@ public class MergeClassCommands implements CommandMarker {
 
     @Reference private MergeClassOperations mergeClassOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private MigrationSetupOperations migrationSetupOperations;
+    @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
 
     public MergeClassCommands() { }
 
-    public MergeClassCommands(MergeClassOperations mergeClassOperations, ProjectOperations projectOperations, MigrationSetupOperations migrationSetupOperations, TypeLocationService typeLocationService) {
+    public MergeClassCommands(MergeClassOperations mergeClassOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
         this.mergeClassOperations = mergeClassOperations;
         this.projectOperations = projectOperations;
-        this.migrationSetupOperations = migrationSetupOperations;
+        this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
     }
 
     @CliAvailabilityIndicator({ "migrate merge class" })
     public boolean isCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable() && migrationSetupOperations.doesMigrationFileExist();
+        return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
     
     @CliCommand(value = "migrate merge class", help = "Merge two classes into one and generate migration")

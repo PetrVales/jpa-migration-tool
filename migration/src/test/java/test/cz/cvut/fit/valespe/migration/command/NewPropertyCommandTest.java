@@ -2,7 +2,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.NewPropertyCommands;
-import cz.cvut.fit.valespe.migration.operation.MigrationSetupOperations;
+import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -44,14 +44,14 @@ public class NewPropertyCommandTest {
 
     private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MigrationSetupOperations migrationSetupOperations = mock(MigrationSetupOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(newPropertyOperations, projectOperations, migrationSetupOperations, typeLocationService);
+    private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
+    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(newPropertyOperations, projectOperations, typeLocationService, liquibaseOperations);
 
     @Test
     public void commandNewPropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(true);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(true);
 
         assertTrue(newPropertyCommands.isCommandAvailable());
     }
@@ -66,7 +66,7 @@ public class NewPropertyCommandTest {
     @Test
     public void commandNewPropertyIsNotAvailableWhenMigrationFileDoesNotExist() {
         when(projectOperations.isFocusedProjectAvailable()).thenReturn(true);
-        when(migrationSetupOperations.doesMigrationFileExist()).thenReturn(false);
+        when(liquibaseOperations.doesMigrationFileExist()).thenReturn(false);
 
         assertFalse(newPropertyCommands.isCommandAvailable());
     }
@@ -78,7 +78,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addId(CLASS);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails, true);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(newPropertyOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
     }
 
     private ClassOrInterfaceTypeDetails mockClassWithTable() {
