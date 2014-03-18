@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -11,7 +12,19 @@ import java.util.Collection;
 
 public class E2ETest {
 
-    protected File testDirectory;
+    protected static File testDirectory;
+
+    @ClassRule
+    public static TestWatcher classWatchman = new TestWatcher() {
+        @Override
+        protected void succeeded(Description description) {
+            try {
+                removeFiles();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     @Rule
     public TestWatcher watchman = new TestWatcher() {
@@ -24,25 +37,16 @@ public class E2ETest {
                 ex.printStackTrace();
             }
         }
-
-        @Override
-        protected void succeeded(Description description) {
-            try {
-                removeFiles();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     };
 
-    protected void runTestScript(String scriptName) throws IOException, InterruptedException {
-        createTestDirectory();
+    protected static void runTestScript(String scriptName) throws IOException, InterruptedException {
+        createTestDirectory(scriptName);
         copyScript(scriptName);
         runScript(scriptName);
     }
 
-    private void createTestDirectory() throws IOException {
-        testDirectory = File.createTempFile("tmp", Long.toString(System.nanoTime()));
+    private static void createTestDirectory(String scriptName) throws IOException {
+        testDirectory = File.createTempFile("tmp_" + scriptName + "_", Long.toString(System.nanoTime()));
         if(!(testDirectory.delete())) {
             throw new IOException("Could not delete temp file: " + testDirectory.getAbsolutePath());
         }
@@ -51,7 +55,7 @@ public class E2ETest {
         }
     }
 
-    private void copyScript(String scriptName) throws IOException {
+    private static void copyScript(String scriptName) throws IOException {
         InputStream script = E2ETest.class.getResourceAsStream(scriptName);
         File scriptFile = new File(testDirectory, scriptName);
         if (scriptFile.createNewFile()) {
@@ -62,7 +66,7 @@ public class E2ETest {
         script.close();
     }
 
-    private void runScript(String scriptName) throws IOException, InterruptedException {
+    private static void runScript(String scriptName) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c",  "roo < " + scriptName, "-c");
         processBuilder.directory(testDirectory);
         Process process = processBuilder.start();
@@ -71,35 +75,30 @@ public class E2ETest {
         }
     }
 
-    protected void removeFiles() throws IOException {
+    protected static void removeFiles() throws IOException {
         FileUtils.deleteDirectory(testDirectory);
     }
 
-    protected String getFileContent(File file) throws IOException {
+    protected static String getFileContent(File file) throws IOException {
         return IOUtils.toString(new FileInputStream(file));
     }
 
-    protected void logDirectoryStructure() {
+    protected static void logDirectoryStructure() {
         logDirecotoryContent(testDirectory, 0);
     }
 
-    protected void logFileContents() throws IOException {
+    protected static void logFileContents() throws IOException {
         logFileContents(testDirectory);
     }
 
-    private void logDirecotoryContent(File dir, int offset) {
+    private static void logDirecotoryContent(File dir, int offset) {
         Collection<File> files = FileUtils.listFiles(dir, null, true);
         for (File file : files) {
-//            for (int i = 0; i < offset; i++)
-//                System.out.println("|  ");
-//            System.out.println("+--" + file.getName() + (file.isDirectory() ? "/" : ""));
-//            if (file.isDirectory())
-//                logDirecotoryContent(file, offset + 1);
             System.out.println("-" + file.getName());
         }
     }
 
-    private void logFileContents(File dir) throws IOException {
+    private static void logFileContents(File dir) throws IOException {
         String[] extensions = {"aj", "xml", "java", "roo"};
         Collection<File> files = FileUtils.listFiles(dir, extensions, true);
         for (File file : files) {

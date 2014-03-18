@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,8 +12,8 @@ import static org.junit.Assert.assertTrue;
 
 public class MigrationSetupTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("initMigration");
     }
 
@@ -23,11 +24,6 @@ public class MigrationSetupTest extends E2ETest {
 
         assertTrue(migration.exists());
         assertTrue(migrationContent.contains("databaseChangeLog"));
-    }
-
-    @After
-    public void clean() throws Exception {
-        removeFiles();
     }
 
 }

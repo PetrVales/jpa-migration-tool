@@ -1,6 +1,7 @@
 package cz.cvut.fit.valespe.migration;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -10,8 +11,8 @@ import static org.junit.Assert.assertTrue;
 
 public class AddIntegerField extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("addIntegerField");
     }
 

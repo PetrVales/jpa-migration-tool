@@ -3,10 +3,7 @@ package cz.cvut.fit.valespe.migration;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.xml.sax.SAXException;
@@ -43,30 +40,8 @@ public class SplitClassTest extends E2ETest {
             "    </changeSet>\n" +
             "</databaseChangeLog>";
 
-    @Rule
-    public TestWatcher watchman = new TestWatcher() {
-        @Override
-        protected void failed(Throwable e, Description description) {
-            try {
-                logDirectoryStructure();
-                logFileContents();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        @Override
-        protected void finished(Description description) {
-            try {
-                removeFiles();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("splitClass");
     }
 

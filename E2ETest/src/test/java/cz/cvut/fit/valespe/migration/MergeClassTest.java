@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,8 +12,8 @@ import static org.junit.Assert.assertTrue;
 
 public class MergeClassTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("mergeClass");
     }
 
@@ -63,11 +64,6 @@ public class MergeClassTest extends E2ETest {
         assertTrue(orderClassContent.contains("setOrderTotal"));
         assertTrue(orderClassContent.contains("getName"));
         assertTrue(orderClassContent.contains("setName"));
-    }
-
-    @After
-    public void clean() throws Exception {
-        removeFiles();
     }
 
 }

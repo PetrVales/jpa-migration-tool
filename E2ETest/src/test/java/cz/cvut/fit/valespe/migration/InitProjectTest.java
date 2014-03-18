@@ -1,7 +1,6 @@
 package cz.cvut.fit.valespe.migration;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -10,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 
 public class InitProjectTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("initProject");
     }
 
@@ -35,11 +34,6 @@ public class InitProjectTest extends E2ETest {
     public void createsResourcesDir() {
         assertTrue(new File(testDirectory, "src/main/resources").exists());
         assertTrue(new File(testDirectory, "src/main/resources").isDirectory());
-    }
-
-    @After
-    public void clean() throws Exception {
-        removeFiles();
     }
 
 }

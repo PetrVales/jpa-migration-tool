@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 
 public class MovePropertyTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("moveProperty");
     }
 
@@ -51,11 +52,6 @@ public class MovePropertyTest extends E2ETest {
         assertTrue(migrationContent.contains("addColumn"));
         assertTrue(migrationContent.contains("name=\"order_total\""));
         assertTrue(migrationContent.contains("type=\"integer\""));
-    }
-
-    @After
-    public void clean() throws Exception {
-        removeFiles();
     }
 
 }

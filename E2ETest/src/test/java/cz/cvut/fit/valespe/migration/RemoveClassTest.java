@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 
 public class RemoveClassTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("removeClass");
     }
 
@@ -38,11 +39,6 @@ public class RemoveClassTest extends E2ETest {
         File aspect = new File(testDirectory, "src/main/java/cz/cvut/Order_Roo_Migration_Entity.aj");
 
         assertFalse(aspect.exists());
-    }
-
-    @After
-    public void clean() throws Exception {
-        removeFiles();
     }
 
 }

@@ -1,6 +1,7 @@
 package cz.cvut.fit.valespe.migration;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -10,8 +11,8 @@ import static org.junit.Assert.assertTrue;
 
 public class AddIdTest extends E2ETest {
 
-    @Before
-    public void init() throws Exception {
+    @BeforeClass
+    public static void init() throws Exception {
         runTestScript("addId");
     }
 
@@ -19,10 +20,11 @@ public class AddIdTest extends E2ETest {
     public void createsIdInClass() throws IOException {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
+        orderClassContent = orderClassContent.replaceAll("\n", " ");
+        orderClassContent = orderClassContent.replaceAll("  ", " ");
 
-        assertTrue(orderClassContent.contains("private Long id"));
-        assertTrue(orderClassContent.contains("@Column(name = \"id\", columnDefinition = \"bigint\")"));
-        assertTrue(orderClassContent.contains("@Id"));
+        assertTrue(orderClassContent.contains("@Column(name = \"id\", columnDefinition = \"bigint\") @Id private Long id"));
+        assertTrue(orderClassContent.contains("@Column(name = \"id2\", columnDefinition = \"integer\") @Id private Integer id2"));
     }
 
     @Test
@@ -42,6 +44,8 @@ public class AddIdTest extends E2ETest {
         assertTrue(migrationContent.contains("addColumn"));
         assertTrue(migrationContent.contains("name=\"id\""));
         assertTrue(migrationContent.contains("type=\"bigint\""));
+        assertTrue(migrationContent.contains("primaryKey=\"true\""));
+        assertTrue(migrationContent.contains("primaryKeyName=\"id_pk\""));
     }
 
 }
