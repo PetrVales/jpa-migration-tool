@@ -47,7 +47,7 @@ public class NewClassOperationsImpl implements NewClassOperations {
     }
 
     @Override
-    public void createEntity(JavaType className, String entityName, String table, String schema, String catalog) {
+    public void createEntity(JavaType className, String entityName, String table) {
         Validate.notNull(className, "Class name required");
         Validate.isTrue(
                 !JdkJavaType.isPartOfJavaLang(className.getSimpleTypeName()),
@@ -64,19 +64,19 @@ public class NewClassOperationsImpl implements NewClassOperations {
                         PhysicalTypeCategory.CLASS
                 );
 
-        cidBuilder.setAnnotations(createAnnotations(entityName, table, schema, catalog));
+        cidBuilder.setAnnotations(createAnnotations(entityName, table));
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
-    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table, String schema, String catalog) {
+    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {
         final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
         annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
-        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table, schema, catalog));
+        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table));
         return annotationBuilder;
     }
 
-    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table, String schema, String catalog)  {
+    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table)  {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(MIGRATION_ENTITY);
 
         if (entityName != null) {
@@ -84,12 +84,6 @@ public class NewClassOperationsImpl implements NewClassOperations {
         }
         if (table != null) {
             entityAnnotationBuilder.addStringAttribute("table", table);
-        }
-        if (schema != null) {
-            entityAnnotationBuilder.addStringAttribute("schema", schema);
-        }
-        if (catalog != null) {
-            entityAnnotationBuilder.addStringAttribute("catalog", catalog);
         }
 
         return entityAnnotationBuilder;

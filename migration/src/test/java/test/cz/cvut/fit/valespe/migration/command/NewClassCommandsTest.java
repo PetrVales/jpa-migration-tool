@@ -51,18 +51,18 @@ public class NewClassCommandsTest {
 
     @Test
     public void commandNewClassGeneratesClassFileAndChangeSetRecord() {
-        newclassCommands.newClass(CLASS, TABLE, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
+        newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME);
 
-        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE, SCHEMA, CATALOG);
-        verify(liquibaseOperations, times(1)).createTable(TABLE, SCHEMA, CATALOG, TABLESPACE);
+        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE);
+        verify(liquibaseOperations, times(1)).createTable(TABLE);
     }
 
     @Test
     public void commandNewClassUseClassNameWhenTableNameIsNotSpecify() {
-        newclassCommands.newClass(CLASS, null, SCHEMA, CATALOG, TABLESPACE, ENTITY_NAME);
+        newclassCommands.newClass(CLASS, null, ENTITY_NAME);
 
-        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, null, SCHEMA, CATALOG);
-        verify(liquibaseOperations, times(1)).createTable(CLASS_NAME, SCHEMA, CATALOG, TABLESPACE);
+        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, null);
+        verify(liquibaseOperations, times(1)).createTable(CLASS_NAME);
     }
 
 }

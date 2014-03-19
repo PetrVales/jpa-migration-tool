@@ -20,11 +20,17 @@ public class AddIdTest extends E2ETest {
     public void createsIdInClass() throws IOException {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
-        orderClassContent = orderClassContent.replaceAll("\n", " ");
-        orderClassContent = orderClassContent.replaceAll("  ", " ");
 
-        assertTrue(orderClassContent.contains("@Column(name = \"id\", columnDefinition = \"bigint\") @Id private Long id"));
-        assertTrue(orderClassContent.contains("@Column(name = \"id2\", columnDefinition = \"integer\") @Id private Integer id2"));
+        assertTrue(orderClassContent.contains(
+                "    @Column(name = \"id\", columnDefinition = \"bigint\")\n" +
+                "    @Id\n" +
+                "    private Long id;"
+        ));
+        assertTrue(orderClassContent.contains(
+                "    @Column(name = \"id2\", columnDefinition = \"integer\")\n" +
+                "    @Id\n" +
+                "    private Integer id2;"
+        ));
     }
 
     @Test
@@ -41,11 +47,22 @@ public class AddIdTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("addColumn"));
-        assertTrue(migrationContent.contains("name=\"id\""));
-        assertTrue(migrationContent.contains("type=\"bigint\""));
-        assertTrue(migrationContent.contains("primaryKey=\"true\""));
-        assertTrue(migrationContent.contains("primaryKeyName=\"id_pk\""));
+        assertTrue(migrationContent.contains(
+                "        <addColumn tableName=\"order\">\n" +
+                "            <column name=\"id\" type=\"bigint\"/>\n" +
+                "        </addColumn>"
+        ));
+        assertTrue(migrationContent.contains(
+                "<addPrimaryKey columnNames=\"id\" constraintName=\"pk_id\" tableName=\"order\"/>"
+        ));
+        assertTrue(migrationContent.contains(
+                "        <addColumn tableName=\"order\">\n" +
+                "            <column name=\"id2\" type=\"integer\"/>\n" +
+                "        </addColumn>"
+        ));
+        assertTrue(migrationContent.contains(
+                "<addPrimaryKey columnNames=\"id2\" constraintName=\"pk_id2\" tableName=\"order\"/>"
+        ));
     }
 
 }

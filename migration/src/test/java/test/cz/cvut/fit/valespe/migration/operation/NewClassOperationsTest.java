@@ -23,8 +23,6 @@ public class NewClassOperationsTest {
     private static final JavaType CLASS = new JavaType("className");
     private static final String ENTITY = "entity-name";
     private static final String TABLE = "table-name";
-    private static final String SCHEMA= "schema-name";
-    private static final String CATALOG = "catalog-name";
 
     private final PathResolver pathResolver = mock(PathResolver.class);
     private final FileManager fileManager = mock(FileManager.class);
@@ -35,7 +33,7 @@ public class NewClassOperationsTest {
     public void createClass() {
         when(pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA)).thenReturn(SRC_MAIN);
 
-        newclassOperations.createEntity(CLASS, ENTITY, TABLE, SCHEMA, CATALOG);
+        newclassOperations.createEntity(CLASS, ENTITY, TABLE);
 
         ArgumentCaptor<ClassOrInterfaceTypeDetails> argument = ArgumentCaptor.forClass(ClassOrInterfaceTypeDetails.class);
         verify(typeManagementService, times(1)).createOrUpdateTypeOnDisk(argument.capture());

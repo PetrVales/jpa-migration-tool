@@ -19,8 +19,8 @@ public interface LiquibaseOperations {
 
     String createNewChangeSet(String user);
 
-    void createColumn(String table, String schema, String catalog, String columnName, String columnType);
-    void createTable(String table, String schema, String catalog, String tablespace);
+    void createColumn(String table, String schema, String catalog, String columnName, String columnType, Boolean id);
+    void createTable(String table);
 
     /**
      * Create drop table record in migration.xml

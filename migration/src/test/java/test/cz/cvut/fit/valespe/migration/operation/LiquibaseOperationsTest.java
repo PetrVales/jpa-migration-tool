@@ -24,7 +24,6 @@ public class LiquibaseOperationsTest {
     private static final String TABLE = "table-name";
     private static final String SCHEMA= "schema-name";
     private static final String CATALOG = "catalog-name";
-    private static final String TABLESPACE = "tablespace";
     private static final String EXPECTED_MIGRATION_FILE =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                     "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
@@ -45,6 +44,17 @@ public class LiquibaseOperationsTest {
                     "        </addColumn>\n" +
                     "    </changeSet>\n" +
                     "</databaseChangeLog>\n";
+    private static final String ADD_ID_COLUMN_AFTER =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                    "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
+                    "\n" +
+                    "<changeSet>\n" +
+                    "        <addColumn catalogName=\"catalog-name\" schemaName=\"schema-name\" tableName=\"table-name\">\n" +
+                    "            <column name=\"column-name\" type=\"column-type\"/>\n" +
+                    "        </addColumn>\n" +
+                    "        <addPrimaryKey columnNames=\"column-name\" constraintName=\"pk_column-name\" tableName=\"table-name\"/>\n" +
+                    "    </changeSet>\n" +
+                    "</databaseChangeLog>\n";
     private static final String ADD_TABLE_BEFORE =
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                     "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
@@ -55,7 +65,7 @@ public class LiquibaseOperationsTest {
                     "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
                     "\n" +
                     "<changeSet>\n" +
-                    "        <createTable catalogName=\"catalog-name\" schemaName=\"schema-name\" tableName=\"table-name\" tablespace=\"tablespace\"/>\n" +
+                    "        <createTable tableName=\"table-name\"/>\n" +
                     "    </changeSet>\n" +
                     "</databaseChangeLog>\n";
     private static final String DROP_COLUMN_BEFORE =
@@ -112,9 +122,19 @@ public class LiquibaseOperationsTest {
         when(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML)).thenReturn(MOCKED_MIGRATION_PATH);
         when(fileManager.getInputStream(MOCKED_MIGRATION_PATH)).thenReturn(new StringBufferInputStream(ADD_COLUMN_BEFORE));
 
-        liquibaseOperations.createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
+        liquibaseOperations.createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, false);
 
         verify(fileManager, times(1)).createOrUpdateTextFileIfRequired(MOCKED_MIGRATION_PATH,  ADD_COLUMN_AFTER, false);
+    }
+
+    @Test
+    public void addIdColumn() {
+        when(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML)).thenReturn(MOCKED_MIGRATION_PATH);
+        when(fileManager.getInputStream(MOCKED_MIGRATION_PATH)).thenReturn(new StringBufferInputStream(ADD_COLUMN_BEFORE));
+
+        liquibaseOperations.createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, true);
+
+        verify(fileManager, times(1)).createOrUpdateTextFileIfRequired(MOCKED_MIGRATION_PATH,  ADD_ID_COLUMN_AFTER, false);
     }
 
     @Test
@@ -122,7 +142,7 @@ public class LiquibaseOperationsTest {
         when(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML)).thenReturn(MOCKED_MIGRATION_PATH);
         when(fileManager.getInputStream(MOCKED_MIGRATION_PATH)).thenReturn(new StringBufferInputStream(ADD_TABLE_BEFORE));
 
-        liquibaseOperations.createTable(TABLE, SCHEMA, CATALOG, TABLESPACE);
+        liquibaseOperations.createTable(TABLE);
 
         verify(fileManager, times(1)).createOrUpdateTextFileIfRequired(MOCKED_MIGRATION_PATH,  ADD_TABLE_AFTER, false);
     }

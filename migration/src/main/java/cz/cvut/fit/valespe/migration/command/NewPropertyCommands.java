@@ -52,12 +52,13 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "property", mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "propertyType", mandatory = true, help = "Type of new property") final JavaType propertyType,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
-            @CliOption(key = "columnType", mandatory = true, help = "The JPA @Column name") final String columnType) {
+            @CliOption(key = "columnType", mandatory = true, help = "The JPA @Column name") final String columnType,
+            @CliOption(key = "id", mandatory = false, help = "@Id", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean id) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(propertyName, propertyType, columnName, columnType, javaTypeDetails);
-        addColumn(columnName, columnType, javaTypeDetails);
+        newPropertyOperations.addFieldToClass(propertyName, propertyType, columnName, columnType, javaTypeDetails, id);
+        addColumn(columnName, columnType, javaTypeDetails, id);
     }
 
     @CliCommand(value = "migrate add id", help = "Some helpful description")
@@ -68,7 +69,7 @@ public class NewPropertyCommands implements CommandMarker {
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
-        addColumn("id", "bigint", javaTypeDetails);
+        addColumn("id", "bigint", javaTypeDetails, true);
     }
 
     @CliCommand(value = "migrate add string", help = "Some helpful description")
@@ -81,7 +82,7 @@ public class NewPropertyCommands implements CommandMarker {
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
-        addColumn(columnName, "varchar2(255)", javaTypeDetails);
+        addColumn(columnName, "varchar2(255)", javaTypeDetails, false);
     }
 
     @CliCommand(value = "migrate add integer", help = "Some helpful description")
@@ -94,7 +95,7 @@ public class NewPropertyCommands implements CommandMarker {
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Integer"), columnName, "integer", javaTypeDetails);
-        addColumn(columnName, "integer", javaTypeDetails);
+        addColumn(columnName, "integer", javaTypeDetails, false);
     }
 
     @CliCommand(value = "migrate add boolean", help = "Some helpful description")
@@ -107,10 +108,10 @@ public class NewPropertyCommands implements CommandMarker {
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Boolean"), columnName, "boolean", javaTypeDetails);
-        addColumn(columnName, "boolean", javaTypeDetails);
+        addColumn(columnName, "boolean", javaTypeDetails, false);
     }
 
-    private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails) {
+    private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails, Boolean id) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
         AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
@@ -119,7 +120,8 @@ public class NewPropertyCommands implements CommandMarker {
                 table == null ? "" : table.getValue(),
                 schema == null ? "" : schema.getValue(),
                 catalog == null ? "" : catalog.getValue(),
-                columnName, columnType
+                columnName, columnType,
+                id
         );
     }
 

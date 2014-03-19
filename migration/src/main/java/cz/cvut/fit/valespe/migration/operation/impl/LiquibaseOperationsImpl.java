@@ -14,6 +14,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Service
@@ -27,6 +29,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     private static final String CREATE_TABLE = "createTable";
     private static final String DROP_TABLE = "dropTable";
     private static final String DROP_COLUMN = "dropColumn";
+    private static final String ADD_PRIMARY_KEY = "addPrimaryKey";
 
     @Reference
     private PathResolver pathResolver;
@@ -58,7 +61,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     }
 
     @Override
-    public void createColumn(String table, String schema, String catalog, String columnName, String columnType) {
+    public void createColumn(String table, String schema, String catalog, String columnName, String columnType, Boolean id) {
         Validate.notNull(table, "Table name required");
         Validate.notNull(columnName, "Column name required");
         Validate.notNull(columnType, "Column type required");
@@ -74,14 +77,23 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(addColumnElement, "tableName", table);
         setAttribute(addColumnElement, "schemaName", schema);
         setAttribute(addColumnElement, "catalogName", catalog);
-        addElementToNewChangeSet(migration, addColumnElement);
+        Element addPrimaryKey = null;
+        if (id) {
+            addPrimaryKey = migration.createElement(ADD_PRIMARY_KEY);
+            setAttribute(addPrimaryKey, "columnNames", columnName);
+            setAttribute(addPrimaryKey, "constraintName", "pk_" + columnName);
+            setAttribute(addPrimaryKey, "tableName", table);
+
+        }
+
+        addElementToNewChangeSet(migration, Arrays.asList(addColumnElement, addPrimaryKey));
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
                 XmlUtils.nodeToString(migration), false);
     }
 
     @Override
-    public void createTable(String table, String schema, String catalog, String tablespace) {
+    public void createTable(String table) {
         Validate.notNull(table, "Table name required");
 
         final String migrationPath = getMigrationXmlPath();
@@ -89,11 +101,8 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
 
         Element createTableElement = migration.createElement(CREATE_TABLE);
         setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "tablespace", tablespace);
 
-        addElementToNewChangeSet(migration, createTableElement);
+        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
                 XmlUtils.nodeToString(migration), false);
@@ -111,7 +120,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(createTableElement, "schemaName", schema);
         setAttribute(createTableElement, "catalogName", catalog);
         setAttribute(createTableElement, "cascadeConstraints", Boolean.toString(cascade));
-        addElementToNewChangeSet(migration, createTableElement);
+        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
                 XmlUtils.nodeToString(migration), false);
@@ -130,7 +139,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(createTableElement, "schemaName", schema);
         setAttribute(createTableElement, "catalogName", catalog);
         setAttribute(createTableElement, "columnName", columnName);
-        addElementToNewChangeSet(migration, createTableElement);
+        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
                 XmlUtils.nodeToString(migration), false);
@@ -157,11 +166,13 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
                 false);
     }
 
-    private void addElementToNewChangeSet(Document migration, Element newElement) {
+    private void addElementToNewChangeSet(Document migration, List<Element> elements) {
         final Element databaseChangeLogElement = getChangeLogElement(migration);
 
         Element changeSetElement = createChangeSetElement(migration, databaseChangeLogElement);
-        changeSetElement.appendChild(newElement);
+        for (Element element : elements)
+            if (element != null)
+                changeSetElement.appendChild(element);
     }
 
     private Document getMigrationDocument(String migrationPath) {

@@ -75,10 +75,20 @@ public class NewPropertyCommandTest {
     public void commandNewPropertyAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false);
 
-        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE);
+        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, false);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, false);
+    }
+
+    @Test
+    public void commandNewPropertyAddNewIdPropertyToClassAndGeneratesMigrationChangeSet() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
+
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, true);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, true);
     }
 
     @Test
@@ -88,7 +98,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addId(CLASS);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails, true);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE, true);
     }
 
     @Test
@@ -98,7 +108,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE, false);
     }
 
     @Test
@@ -108,7 +118,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE, false);
     }
 
     @Test
@@ -118,7 +128,7 @@ public class NewPropertyCommandTest {
         newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, false);
     }
 
     private ClassOrInterfaceTypeDetails mockClassWithTable() {

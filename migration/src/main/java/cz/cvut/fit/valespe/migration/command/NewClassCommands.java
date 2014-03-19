@@ -37,12 +37,9 @@ public class NewClassCommands implements CommandMarker {
     public void newClass(
             @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType className,
             @CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table,
-            @CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") final String schema,
-            @CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog,
-            @CliOption(key = "tablespace", mandatory = false, help = "The JPA table catalog name to use for this entity") final String tablespace,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName) {
-        newclassOperations.createEntity(className, entityName, table, schema, catalog);
-        liquibaseOperations.createTable(getTableName(className, table), schema, catalog, tablespace);
+        newclassOperations.createEntity(className, entityName, table);
+        liquibaseOperations.createTable(getTableName(className, table));
     }
 
     private String getTableName(JavaType className, String table) {
