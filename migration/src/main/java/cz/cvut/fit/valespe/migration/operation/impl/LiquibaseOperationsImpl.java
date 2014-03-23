@@ -14,7 +14,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -56,12 +59,22 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     }
 
     @Override
-    public String createNewChangeSet(String user) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public void createChangeSet(List<Element> elements, String user, String id) {
+        final String migrationPath = getMigrationXmlPath();
+        final Document migration = getMigrationDocument(migrationPath);
+
+        Element changeSetElement = createChangeSetElement(migration, getChangeLogElement(migration), user, id);
+        for (Element element : elements)
+            if (element != null) {
+                migration.adoptNode(element);
+                changeSetElement.appendChild(element);
+            }
+
+        fileManager.createOrUpdateTextFileIfRequired(migrationPath, XmlUtils.nodeToString(migration), false);
     }
 
     @Override
-    public void createColumn(String table, String schema, String catalog, String columnName, String columnType, Boolean id) {
+    public Element addColumn(String table, String columnName, String columnType) {
         Validate.notNull(table, "Table name required");
         Validate.notNull(columnName, "Column name required");
         Validate.notNull(columnType, "Column type required");
@@ -75,25 +88,33 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(columnElement, "type", columnType);
         addColumnElement.appendChild(columnElement);
         setAttribute(addColumnElement, "tableName", table);
-        setAttribute(addColumnElement, "schemaName", schema);
-        setAttribute(addColumnElement, "catalogName", catalog);
-        Element addPrimaryKey = null;
-        if (id) {
-            addPrimaryKey = migration.createElement(ADD_PRIMARY_KEY);
-            setAttribute(addPrimaryKey, "columnNames", columnName);
-            setAttribute(addPrimaryKey, "constraintName", "pk_" + columnName);
-            setAttribute(addPrimaryKey, "tableName", table);
 
-        }
-
-        addElementToNewChangeSet(migration, Arrays.asList(addColumnElement, addPrimaryKey));
-
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
+        return addColumnElement;
     }
 
     @Override
-    public void createTable(String table) {
+    public Element addPrimaryKey(List<String> columnName, String tableName, String constraintName) {
+        final String migrationPath = getMigrationXmlPath();
+        final Document migration = getMigrationDocument(migrationPath);
+
+        StringBuilder builder = new StringBuilder();
+        final Iterator<String> iterator = columnName.iterator();
+        while (iterator.hasNext()) {
+            builder.append(iterator.next());
+            if (iterator.hasNext())
+                builder.append(", ");
+        }
+
+        Element addPrimaryKey = migration.createElement(ADD_PRIMARY_KEY);
+        setAttribute(addPrimaryKey, "columnNames", builder.toString());
+        setAttribute(addPrimaryKey, "constraintName", constraintName);
+        setAttribute(addPrimaryKey, "tableName", tableName);
+
+        return addPrimaryKey;
+    }
+
+    @Override
+    public Element createTable(String table) {
         Validate.notNull(table, "Table name required");
 
         final String migrationPath = getMigrationXmlPath();
@@ -102,47 +123,31 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         Element createTableElement = migration.createElement(CREATE_TABLE);
         setAttribute(createTableElement, "tableName", table);
 
-        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
-
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
+        return createTableElement;
     }
 
     @Override
-    public void dropTable(String table, String schema, String catalog, boolean cascade) {
-        Validate.notNull(table, "Table name required");
-
+    public Element dropTable(String table, boolean cascade) {
         final String migrationPath = getMigrationXmlPath();
         final Document migration = getMigrationDocument(migrationPath);
 
-        Element createTableElement = migration.createElement(DROP_TABLE);
-        setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "cascadeConstraints", Boolean.toString(cascade));
-        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
+        Element dropTableElement = migration.createElement(DROP_TABLE);
+        setAttribute(dropTableElement, "tableName", table);
+        setAttribute(dropTableElement, "cascadeConstraints", Boolean.toString(cascade));
 
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
+        return dropTableElement;
     }
 
     @Override
-    public void dropColumn(String table, String schema, String catalog, String columnName) {
-        Validate.notNull(table, "Table name required");
-        Validate.notNull(columnName, "Column name required");
-
+    public Element dropColumn(String table, String columnName) {
         final String migrationPath = getMigrationXmlPath();
         final Document migration = getMigrationDocument(migrationPath);
 
-        Element createTableElement = migration.createElement(DROP_COLUMN);
-        setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "columnName", columnName);
-        addElementToNewChangeSet(migration, Arrays.asList(createTableElement));
+        Element dropColumnElement = migration.createElement(DROP_COLUMN);
+        setAttribute(dropColumnElement, "tableName", table);
+        setAttribute(dropColumnElement, "columnName", columnName);
 
-        fileManager.createOrUpdateTextFileIfRequired(migrationPath,
-                XmlUtils.nodeToString(migration), false);
+        return dropColumnElement;
     }
 
     private String getMigrationXmlPath() {
@@ -166,15 +171,6 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
                 false);
     }
 
-    private void addElementToNewChangeSet(Document migration, List<Element> elements) {
-        final Element databaseChangeLogElement = getChangeLogElement(migration);
-
-        Element changeSetElement = createChangeSetElement(migration, databaseChangeLogElement);
-        for (Element element : elements)
-            if (element != null)
-                changeSetElement.appendChild(element);
-    }
-
     private Document getMigrationDocument(String migrationPath) {
         final InputStream inputStream = fileManager.getInputStream(migrationPath);
         return XmlUtils.readXml(inputStream);
@@ -187,8 +183,10 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         return databaseChangeLogElement;
     }
 
-    private Element createChangeSetElement(Document migration, Element databaseChangeLogElement) {
+    private Element createChangeSetElement(Document migration, Element databaseChangeLogElement, String author, String id) {
         Element changeSetElement = migration.createElement(CHANGE_SET);
+        setAttribute(changeSetElement, "author", author == null ? "" : author);
+        setAttribute(changeSetElement, "id", id == null ? "" : id);
         databaseChangeLogElement.appendChild(changeSetElement);
         return changeSetElement;
     }

@@ -6,6 +6,9 @@ import cz.cvut.fit.valespe.migration.operation.NewClassOperations;
 import org.junit.Test;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,9 +20,8 @@ public class NewClassCommandsTest {
     private static final JavaType CLASS = new JavaType("test." + CLASS_NAME);
     private static final String ENTITY_NAME = "entity-name";
     private static final String TABLE = "table";
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
-    private static final String TABLESPACE = "tablespace";
+    private static final String AUTHOR = "author";
+    private static final String ID = "id";
 
     private NewClassOperations newclassOperations = mock(NewClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -51,18 +53,26 @@ public class NewClassCommandsTest {
 
     @Test
     public void commandNewClassGeneratesClassFileAndChangeSetRecord() {
-        newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME);
+        Element createTable = mock(Element.class);
+        when(liquibaseOperations.createTable(TABLE)).thenReturn(createTable);
+
+        newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME, AUTHOR, ID);
 
         verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE);
         verify(liquibaseOperations, times(1)).createTable(TABLE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTable), AUTHOR, ID);
     }
 
     @Test
-    public void commandNewClassUseClassNameWhenTableNameIsNotSpecify() {
-        newclassCommands.newClass(CLASS, null, ENTITY_NAME);
+    public void commandNewClassUseTableNameWhenEntityNameIsNotSpecify() {
+        Element createTable = mock(Element.class);
+        when(liquibaseOperations.createTable(TABLE)).thenReturn(createTable);
 
-        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, null);
-        verify(liquibaseOperations, times(1)).createTable(CLASS_NAME);
+        newclassCommands.newClass(CLASS, TABLE, null, AUTHOR, ID);
+
+        verify(newclassOperations, times(1)).createEntity(CLASS, TABLE, TABLE);
+        verify(liquibaseOperations, times(1)).createTable(TABLE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTable), AUTHOR, ID);
     }
 
 }

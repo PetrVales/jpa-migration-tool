@@ -12,6 +12,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -25,13 +28,17 @@ public class NewPropertyCommandTest {
     private static final String COLUMN_NAME = "column-name";
     private static final String COLUMN_TYPE = "column-type";
     private static final String TABLE = "table";
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
+    private static final String AUTHOR = "author";
+    private static final String ID = "id";
+    private static final String PK_SUFFIX = "_pk";
+    private static final String PK = COLUMN_NAME + PK_SUFFIX;
+
 
     private static final JavaSymbolName ID_PROPERTY = new JavaSymbolName("id");
     private static final JavaType ID_PROPERTY_TYPE = new JavaType("java.lang.Long");
     private static final String ID_COLUMN_NAME = "id";
     private static final String ID_COLUMN_TYPE = "bigint";
+    private static final String ID_PK = ID_COLUMN_NAME + PK_SUFFIX;
 
     private static final JavaType STRING_PROPERTY_TYPE = new JavaType("java.lang.String");
     private static final String STRING_COLUMN_TYPE = "varchar2(255)";
@@ -73,75 +80,91 @@ public class NewPropertyCommandTest {
 
     @Test
     public void commandNewPropertyAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
+        Element addColumn = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, false);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, false);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void commandNewPropertyAddNewIdPropertyToClassAndGeneratesMigrationChangeSet() {
+        Element addColumn = mock(Element.class);
+        Element addPrimaryKey = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
+        when(liquibaseOperations.addPrimaryKey(Arrays.asList(COLUMN_NAME), TABLE, PK)).thenReturn(addPrimaryKey);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, true);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, COLUMN_TYPE, true);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
 
     @Test
     public void addIdCommandTest() {
+        Element addColumn = mock(Element.class);
+        Element addPrimaryKey = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE)).thenReturn(addColumn);
+        when(liquibaseOperations.addPrimaryKey(Arrays.asList(ID_COLUMN_NAME), TABLE, ID_PK)).thenReturn(addPrimaryKey);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.addId(CLASS);
+        newPropertyCommands.addId(CLASS, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails, true);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, ID_COLUMN_NAME, ID_COLUMN_TYPE, true);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
 
     @Test
     public void addStringCommandTest() {
+        Element addColumn = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, STRING_COLUMN_TYPE)).thenReturn(addColumn);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME);
+        newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, STRING_COLUMN_TYPE, false);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, STRING_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void addIntegerCommandTest() {
+        Element addColumn = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, INTEGER_COLUMN_TYPE)).thenReturn(addColumn);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME);
+        newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, INTEGER_COLUMN_TYPE, false);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, INTEGER_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void addBooleanCommandTest() {
+        Element addColumn = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE)).thenReturn(addColumn);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
-        newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME);
+        newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
         verify(newPropertyOperations, times(1)).addFieldToClass(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).createColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, false);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     private ClassOrInterfaceTypeDetails mockClassWithTable() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
-        AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
-        when(schemaMock.getValue()).thenReturn(SCHEMA);
-        AnnotationAttributeValue catalogMock = mock(AnnotationAttributeValue.class);
-        when(catalogMock.getValue()).thenReturn(CATALOG);
         AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
         when(annotationMetadata.getAttribute("table")).thenReturn(tableMock);
-        when(annotationMetadata.getAttribute("schema")).thenReturn(schemaMock);
-        when(annotationMetadata.getAttribute("catalog")).thenReturn(catalogMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(annotationMetadata);
         when(typeLocationService.getTypeDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);

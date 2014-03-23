@@ -1,5 +1,9 @@
 package cz.cvut.fit.valespe.migration.operation;
 
+import org.w3c.dom.Element;
+
+import java.util.List;
+
 /**
  * Provides functionality for generating Liquibase migration changesets.
  */
@@ -17,23 +21,23 @@ public interface LiquibaseOperations {
      */
     void createMigrationFile();
 
-    String createNewChangeSet(String user);
+    Element addColumn(String table, String columnName, String columnType);
+    Element createTable(String table);
 
-    void createColumn(String table, String schema, String catalog, String columnName, String columnType, Boolean id);
-    void createTable(String table);
+    Element addPrimaryKey(List<String> columnName, String tableName, String constraintName);
 
     /**
      * Create drop table record in migration.xml
      */
-    void dropTable(String table, String schema, String catalog, boolean cascade);
+    Element dropTable(String table, boolean cascade);
 
     /**
      * Create dropColumn record in migration.xml
      * @param table
-     * @param schema
-     * @param catalog
      * @param columnName
      */
-    void dropColumn(String table, String schema, String catalog, String columnName);
+    Element dropColumn(String table, String columnName);
+
+    void createChangeSet(List<Element> elements, String user, String id);
 
 }

@@ -2,26 +2,39 @@ package cz.cvut.fit.valespe.migration;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.AfterClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.junit.runners.model.MultipleFailureException;
+import org.junit.runners.model.Statement;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class E2ETest {
 
     protected static File testDirectory;
+    private static boolean failed;
 
     @ClassRule
     public static TestWatcher classWatchman = new TestWatcher() {
         @Override
-        protected void succeeded(Description description) {
+        protected void starting(Description description) {
+            failed = false;
+        }
+
+        @Override
+        protected void finished(Description description) {
             try {
+                if (!failed)
                 removeFiles();
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
     };
@@ -31,6 +44,7 @@ public class E2ETest {
         @Override
         protected void failed(Throwable e, Description description) {
             try {
+                failed = true;
                 logDirectoryStructure();
                 logFileContents();
             } catch (Exception ex) {

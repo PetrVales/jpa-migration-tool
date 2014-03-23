@@ -76,20 +76,13 @@ public class MovePropertyCommands implements CommandMarker {
     private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails) {
         AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
-        AnnotationAttributeValue<String> fromSchema = fromEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> fromCatalog = fromEntity.getAttribute("catalog");
         AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
-        AnnotationAttributeValue<String> toSchema = toEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> toCatalog = toEntity.getAttribute("catalog");
         movePropertyOperations.moveColumn(
                 columnName, columnType,
                 fromTable == null ? "" : fromTable.getValue(),
-                fromSchema == null ? "" : fromSchema.getValue(),
-                fromCatalog == null ? "" : fromCatalog.getValue(),
-                toTable == null ? "" : toTable.getValue(),
-                toSchema == null ? "" : toSchema.getValue(),
-                toCatalog == null ? "" : toCatalog.getValue());
+                toTable == null ? "" : toTable.getValue()
+        );
     }
     
 }

@@ -2,5 +2,5 @@ project --topLevelPackage cz.cvut
 migration setup
 migrate new class --class ~.Order --table order
 migrate add id --class ~.Order
-migrate new property --class ~.Order --id --property id2 --propertyType java.lang.Integer --column id2 --columnType integer
+migrate new property --class ~.Order --pk --property id2 --propertyType java.lang.Integer --column id2 --columnType integer
 exit

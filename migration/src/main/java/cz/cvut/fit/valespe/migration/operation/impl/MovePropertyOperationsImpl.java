@@ -35,7 +35,7 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
     }
 
     @Override
-    public void moveColumn(String columnName, String columnType, String fromTable, String fromSchema, String fromCatalog, String toTable, String toSchema, String toCatalog) {
+    public void moveColumn(String columnName, String columnType, String fromTable, String toTable) {
         Validate.notNull(toTable, "Table name required");
 
         final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
@@ -48,23 +48,21 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
 
         Element changeSetElement = migration.createElement(CHANGE_SET);
         databaseChangeLogElement.appendChild(changeSetElement);
-        addColumn(columnName, columnType, toTable, toSchema, toCatalog, migration, changeSetElement);
+        addColumn(columnName, columnType, toTable, migration, changeSetElement);
 //        moveData(fromTable, toTable, columnName, where, migration, changeSetElement);
-        dropColumn(columnName, fromTable, fromSchema, fromCatalog, migration, changeSetElement);
+        dropColumn(columnName, fromTable, migration, changeSetElement);
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,
                 XmlUtils.nodeToString(migration), false);
     }
 
-    private void addColumn(String columnName, String columnType, String table, String schema, String catalog, Document migration, Element changeSetElement) {
+    private void addColumn(String columnName, String columnType, String table, Document migration, Element changeSetElement) {
         Element addColumnElement = migration.createElement(ADD_COLUMN);
         Element columnElement = migration.createElement("column");
         setAttribute(columnElement, "name", columnName);
         setAttribute(columnElement, "type", columnType);
         addColumnElement.appendChild(columnElement);
         setAttribute(addColumnElement, "tableName", table);
-        setAttribute(addColumnElement, "schemaName", schema);
-        setAttribute(addColumnElement, "catalogName", catalog);
         changeSetElement.appendChild(addColumnElement);
     }
 
@@ -76,11 +74,9 @@ public class MovePropertyOperationsImpl implements MovePropertyOperations {
 
     }
 
-    private void dropColumn(String columnName, String table, String schema, String catalog, Document migration, Element changeSetElement) {
+    private void dropColumn(String columnName, String table, Document migration, Element changeSetElement) {
         Element createTableElement = migration.createElement(DROP_COLUMN);
         setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
         setAttribute(createTableElement, "columnName", columnName);
         changeSetElement.appendChild(createTableElement);
     }

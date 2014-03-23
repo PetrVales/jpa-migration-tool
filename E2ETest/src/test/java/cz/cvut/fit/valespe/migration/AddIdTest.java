@@ -1,6 +1,5 @@
 package cz.cvut.fit.valespe.migration;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -50,18 +49,14 @@ public class AddIdTest extends E2ETest {
         assertTrue(migrationContent.contains(
                 "        <addColumn tableName=\"order\">\n" +
                 "            <column name=\"id\" type=\"bigint\"/>\n" +
-                "        </addColumn>"
-        ));
-        assertTrue(migrationContent.contains(
-                "<addPrimaryKey columnNames=\"id\" constraintName=\"pk_id\" tableName=\"order\"/>"
+                "        </addColumn>\n" +
+                "        <addPrimaryKey columnNames=\"id\" constraintName=\"id_pk\" tableName=\"order\"/>"
         ));
         assertTrue(migrationContent.contains(
                 "        <addColumn tableName=\"order\">\n" +
                 "            <column name=\"id2\" type=\"integer\"/>\n" +
-                "        </addColumn>"
-        ));
-        assertTrue(migrationContent.contains(
-                "<addPrimaryKey columnNames=\"id2\" constraintName=\"pk_id2\" tableName=\"order\"/>"
+                "        </addColumn>\n" +
+                "        <addPrimaryKey columnNames=\"id2\" constraintName=\"id2_pk\" tableName=\"order\"/>"
         ));
     }
 

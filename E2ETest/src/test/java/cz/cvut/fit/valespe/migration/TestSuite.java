@@ -129,7 +129,7 @@ public class TestSuite extends TestCase {
     @AfterClass
     public static void afterTests() throws IOException, InterruptedException {
         for (Map.Entry<String, File> entry : ADD_ONS.entrySet()) {
-            rooUninstall(entry.getKey());
+//            rooUninstall(entry.getKey());
         }
     }
 

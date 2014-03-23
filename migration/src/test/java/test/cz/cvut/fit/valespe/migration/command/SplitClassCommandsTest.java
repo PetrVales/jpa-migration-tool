@@ -1,19 +1,24 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
+import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.SplitClassCommands;
-import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.SplitClassOperations;
+import cz.cvut.fit.valespe.migration.operation.*;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
 import test.cz.cvut.fit.valespe.migration.MigrationTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -25,6 +30,7 @@ import static org.mockito.Mockito.*;
 public class SplitClassCommandsTest extends MigrationTest {
 
     private static final JavaType ORIGINAL_CLASS = new JavaType("test.Class");
+    private static final String ORIGINAL_TABLE = "originalTable";
     private static final String COMMON_PROPERTY_NAME = "commonProperty";
     private static final String A_PROPERTY_NAME = "aProperty";
     private static final String B_PROPERTY_NAME = "bProperty";
@@ -43,15 +49,16 @@ public class SplitClassCommandsTest extends MigrationTest {
     private static final String B_TABLE = "bTable";
     private static final String A_PROPERTIES = COMMON_PROPERTY_NAME + "," + A_PROPERTY_NAME;
     private static final String B_PROPERTIES = COMMON_PROPERTY_NAME + "," + B_PROPERTY_NAME;
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
-    private static final String TABLESPACE = "tablespace";
+    public static final String AUTHOR = "author";
+    public static final String ID = "id";
 
-    private SplitClassOperations splitClassOperations = mock(SplitClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private SplitClassCommands splitClassCommands = new SplitClassCommands(splitClassOperations, projectOperations, liquibaseOperations, typeLocationService);
+    private NewClassOperations newClassOperations = mock(NewClassOperations.class);
+    private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
+    private RemoveClassOperations removeClassOperations = mock(RemoveClassOperations.class);
+    private SplitClassCommands splitClassCommands = new SplitClassCommands(newClassOperations, newPropertyOperations, removeClassOperations, projectOperations, liquibaseOperations, typeLocationService);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -78,28 +85,59 @@ public class SplitClassCommandsTest extends MigrationTest {
 
     @Test
     public void commandSplitsOriginalClassIntoTwoNewClasses() {
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
+        ClassOrInterfaceTypeDetails originalCoitd = mock(ClassOrInterfaceTypeDetails.class);
+        ClassOrInterfaceTypeDetails aCoitd = mock(ClassOrInterfaceTypeDetails.class);
+        ClassOrInterfaceTypeDetails bCoitd = mock(ClassOrInterfaceTypeDetails.class);
 
         List fields = new ArrayList<FieldMetadata>(3);
         fields.add(mockProperty(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE));
         fields.add(mockProperty(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE));
         fields.add(mockProperty(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE));
 
-        when(classOrInterfaceTypeDetails.getDeclaredFields()).thenReturn(fields);
-        when(typeLocationService.getTypeDetails(ORIGINAL_CLASS)).thenReturn(classOrInterfaceTypeDetails);
 
-        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, A_PROPERTIES, B_PROPERTIES, SCHEMA, CATALOG, TABLESPACE);
+        final AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
+        when(annotationMetadata.getAttribute("table")).thenReturn(new AnnotationAttributeValue<Object>() {
+            @Override public JavaSymbolName getName() { return null; }
+            @Override public Object getValue() { return ORIGINAL_TABLE; }
+        });
+        when(originalCoitd.getDeclaredFields()).thenReturn(fields);
+        when(originalCoitd.getAnnotation(MigrationEntity.MIGRATION_ENTITY)).thenReturn(annotationMetadata);
 
-        ArgumentCaptor<List> aProperties = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<List> bProperties = ArgumentCaptor.forClass(List.class);
-        verify(splitClassOperations, times(1)).createClass(eq(ORIGINAL_CLASS), eq(A_CLASS), aProperties.capture(), eq(A_TABLE), eq(SCHEMA), eq(CATALOG), eq(TABLESPACE));
-        verify(splitClassOperations, times(1)).createClass(eq(ORIGINAL_CLASS), eq(B_CLASS), bProperties.capture(), eq(B_TABLE), eq(SCHEMA), eq(CATALOG), eq(TABLESPACE));
-        verify(splitClassOperations, times(1)).createTable(anyList(), eq(A_TABLE), eq(SCHEMA), eq(CATALOG), eq(TABLESPACE));
-        verify(splitClassOperations, times(1)).createTable(anyList(), eq(B_TABLE), eq(SCHEMA), eq(CATALOG), eq(TABLESPACE));
-        verify(splitClassOperations, times(1)).removeClass(ORIGINAL_CLASS);
+        when(typeLocationService.getTypeDetails(ORIGINAL_CLASS)).thenReturn(originalCoitd);
+        when(typeLocationService.getTypeDetails(A_CLASS)).thenReturn(aCoitd);
+        when(typeLocationService.getTypeDetails(B_CLASS)).thenReturn(bCoitd);
 
-        assertEquals(2, aProperties.getValue().size());
-        assertEquals(2, bProperties.getValue().size());
+        Element createTableA = mock(Element.class);
+        when(liquibaseOperations.createTable(A_TABLE)).thenReturn(createTableA);
+        Element createTableB = mock(Element.class);
+        when(liquibaseOperations.createTable(B_TABLE)).thenReturn(createTableB);
+        Element addColumnACommon = mock(Element.class);
+        when(liquibaseOperations.addColumn(A_TABLE, COMMON_COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumnACommon);
+        Element addColumnBCommon = mock(Element.class);
+        when(liquibaseOperations.addColumn(B_TABLE, COMMON_COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumnBCommon);
+        Element addColumnA = mock(Element.class);
+        when(liquibaseOperations.addColumn(A_TABLE, A_COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumnA);
+        Element addColumnB = mock(Element.class);
+        when(liquibaseOperations.addColumn(B_TABLE, B_COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumnB);
+        Element dropTable = mock(Element.class);
+        when(liquibaseOperations.dropTable(ORIGINAL_TABLE, true)).thenReturn(dropTable);
+
+
+
+        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, AUTHOR, ID);
+
+        verify(newClassOperations, times(1)).createEntity(A_CLASS, A_TABLE, A_TABLE);
+        verify(newClassOperations, times(1)).createEntity(B_CLASS, B_TABLE, B_TABLE);
+
+        verify(newPropertyOperations, times(1)).addFieldToClass(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, aCoitd);
+        verify(newPropertyOperations, times(1)).addFieldToClass(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, aCoitd);
+        verify(newPropertyOperations, times(1)).addFieldToClass(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, bCoitd);
+        verify(newPropertyOperations, times(1)).addFieldToClass(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, bCoitd);
+
+
+        verify(removeClassOperations, times(1)).removeClass(ORIGINAL_CLASS);
+        verify(liquibaseOperations, times(1)).dropTable(ORIGINAL_TABLE, true);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTableA, createTableB, addColumnACommon, addColumnA, addColumnBCommon, addColumnB, dropTable), AUTHOR, ID);
     }
 
 }

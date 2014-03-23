@@ -1,11 +1,8 @@
 package cz.cvut.fit.valespe.migration;
 
 import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.*;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -17,26 +14,44 @@ import static org.junit.Assert.fail;
 
 public class SplitClassTest extends E2ETest {
 
-    private final String expectedMigrationContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+    private final String expectedMigrationContent =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
             "\n" +
-            "<changeSet>\n" +
+            "    <changeSet>\n" +
             "        <createTable tableName=\"original\"/>\n" +
             "    </changeSet>\n" +
-            "<changeSet>\n" +
+            "    <changeSet>\n" +
             "        <addColumn tableName=\"original\">\n" +
             "            <column name=\"a\" type=\"integer\"/>\n" +
             "        </addColumn>\n" +
             "    </changeSet>\n" +
-            "<changeSet>\n" +
+            "    <changeSet>\n" +
             "        <addColumn tableName=\"original\">\n" +
             "            <column name=\"b\" type=\"integer\"/>\n" +
             "        </addColumn>\n" +
             "    </changeSet>\n" +
-            "<changeSet>\n" +
+            "    <changeSet>\n" +
             "        <addColumn tableName=\"original\">\n" +
             "            <column name=\"common\" type=\"integer\"/>\n" +
             "        </addColumn>\n" +
+            "    </changeSet>\n" +
+            "    <changeSet>\n" +
+            "        <createTable tableName=\"a_table\"/>\n" +
+            "        <createTable tableName=\"b_table\"/>\n" +
+            "        <addColumn tableName=\"a_table\">\n" +
+            "            <column name=\"a\" type=\"integer\"/>\n" +
+            "        </addColumn>\n" +
+            "        <addColumn tableName=\"a_table\">\n" +
+            "            <column name=\"common\" type=\"integer\"/>\n" +
+            "        </addColumn>\n" +
+            "        <addColumn tableName=\"b_table\">\n" +
+            "            <column name=\"b\" type=\"integer\"/>\n" +
+            "        </addColumn>\n" +
+            "        <addColumn tableName=\"b_table\">\n" +
+            "            <column name=\"common\" type=\"integer\"/>\n" +
+            "        </addColumn>\n" +
+            "        <dropTable cascadeConstraints=\"true\" tableName=\"original\"/>\n" +
             "    </changeSet>\n" +
             "</databaseChangeLog>";
 

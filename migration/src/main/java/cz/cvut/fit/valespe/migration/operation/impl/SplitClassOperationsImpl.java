@@ -48,7 +48,7 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
     private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
     @Override
-    public void createClass(JavaType original, JavaType target, List<FieldMetadata> propertiesA, String table, String schema, String catalog, String tablespace) {
+    public void createClass(JavaType original, JavaType target, List<FieldMetadata> propertiesA, String table) {
         final ClassOrInterfaceTypeDetails originalTypeDetails = typeLocationService.getTypeDetails(original);
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -64,7 +64,7 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
         builder.setDeclaredMethods(getDeclaredMethods(originalTypeDetails.getDeclaredMethods()));
         builder.setDeclaredInnerTypes(getDeclaredInnerTypes(originalTypeDetails.getDeclaredInnerTypes()));
         builder.setEnumConstants(originalTypeDetails.getEnumConstants());
-        builder.setAnnotations(createAnnotations(target.getSimpleTypeName(), table, schema, catalog));
+        builder.setAnnotations(createAnnotations(target.getSimpleTypeName(), table));
 
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
@@ -100,14 +100,14 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
     }
 
 
-    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table, String schema, String catalog) {
+    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {
         final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
         annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
-        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table, schema, catalog));
+        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table));
         return annotationBuilder;
     }
 
-    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table, String schema, String catalog)  {
+    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table)  {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(MIGRATION_ENTITY);
 
         if (entityName != null) {
@@ -115,12 +115,6 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
         }
         if (table != null) {
             entityAnnotationBuilder.addStringAttribute("table", table);
-        }
-        if (schema != null) {
-            entityAnnotationBuilder.addStringAttribute("schema", schema);
-        }
-        if (catalog != null) {
-            entityAnnotationBuilder.addStringAttribute("catalog", catalog);
         }
 
         return entityAnnotationBuilder;
@@ -132,14 +126,14 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
     }
 
     @Override
-    public void createTable(List<FieldMetadata> properties, String table, String schema, String catalog, String tablespace) {
-        createTable(table, schema, catalog, tablespace);
+    public void createTable(List<FieldMetadata> properties, String table) {
+        createTable(table);
         for (FieldMetadata fieldMetadata : properties) {
-//            createColumn(table, schema, catalog, );
+//            addColumn(table, schema, catalog, );
         }
     }
 
-    public void createTable(String table, String schema, String catalog, String tablespace) {
+    public void createTable(String table) {
         Validate.notNull(table, "Table name required");
 
         final String migrationPath = pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML);
@@ -154,9 +148,6 @@ public class SplitClassOperationsImpl implements SplitClassOperations {
         databaseChangeLogElement.appendChild(changeSetElement);
         Element createTableElement = migration.createElement(CREATE_TABLE);
         setAttribute(createTableElement, "tableName", table);
-        setAttribute(createTableElement, "schemaName", schema);
-        setAttribute(createTableElement, "catalogName", catalog);
-        setAttribute(createTableElement, "tablespace", tablespace);
         changeSetElement.appendChild(createTableElement);
 
         fileManager.createOrUpdateTextFileIfRequired(migrationPath,

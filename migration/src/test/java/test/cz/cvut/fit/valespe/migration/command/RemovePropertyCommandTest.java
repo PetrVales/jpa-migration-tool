@@ -13,6 +13,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -25,8 +28,8 @@ public class RemovePropertyCommandTest {
     private static final JavaSymbolName PROPERTY = new JavaSymbolName("property");
     private static final String COLUMN_NAME = "column-name";
     private static final String TABLE = "table";
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
+    public static final String AUTHOR = "author";
+    public static final String ID = "id";
 
     private RemovePropertyOperations removePropertyOperations = mock(RemovePropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -61,14 +64,8 @@ public class RemovePropertyCommandTest {
     public void commandRemovePropertyToClassAndGeneratesMigrationChangeSet() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
-        AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
-        when(schemaMock.getValue()).thenReturn(SCHEMA);
-        AnnotationAttributeValue catalogMock = mock(AnnotationAttributeValue.class);
-        when(catalogMock.getValue()).thenReturn(CATALOG);
         AnnotationMetadata migrationEntityAnnotationMetadata = mock(AnnotationMetadata.class);
         when(migrationEntityAnnotationMetadata.getAttribute("table")).thenReturn(tableMock);
-        when(migrationEntityAnnotationMetadata.getAttribute("schema")).thenReturn(schemaMock);
-        when(migrationEntityAnnotationMetadata.getAttribute("catalog")).thenReturn(catalogMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(migrationEntityAnnotationMetadata);
         AnnotationAttributeValue columnMock = mock(AnnotationAttributeValue.class);
@@ -79,11 +76,14 @@ public class RemovePropertyCommandTest {
         when(declaredField.getAnnotation( new JavaType("javax.persistence.Column"))).thenReturn(columnAnnotationMetadata);
         when(classOrInterfaceTypeDetails.getDeclaredField(PROPERTY)).thenReturn(declaredField);
         when(typeLocationService.getTypeDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
+        Element dropColumn = mock(Element.class);
+        when(liquibaseOperations.dropColumn(TABLE, COLUMN_NAME)).thenReturn(dropColumn);
 
-        removePropertyCommands.removeProperty(CLASS, PROPERTY);
+        removePropertyCommands.removeProperty(CLASS, PROPERTY, AUTHOR, ID);
 
         verify(removePropertyOperations, times(1)).removeFieldFromClass(PROPERTY, classOrInterfaceTypeDetails);
-        verify(liquibaseOperations, times(1)).dropColumn(TABLE, SCHEMA, CATALOG, COLUMN_NAME);
+        verify(liquibaseOperations, times(1)).dropColumn(TABLE, COLUMN_NAME);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(dropColumn), AUTHOR, ID);
     }
 
 }

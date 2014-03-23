@@ -11,6 +11,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,8 +24,8 @@ public class RemoveClassCommandTest {
 
     private static final JavaType CLASS_TO_REMOVE = new JavaType("test.Type");
     private static final String TABLE = "table";
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
+    private static final String AUTHOR = "author";
+    private static final String ID = "ID";
 
     private RemoveClassOperations removeClassOperations = mock(RemoveClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -58,22 +61,19 @@ public class RemoveClassCommandTest {
     public void commandRemoveClassRemovesClassAndGeneratesMigrationChangeSet() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
-        AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
-        when(schemaMock.getValue()).thenReturn(SCHEMA);
-        AnnotationAttributeValue catalogMock = mock(AnnotationAttributeValue.class);
-        when(catalogMock.getValue()).thenReturn(CATALOG);
         AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
         when(annotationMetadata.getAttribute("table")).thenReturn(tableMock);
-        when(annotationMetadata.getAttribute("schema")).thenReturn(schemaMock);
-        when(annotationMetadata.getAttribute("catalog")).thenReturn(catalogMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(annotationMetadata);
         when(typeLocationService.getTypeDetails(CLASS_TO_REMOVE)).thenReturn(classOrInterfaceTypeDetails);
+        Element dropTable = mock(Element.class);
+        when(liquibaseOperations.dropTable(TABLE, false)).thenReturn(dropTable);
 
-        removeClassCommand.removeClass(CLASS_TO_REMOVE);
+        removeClassCommand.removeClass(CLASS_TO_REMOVE, AUTHOR, ID);
 
         verify(removeClassOperations, times(1)).removeClass(CLASS_TO_REMOVE);
-        verify(liquibaseOperations, times(1)).dropTable(TABLE, SCHEMA, CATALOG, false);
+        verify(liquibaseOperations, times(1)).dropTable(TABLE, false);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(dropTable), AUTHOR, ID);
     }
 
 }

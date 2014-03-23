@@ -18,6 +18,11 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
@@ -53,76 +58,83 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "propertyType", mandatory = true, help = "Type of new property") final JavaType propertyType,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "columnType", mandatory = true, help = "The JPA @Column name") final String columnType,
-            @CliOption(key = "id", mandatory = false, help = "@Id", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean id) {
+            @CliOption(key = "pk", mandatory = false, help = "@Id", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean pk,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
+    ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(propertyName, propertyType, columnName, columnType, javaTypeDetails, id);
-        addColumn(columnName, columnType, javaTypeDetails, id);
+        newPropertyOperations.addFieldToClass(propertyName, propertyType, columnName, columnType, javaTypeDetails, pk);
+        addColumn(columnName, columnType, javaTypeDetails, pk, author, id);
     }
 
     @CliCommand(value = "migrate add id", help = "Some helpful description")
     public void addId(
-            @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName
+            @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
-        addColumn("id", "bigint", javaTypeDetails, true);
+        addColumn("id", "bigint", javaTypeDetails, true, author, id);
     }
 
     @CliCommand(value = "migrate add string", help = "Some helpful description")
     public void addString(
             @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
-        addColumn(columnName, "varchar2(255)", javaTypeDetails, false);
+        addColumn(columnName, "varchar2(255)", javaTypeDetails, false, author, id);
     }
 
     @CliCommand(value = "migrate add integer", help = "Some helpful description")
     public void addInteger(
             @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Integer"), columnName, "integer", javaTypeDetails);
-        addColumn(columnName, "integer", javaTypeDetails, false);
+        addColumn(columnName, "integer", javaTypeDetails, false, author, id);
     }
 
     @CliCommand(value = "migrate add boolean", help = "Some helpful description")
     public void addBoolean(
             @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
         newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Boolean"), columnName, "boolean", javaTypeDetails);
-        addColumn(columnName, "boolean", javaTypeDetails, false);
+        addColumn(columnName, "boolean", javaTypeDetails, false, author, id);
     }
 
-    private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails, Boolean id) {
+    private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails, Boolean pk, String author, String id) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
-        AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        liquibaseOperations.createColumn(
-                table == null ? "" : table.getValue(),
-                schema == null ? "" : schema.getValue(),
-                catalog == null ? "" : catalog.getValue(),
-                columnName, columnType,
-                id
-        );
+        final List<Element> elements = new LinkedList<Element>();
+        elements.add(liquibaseOperations.addColumn(table == null ? "" : table.getValue(), columnName, columnType));
+        if (pk != null && pk)
+            elements.add(liquibaseOperations.addPrimaryKey(Arrays.asList(columnName), table.getValue(), columnName + "_pk"));
+        liquibaseOperations.createChangeSet(elements, author, id);
     }
 
 }

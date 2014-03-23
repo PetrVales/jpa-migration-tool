@@ -17,6 +17,9 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 @Component
 @Service
@@ -48,25 +51,23 @@ public class RemoveClassCommands implements CommandMarker {
     }
     
     @CliCommand(value = "migrate remove class", help = "Remove class and its aspects and make record in migration.xml")
-    public void removeClass(@CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target) {
+    public void removeClass(
+            @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
+    ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(target);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", target.getSimpleTypeName());
 
         removeClassOperations.removeClass(target);
-        removeTable(javaTypeDetails);
+        removeTable(javaTypeDetails, author, id);
     }
 
-    private void removeTable(ClassOrInterfaceTypeDetails javaTypeDetails) {
+    private void removeTable(ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
-        AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
-        liquibaseOperations.dropTable(
-                table == null ? "" : table.getValue(),
-                schema == null ? "" : schema.getValue(),
-                catalog == null ? "" : catalog.getValue(),
-                false
-        );
+        final Element element = liquibaseOperations.dropTable(table == null ? "" : table.getValue(), false);
+        liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
     }
 
 }

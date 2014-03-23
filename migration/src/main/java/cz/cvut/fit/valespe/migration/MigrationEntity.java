@@ -1,5 +1,7 @@
 package cz.cvut.fit.valespe.migration;
 
+import org.springframework.roo.model.JavaType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,6 +15,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface MigrationEntity {
+
+    public static final JavaType MIGRATION_ENTITY = new JavaType("cz.cvut.fit.valespe.migration.MigrationEntity");
 
     /**
      * Specifies the database catalog name that should be used for the entity.

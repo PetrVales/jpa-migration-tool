@@ -19,6 +19,9 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 @Component
 @Service
@@ -49,29 +52,26 @@ public class RemovePropertyCommands implements CommandMarker {
     @CliCommand(value = "migrate remove property", help = "Some helpful description")
     public void removeProperty(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType typeName,
-            @CliOption(key = "property", mandatory = true, help = "The java type to apply this annotation to") JavaSymbolName propertyName) {
+            @CliOption(key = "property", mandatory = true, help = "The java type to apply this annotation to") JavaSymbolName propertyName,
+            @CliOption(key = "author", mandatory = false, help = "author") final String author,
+            @CliOption(key = "id", mandatory = false, help = "id") final String id
+    ) {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
         Validate.notNull(javaTypeDetails.declaresField(propertyName), "The specified property, '%s', of type, %s, doesn't exist", propertyName, typeName);
 
         removePropertyOperations.removeFieldFromClass(propertyName, javaTypeDetails);
-        dropColumn(propertyName, javaTypeDetails);
+        dropColumn(propertyName, javaTypeDetails, author, id);
     }
 
-    private void dropColumn(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails) {
+    private void dropColumn(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
         AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
-        AnnotationAttributeValue<String> schema = migrationEntity.getAttribute("schema");
-        AnnotationAttributeValue<String> catalog = migrationEntity.getAttribute("catalog");
         FieldMetadata declaredField = javaTypeDetails.getDeclaredField(propertyName);
         AnnotationMetadata column = declaredField.getAnnotation(COLUMN_ANNOTATION);
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
-        liquibaseOperations.dropColumn(
-                table == null ? "" : table.getValue(),
-                schema == null ? "" : schema.getValue(),
-                catalog == null ? "" : catalog.getValue(),
-                columnName.getValue()
-        );
+        final Element element = liquibaseOperations.dropColumn(table.getValue(), columnName.getValue());
+        liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
     }
 
 }

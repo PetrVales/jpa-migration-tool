@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface SplitClassOperations {
 
-    void createClass(JavaType original, JavaType target, List<FieldMetadata> propertiesA, String table, String schema, String catalog, String tablespace);
+    void createClass(JavaType original, JavaType target, List<FieldMetadata> propertiesA, String table);
 
     void removeClass(JavaType target);
 
-    void createTable(List<FieldMetadata> properties, String table, String schema, String catalog, String tablespace);
+    void createTable(List<FieldMetadata> properties, String table);
 }

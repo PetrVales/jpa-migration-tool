@@ -31,11 +31,7 @@ public class MovePropertyCommandTest {
     private static final String COLUMN_NAME = "column-name";
     private static final String COLUMN_TYPE = "column-type";
     private static final String FROM_TABLE = "from-table";
-    private static final String FROM_SCHEMA = "from-schema";
-    private static final String FROM_CATALOG = "from-catalog";
     private static final String TO_TABLE = "to-table";
-    private static final String TO_SCHEMA = "to-schema";
-    private static final String TO_CATALOG = "to-catalog";
 
     private NewPropertyOperations newpropertyOperations = mock(NewPropertyOperations.class);
     private RemovePropertyOperations removepropertyOperations = mock(RemovePropertyOperations.class);
@@ -76,7 +72,7 @@ public class MovePropertyCommandTest {
         movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY);
 
         verify(newpropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, toCLass);
-        verify(movePropertyOperations, times(1)).moveColumn(COLUMN_NAME, COLUMN_TYPE, FROM_TABLE, FROM_SCHEMA, FROM_CATALOG, TO_TABLE, TO_SCHEMA, TO_CATALOG);
+        verify(movePropertyOperations, times(1)).moveColumn(COLUMN_NAME, COLUMN_TYPE, FROM_TABLE, TO_TABLE);
         verify(removepropertyOperations, times(1)).removeFieldFromClass(PROPERTY, fromCLass);
     }
 
@@ -97,13 +93,7 @@ public class MovePropertyCommandTest {
         AnnotationMetadata classAnnotationMetadata = mock(AnnotationMetadata.class);
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(FROM_TABLE);
-        AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
-        when(schemaMock.getValue()).thenReturn(FROM_SCHEMA);
-        AnnotationAttributeValue catalogMock = mock(AnnotationAttributeValue.class);
-        when(catalogMock.getValue()).thenReturn(FROM_CATALOG);
         when(classAnnotationMetadata.getAttribute("table")).thenReturn(tableMock);
-        when(classAnnotationMetadata.getAttribute("schema")).thenReturn(schemaMock);
-        when(classAnnotationMetadata.getAttribute("catalog")).thenReturn(catalogMock);
 
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getField(PROPERTY)).thenReturn(fieldMetadata);
@@ -117,14 +107,8 @@ public class MovePropertyCommandTest {
     private ClassOrInterfaceTypeDetails mockToClass() {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TO_TABLE);
-        AnnotationAttributeValue schemaMock = mock(AnnotationAttributeValue.class);
-        when(schemaMock.getValue()).thenReturn(TO_SCHEMA);
-        AnnotationAttributeValue catalogMock = mock(AnnotationAttributeValue.class);
-        when(catalogMock.getValue()).thenReturn(TO_CATALOG);
         AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
         when(annotationMetadata.getAttribute("table")).thenReturn(tableMock);
-        when(annotationMetadata.getAttribute("schema")).thenReturn(schemaMock);
-        when(annotationMetadata.getAttribute("catalog")).thenReturn(catalogMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(annotationMetadata);
         when(typeLocationService.getTypeDetails(TO_CLASS)).thenReturn(classOrInterfaceTypeDetails);
