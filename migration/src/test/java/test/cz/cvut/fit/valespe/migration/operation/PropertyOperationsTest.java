@@ -1,38 +1,54 @@
 package test.cz.cvut.fit.valespe.migration.operation;
 
-import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.impl.RemovePropertyOperationsImpl;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.impl.PropertyOperationsImpl;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
-public class RemovePropertyOperationsTest {
+public class PropertyOperationsTest {
 
     private static final JavaType CLASS = new JavaType("test.Class");
-    private static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.CLASS;
     private static final JavaSymbolName PROPERTY = new JavaSymbolName("property");
-    private static final JavaSymbolName PROPERTY_NOT_TO_REMOVE = new JavaSymbolName("propertyNotToRemove");
     private static final JavaType PROPERTY_TYPE = new JavaType("test.Type");
     private static final String PHYSICAL_TYPE_IDENTIFIER = "MID:" + PhysicalTypeIdentifier.class.getName() + "#?";
+    private static final String COLUMN_NAME = "column-name";
+    private static final String COLUMN_TYPE = "column-type";
+    private static final JavaSymbolName PROPERTY_NOT_TO_REMOVE = new JavaSymbolName("propertyNotToRemove");
+    private static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.CLASS;
 
-    private TypeManagementService typeManagementService = mock(TypeManagementService.class);
-    private RemovePropertyOperations removePropertyOperations = new RemovePropertyOperationsImpl(typeManagementService);
+    private final TypeManagementService typeManagementService = mock(TypeManagementService.class);
+    private final TypeLocationService typeLocationService = mock(TypeLocationService.class);
+    private final PropertyOperations propertyOperations = new PropertyOperationsImpl(typeManagementService, typeLocationService);
+
+    @Test
+    public void createClass() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
+        when(classOrInterfaceTypeDetails.getDeclaredByMetadataId()).thenReturn(PHYSICAL_TYPE_IDENTIFIER);
+
+        propertyOperations.addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
+
+        ArgumentCaptor<FieldMetadata> argument = ArgumentCaptor.forClass(FieldMetadata.class);
+        verify(typeManagementService, times(1)).addField(argument.capture());
+
+        assertEquals(PROPERTY.getSymbolName(), argument.getValue().getFieldName().getSymbolName());
+        assertEquals(PROPERTY_TYPE.getSimpleTypeName(), argument.getValue().getFieldType().getSimpleTypeName());
+        assertFalse(argument.getValue().getAnnotations().isEmpty());
+    }
 
     @Test
     public void removeFieldFromClass() {
@@ -53,7 +69,7 @@ public class RemovePropertyOperationsTest {
         when(classOrInterfaceTypeDetails.getName()).thenReturn(CLASS);
         when(classOrInterfaceTypeDetails.getPhysicalTypeCategory()).thenReturn(PHYSICAL_TYPE_CATEGORY);
 
-        removePropertyOperations.removeFieldFromClass(PROPERTY, classOrInterfaceTypeDetails);
+        propertyOperations.removeField(PROPERTY, classOrInterfaceTypeDetails);
 
         ArgumentCaptor<ClassOrInterfaceTypeDetails> argument = ArgumentCaptor.forClass(ClassOrInterfaceTypeDetails.class);
         verify(typeManagementService, times(1)).createOrUpdateTypeOnDisk(argument.capture());

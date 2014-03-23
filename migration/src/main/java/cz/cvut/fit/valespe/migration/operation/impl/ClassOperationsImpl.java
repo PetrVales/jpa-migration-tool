@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.NewClassOperations;
+import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -16,11 +16,7 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +25,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
 @Component
 @Service
-public class NewClassOperationsImpl implements NewClassOperations {
+public class ClassOperationsImpl implements ClassOperations {
 
     public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
     private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
@@ -38,16 +34,16 @@ public class NewClassOperationsImpl implements NewClassOperations {
     @Reference private FileManager fileManager;
     @Reference private TypeManagementService typeManagementService;
 
-    public NewClassOperationsImpl() { }
+    public ClassOperationsImpl() { }
 
-    public NewClassOperationsImpl(PathResolver pathResolver, FileManager fileManager, TypeManagementService typeManagementService) {
+    public ClassOperationsImpl(PathResolver pathResolver, FileManager fileManager, TypeManagementService typeManagementService) {
         this.pathResolver = pathResolver;
         this.fileManager = fileManager;
         this.typeManagementService = typeManagementService;
     }
 
     @Override
-    public void createEntity(JavaType className, String entityName, String table) {
+    public void createClass(JavaType className, String entityName, String table) {
         Validate.notNull(className, "Class name required");
         Validate.isTrue(
                 !JdkJavaType.isPartOfJavaLang(className.getSimpleTypeName()),
@@ -67,6 +63,11 @@ public class NewClassOperationsImpl implements NewClassOperations {
         cidBuilder.setAnnotations(createAnnotations(entityName, table));
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    }
+
+    @Override
+    public void removeClass(JavaType target) {
+        fileManager.delete(pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, target));
     }
 
     private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {

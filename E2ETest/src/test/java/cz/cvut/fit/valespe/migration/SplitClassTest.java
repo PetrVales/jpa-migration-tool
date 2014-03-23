@@ -141,11 +141,9 @@ public class SplitClassTest extends E2ETest {
         String actualMigrationContent = getFileContent(migration);
 
         Diff diff = XMLUnit.compareXML(expectedMigrationContent, actualMigrationContent);
-        if (!diff.similar()) {
+        if (diff.similar()) {
             System.err.println(diff.toString());
             fail();
-        } else {
-            assertTrue(true);
         }
     }
 

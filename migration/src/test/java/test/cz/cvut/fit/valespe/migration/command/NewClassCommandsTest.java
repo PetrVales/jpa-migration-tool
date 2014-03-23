@@ -1,8 +1,8 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.NewClassCommands;
+import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.NewClassOperations;
 import org.junit.Test;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
@@ -23,7 +23,7 @@ public class NewClassCommandsTest {
     private static final String AUTHOR = "author";
     private static final String ID = "id";
 
-    private NewClassOperations newclassOperations = mock(NewClassOperations.class);
+    private ClassOperations newclassOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private NewClassCommands newclassCommands = new NewClassCommands(newclassOperations, projectOperations, liquibaseOperations);
@@ -58,7 +58,7 @@ public class NewClassCommandsTest {
 
         newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME, AUTHOR, ID);
 
-        verify(newclassOperations, times(1)).createEntity(CLASS, ENTITY_NAME, TABLE);
+        verify(newclassOperations, times(1)).createClass(CLASS, ENTITY_NAME, TABLE);
         verify(liquibaseOperations, times(1)).createTable(TABLE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTable), AUTHOR, ID);
     }
@@ -70,7 +70,7 @@ public class NewClassCommandsTest {
 
         newclassCommands.newClass(CLASS, TABLE, null, AUTHOR, ID);
 
-        verify(newclassOperations, times(1)).createEntity(CLASS, TABLE, TABLE);
+        verify(newclassOperations, times(1)).createClass(CLASS, TABLE, TABLE);
         verify(liquibaseOperations, times(1)).createTable(TABLE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTable), AUTHOR, ID);
     }

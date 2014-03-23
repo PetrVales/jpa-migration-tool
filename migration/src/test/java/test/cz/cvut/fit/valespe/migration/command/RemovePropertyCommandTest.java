@@ -3,7 +3,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.RemovePropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -31,11 +31,11 @@ public class RemovePropertyCommandTest {
     public static final String AUTHOR = "author";
     public static final String ID = "id";
 
-    private RemovePropertyOperations removePropertyOperations = mock(RemovePropertyOperations.class);
+    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
-    private RemovePropertyCommands removePropertyCommands = new RemovePropertyCommands(removePropertyOperations, projectOperations, typeLocationService, liquibaseOperations);
+    private RemovePropertyCommands removePropertyCommands = new RemovePropertyCommands(propertyOperations, projectOperations, typeLocationService, liquibaseOperations);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -81,7 +81,7 @@ public class RemovePropertyCommandTest {
 
         removePropertyCommands.removeProperty(CLASS, PROPERTY, AUTHOR, ID);
 
-        verify(removePropertyOperations, times(1)).removeFieldFromClass(PROPERTY, classOrInterfaceTypeDetails);
+        verify(propertyOperations, times(1)).removeField(PROPERTY, classOrInterfaceTypeDetails);
         verify(liquibaseOperations, times(1)).dropColumn(TABLE, COLUMN_NAME);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(dropColumn), AUTHOR, ID);
     }

@@ -1,8 +1,8 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
+import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.RemoveClassOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,7 +27,7 @@ public class RemoveClassCommands implements CommandMarker {
 
     private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
     
-    @Reference private RemoveClassOperations removeClassOperations;
+    @Reference private ClassOperations classOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private LiquibaseOperations liquibaseOperations;
@@ -35,11 +35,11 @@ public class RemoveClassCommands implements CommandMarker {
     public RemoveClassCommands() { }
 
     public RemoveClassCommands(
-            RemoveClassOperations removeClassOperations,
+            ClassOperations classOperations,
             ProjectOperations projectOperations,
             TypeLocationService typeLocationService,
             LiquibaseOperations liquibaseOperations) {
-        this.removeClassOperations = removeClassOperations;
+        this.classOperations = classOperations;
         this.projectOperations = projectOperations;
         this.typeLocationService = typeLocationService;
         this.liquibaseOperations = liquibaseOperations;
@@ -59,7 +59,7 @@ public class RemoveClassCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(target);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", target.getSimpleTypeName());
 
-        removeClassOperations.removeClass(target);
+        classOperations.removeClass(target);
         removeTable(javaTypeDetails, author, id);
     }
 

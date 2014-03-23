@@ -1,52 +1,46 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
 import cz.cvut.fit.valespe.migration.JpaFieldDetails;
-import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
-import org.apache.commons.lang3.Validate;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @Service
-public class NewPropertyOperationsImpl implements NewPropertyOperations {
+public class PropertyOperationsImpl implements PropertyOperations {
 
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
 
-    public NewPropertyOperationsImpl() { }
+    public PropertyOperationsImpl() { }
 
-    public NewPropertyOperationsImpl(TypeManagementService typeManagementService, TypeLocationService typeLocationService) {
+    public PropertyOperationsImpl(TypeManagementService typeManagementService, TypeLocationService typeLocationService) {
         this.typeManagementService = typeManagementService;
         this.typeLocationService = typeLocationService;
     }
 
     @Override
-    public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType) {
-        addFieldToClass(propertyName, propertyType, columnName, columnType, classType, false);
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType) {
+        addField(propertyName, propertyType, columnName, columnType, classType, false);
     }
 
     @Override
-    public void addFieldToClass(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType, boolean id) {
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType, boolean id) {
         final String physicalTypeIdentifier = classType.getDeclaredByMetadataId();
         final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName);
         if (columnName != null) {
@@ -58,6 +52,23 @@ public class NewPropertyOperationsImpl implements NewPropertyOperations {
         fieldDetails.setId(id);
 
         insertField(fieldDetails);
+    }
+
+    @Override
+    public void removeField(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails) {
+        List<? extends FieldMetadata> fields = javaTypeDetails.getDeclaredFields();
+        List<FieldMetadataBuilder> fieldsBuilders = new ArrayList<FieldMetadataBuilder>(fields.size());
+
+        for (FieldMetadata fieldMetadata : fields) {
+            if (fieldMetadata.getFieldName().compareTo(propertyName) != 0) {
+                fieldsBuilders.add(new FieldMetadataBuilder(fieldMetadata));
+            }
+        }
+
+        ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(javaTypeDetails);
+        builder.setDeclaredFields(fieldsBuilders);
+
+        typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
 
     private void insertField(final FieldDetails fieldDetails) {

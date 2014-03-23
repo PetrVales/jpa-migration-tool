@@ -4,16 +4,9 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
-public interface NewPropertyOperations {
+public interface PropertyOperations {
 
-    /**
-     * Add field with given name and type to class of given class
-     * @param propertyName
-     * @param propertyType
-     * @param columnName
-     * @param classType
-     */
-    void addFieldToClass(
+    void addField(
             JavaSymbolName propertyName,
             JavaType propertyType,
             String columnName,
@@ -21,15 +14,7 @@ public interface NewPropertyOperations {
             ClassOrInterfaceTypeDetails classType
     );
 
-    /**
-     * Add field with given name and type to class of given class
-     * @param propertyName
-     * @param propertyType
-     * @param columnName
-     * @param classType
-     * @id
-     */
-    void addFieldToClass(
+    void addField(
             JavaSymbolName propertyName,
             JavaType propertyType,
             String columnName,
@@ -37,5 +22,7 @@ public interface NewPropertyOperations {
             ClassOrInterfaceTypeDetails classType,
             boolean id
     );
+
+    void removeField(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails);
 
 }

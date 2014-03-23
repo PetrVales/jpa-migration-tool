@@ -3,8 +3,7 @@ package cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -31,8 +30,7 @@ public class MovePropertyCommands implements CommandMarker {
     private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
     private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
     
-    @Reference private NewPropertyOperations newpropertyOperations;
-    @Reference private RemovePropertyOperations removepropertyOperations;
+    @Reference private PropertyOperations propertyOperations;
     @Reference private MovePropertyOperations movePropertyOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
@@ -40,9 +38,8 @@ public class MovePropertyCommands implements CommandMarker {
 
     public MovePropertyCommands() { }
 
-    public MovePropertyCommands(NewPropertyOperations newpropertyOperations, RemovePropertyOperations removepropertyOperations, MovePropertyOperations movePropertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
-        this.newpropertyOperations = newpropertyOperations;
-        this.removepropertyOperations = removepropertyOperations;
+    public MovePropertyCommands(PropertyOperations propertyOperations, MovePropertyOperations movePropertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
+        this.propertyOperations = propertyOperations;
         this.movePropertyOperations = movePropertyOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
@@ -68,9 +65,9 @@ public class MovePropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
-        newpropertyOperations.addFieldToClass(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toTypeDetails);
+        propertyOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toTypeDetails);
         moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails);
-        removepropertyOperations.removeFieldFromClass(propertyName, fromTypeDetails);
+        propertyOperations.removeField(propertyName, fromTypeDetails);
     }
 
     private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails) {

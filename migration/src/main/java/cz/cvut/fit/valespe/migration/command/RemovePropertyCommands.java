@@ -2,7 +2,7 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -30,15 +30,15 @@ public class RemovePropertyCommands implements CommandMarker {
     private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
     private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
     
-    @Reference private RemovePropertyOperations removePropertyOperations;
+    @Reference private PropertyOperations propertyOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private LiquibaseOperations liquibaseOperations;
 
     public RemovePropertyCommands() { }
 
-    public RemovePropertyCommands(RemovePropertyOperations removePropertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
-        this.removePropertyOperations = removePropertyOperations;
+    public RemovePropertyCommands(PropertyOperations propertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
+        this.propertyOperations = propertyOperations;
         this.projectOperations = projectOperations;
         this.typeLocationService = typeLocationService;
         this.liquibaseOperations = liquibaseOperations;
@@ -60,7 +60,7 @@ public class RemovePropertyCommands implements CommandMarker {
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
         Validate.notNull(javaTypeDetails.declaresField(propertyName), "The specified property, '%s', of type, %s, doesn't exist", propertyName, typeName);
 
-        removePropertyOperations.removeFieldFromClass(propertyName, javaTypeDetails);
+        propertyOperations.removeField(propertyName, javaTypeDetails);
         dropColumn(propertyName, javaTypeDetails, author, id);
     }
 

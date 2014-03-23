@@ -2,7 +2,7 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -32,15 +32,15 @@ public class NewPropertyCommands implements CommandMarker {
 
     private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
     
-    @Reference private NewPropertyOperations newPropertyOperations;
+    @Reference private PropertyOperations propertyOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
 
     public NewPropertyCommands() {}
 
-    public NewPropertyCommands(NewPropertyOperations newPropertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
-        this.newPropertyOperations = newPropertyOperations;
+    public NewPropertyCommands(PropertyOperations propertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
+        this.propertyOperations = propertyOperations;
         this.projectOperations = projectOperations;
         this.typeLocationService = typeLocationService;
         this.liquibaseOperations = liquibaseOperations;
@@ -65,7 +65,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(propertyName, propertyType, columnName, columnType, javaTypeDetails, pk);
+        propertyOperations.addField(propertyName, propertyType, columnName, columnType, javaTypeDetails, pk);
         addColumn(columnName, columnType, javaTypeDetails, pk, author, id);
     }
 
@@ -78,7 +78,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
+        propertyOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
         addColumn("id", "bigint", javaTypeDetails, true, author, id);
     }
 
@@ -93,7 +93,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
+        propertyOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
         addColumn(columnName, "varchar2(255)", javaTypeDetails, false, author, id);
     }
 
@@ -108,7 +108,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Integer"), columnName, "integer", javaTypeDetails);
+        propertyOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", javaTypeDetails);
         addColumn(columnName, "integer", javaTypeDetails, false, author, id);
     }
 
@@ -123,7 +123,7 @@ public class NewPropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
 
-        newPropertyOperations.addFieldToClass(field, new JavaType("java.lang.Boolean"), columnName, "boolean", javaTypeDetails);
+        propertyOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", javaTypeDetails);
         addColumn(columnName, "boolean", javaTypeDetails, false, author, id);
     }
 

@@ -20,10 +20,8 @@ import org.springframework.roo.shell.CommandMarker;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Component
 @Service
@@ -32,19 +30,17 @@ public class SplitClassCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private LiquibaseOperations liquibaseOperations;
-    @Reference private NewClassOperations newClassOperations;
-    @Reference private NewPropertyOperations newPropertyOperations;
-    @Reference private RemoveClassOperations removeClassOperations;
+    @Reference private ClassOperations classOperations;
+    @Reference private PropertyOperations propertyOperations;
 
     public SplitClassCommands() { }
 
-    public SplitClassCommands(NewClassOperations newClassOperations, NewPropertyOperations newPropertyOperations, RemoveClassOperations removeClassOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
+    public SplitClassCommands(ClassOperations classOperations, PropertyOperations propertyOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
-        this.newClassOperations = newClassOperations;
-        this.newPropertyOperations = newPropertyOperations;
-        this.removeClassOperations = removeClassOperations;
+        this.classOperations = classOperations;
+        this.propertyOperations = propertyOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate split class" })
@@ -52,7 +48,6 @@ public class SplitClassCommands implements CommandMarker {
         return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
 
-//    migrate split class --class ~.Original --classA ~.A --tableA a_table --propertiesA a common --classB ~.B --tableB b_table --propertiesB b common
     @CliCommand(value = "migrate split class", help = "")
     public void splitClass(
             @CliOption(key = {"", "class"}, mandatory = true, help = "The java type to apply this annotation to") final JavaType target,
@@ -90,15 +85,15 @@ public class SplitClassCommands implements CommandMarker {
 
         List<Element> elements = new LinkedList<Element>();
 
-        newClassOperations.createEntity(targetA, entityA == null ? tableA : entityA, tableA);
+        classOperations.createClass(targetA, entityA == null ? tableA : entityA, tableA);
         elements.add(liquibaseOperations.createTable(tableA));
-        newClassOperations.createEntity(targetB, entityB == null ? tableB : entityB, tableB);
+        classOperations.createClass(targetB, entityB == null ? tableB : entityB, tableB);
         elements.add(liquibaseOperations.createTable(tableB));
 
         elements.addAll(addPropertiesToClass(targetA, tableA, propertiesA));
         elements.addAll(addPropertiesToClass(targetB, tableB, propertiesB));
 
-        removeClassOperations.removeClass(target);
+        classOperations.removeClass(target);
 
         final AnnotationMetadata annotation = classTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
         final AnnotationAttributeValue<String> name = annotation.getAttribute("table");
@@ -113,7 +108,7 @@ public class SplitClassCommands implements CommandMarker {
             final AnnotationMetadata annotation = field.getAnnotation(JpaJavaType.COLUMN);
             final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
             final AnnotationAttributeValue<String> columnDefinition = annotation.getAttribute("columnDefinition");
-            newPropertyOperations.addFieldToClass(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), classTypeDetails);
+            propertyOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), classTypeDetails);
             elements.add(liquibaseOperations.addColumn(table, name.getValue(), columnDefinition.getValue()));
         }
         return elements;

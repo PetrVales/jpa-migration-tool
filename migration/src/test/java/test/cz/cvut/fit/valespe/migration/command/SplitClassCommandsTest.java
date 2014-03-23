@@ -4,7 +4,6 @@ import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.SplitClassCommands;
 import cz.cvut.fit.valespe.migration.operation.*;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -12,7 +11,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 import test.cz.cvut.fit.valespe.migration.MigrationTest;
@@ -55,10 +53,9 @@ public class SplitClassCommandsTest extends MigrationTest {
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private NewClassOperations newClassOperations = mock(NewClassOperations.class);
-    private NewPropertyOperations newPropertyOperations = mock(NewPropertyOperations.class);
-    private RemoveClassOperations removeClassOperations = mock(RemoveClassOperations.class);
-    private SplitClassCommands splitClassCommands = new SplitClassCommands(newClassOperations, newPropertyOperations, removeClassOperations, projectOperations, liquibaseOperations, typeLocationService);
+    private ClassOperations classOperations = mock(ClassOperations.class);
+    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
+    private SplitClassCommands splitClassCommands = new SplitClassCommands(classOperations, propertyOperations, projectOperations, liquibaseOperations, typeLocationService);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -126,16 +123,16 @@ public class SplitClassCommandsTest extends MigrationTest {
 
         splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, AUTHOR, ID);
 
-        verify(newClassOperations, times(1)).createEntity(A_CLASS, A_TABLE, A_TABLE);
-        verify(newClassOperations, times(1)).createEntity(B_CLASS, B_TABLE, B_TABLE);
+        verify(classOperations, times(1)).createClass(A_CLASS, A_TABLE, A_TABLE);
+        verify(classOperations, times(1)).createClass(B_CLASS, B_TABLE, B_TABLE);
 
-        verify(newPropertyOperations, times(1)).addFieldToClass(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, aCoitd);
-        verify(newPropertyOperations, times(1)).addFieldToClass(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, aCoitd);
-        verify(newPropertyOperations, times(1)).addFieldToClass(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, bCoitd);
-        verify(newPropertyOperations, times(1)).addFieldToClass(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, bCoitd);
+        verify(propertyOperations, times(1)).addField(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, aCoitd);
+        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, aCoitd);
+        verify(propertyOperations, times(1)).addField(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, bCoitd);
+        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, bCoitd);
 
 
-        verify(removeClassOperations, times(1)).removeClass(ORIGINAL_CLASS);
+        verify(classOperations, times(1)).removeClass(ORIGINAL_CLASS);
         verify(liquibaseOperations, times(1)).dropTable(ORIGINAL_TABLE, true);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTableA, createTableB, addColumnACommon, addColumnA, addColumnBCommon, addColumnB, dropTable), AUTHOR, ID);
     }

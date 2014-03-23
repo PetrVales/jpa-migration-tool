@@ -4,8 +4,7 @@ import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.MovePropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.NewPropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.RemovePropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -33,13 +32,12 @@ public class MovePropertyCommandTest {
     private static final String FROM_TABLE = "from-table";
     private static final String TO_TABLE = "to-table";
 
-    private NewPropertyOperations newpropertyOperations = mock(NewPropertyOperations.class);
-    private RemovePropertyOperations removepropertyOperations = mock(RemovePropertyOperations.class);
+    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
     private MovePropertyOperations movePropertyOperations = mock(MovePropertyOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(newpropertyOperations, removepropertyOperations, movePropertyOperations, liquibaseOperations, typeLocationService, projectOperations);
+    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(propertyOperations, movePropertyOperations, liquibaseOperations, typeLocationService, projectOperations);
 
     @Test
     public void commandMovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -71,9 +69,9 @@ public class MovePropertyCommandTest {
 
         movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY);
 
-        verify(newpropertyOperations, times(1)).addFieldToClass(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, toCLass);
+        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, toCLass);
         verify(movePropertyOperations, times(1)).moveColumn(COLUMN_NAME, COLUMN_TYPE, FROM_TABLE, TO_TABLE);
-        verify(removepropertyOperations, times(1)).removeFieldFromClass(PROPERTY, fromCLass);
+        verify(propertyOperations, times(1)).removeField(PROPERTY, fromCLass);
     }
 
     private ClassOrInterfaceTypeDetails mockFromClass() {

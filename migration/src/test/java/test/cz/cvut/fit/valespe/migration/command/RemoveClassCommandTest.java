@@ -2,8 +2,8 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.RemoveClassCommands;
+import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.RemoveClassOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -27,12 +27,12 @@ public class RemoveClassCommandTest {
     private static final String AUTHOR = "author";
     private static final String ID = "ID";
 
-    private RemoveClassOperations removeClassOperations = mock(RemoveClassOperations.class);
+    private ClassOperations classOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private RemoveClassCommands removeClassCommand =
-            new RemoveClassCommands(removeClassOperations, projectOperations, typeLocationService, liquibaseOperations);
+            new RemoveClassCommands(classOperations, projectOperations, typeLocationService, liquibaseOperations);
 
     @Test
     public void commandRemoveClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -71,7 +71,7 @@ public class RemoveClassCommandTest {
 
         removeClassCommand.removeClass(CLASS_TO_REMOVE, AUTHOR, ID);
 
-        verify(removeClassOperations, times(1)).removeClass(CLASS_TO_REMOVE);
+        verify(classOperations, times(1)).removeClass(CLASS_TO_REMOVE);
         verify(liquibaseOperations, times(1)).dropTable(TABLE, false);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(dropTable), AUTHOR, ID);
     }
