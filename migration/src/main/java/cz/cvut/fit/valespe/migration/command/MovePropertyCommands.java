@@ -20,6 +20,11 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
@@ -55,7 +60,11 @@ public class MovePropertyCommands implements CommandMarker {
     public void moveProperty(
             @CliOption(key = "from", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType fromType,
             @CliOption(key = "to", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType toType,
-            @CliOption(key = "property", mandatory = true, help = "The name of the field to moveProperty") final JavaSymbolName propertyName) {
+            @CliOption(key = "property", mandatory = true, help = "The name of the field to moveProperty") final JavaSymbolName propertyName,
+            @CliOption(key = "query", mandatory = true, help = "Query") final String query,
+            @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
+            @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id
+        ) {
         final ClassOrInterfaceTypeDetails fromTypeDetails = typeLocationService.getTypeDetails(fromType);
         Validate.notNull(fromTypeDetails, "The type specified, '%s', doesn't exist", fromType);
         final ClassOrInterfaceTypeDetails toTypeDetails = typeLocationService.getTypeDetails(toType);
@@ -66,20 +75,22 @@ public class MovePropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
         propertyOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toTypeDetails);
-        moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails);
+        moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails, query, author, id);
         propertyOperations.removeField(propertyName, fromTypeDetails);
     }
 
-    private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails) {
+    private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {
         AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
         AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
         AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
-        movePropertyOperations.moveColumn(
-                columnName, columnType,
-                fromTable == null ? "" : fromTable.getValue(),
-                toTable == null ? "" : toTable.getValue()
-        );
+
+        List<Element> elements = new LinkedList<Element>();
+        elements.add(liquibaseOperations.addColumn(toTable.getValue(), columnName, columnType));
+        elements.add(liquibaseOperations.copyColumnData(fromTable.getValue(), toTable.getValue(), columnName, query));
+        elements.add(liquibaseOperations.dropColumn(fromTable.getValue(), columnName));
+
+        liquibaseOperations.createChangeSet(elements, author, id);
     }
     
 }

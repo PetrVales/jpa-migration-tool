@@ -33,6 +33,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     private static final String DROP_TABLE = "dropTable";
     private static final String DROP_COLUMN = "dropColumn";
     private static final String ADD_PRIMARY_KEY = "addPrimaryKey";
+    private static final String SQL = "sql";
 
     @Reference
     private PathResolver pathResolver;
@@ -59,11 +60,11 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     }
 
     @Override
-    public void createChangeSet(List<Element> elements, String user, String id) {
+    public void createChangeSet(List<Element> elements, String author, String id) {
         final String migrationPath = getMigrationXmlPath();
         final Document migration = getMigrationDocument(migrationPath);
 
-        Element changeSetElement = createChangeSetElement(migration, getChangeLogElement(migration), user, id);
+        Element changeSetElement = createChangeSetElement(migration, getChangeLogElement(migration), author, id);
         for (Element element : elements)
             if (element != null) {
                 migration.adoptNode(element);
@@ -148,6 +149,23 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(dropColumnElement, "columnName", columnName);
 
         return dropColumnElement;
+    }
+
+    @Override
+    public Element copyColumnData(String tableFrom, String tableTo, String columnName, String query) {
+        return sql("UPDATE " + tableTo + " SET " + columnName + "(SELECT " + columnName + " FROM " + tableFrom + " WHERE " + query + ")");
+    }
+
+    @Override
+    public Element sql(String query) {
+        final String migrationPath = getMigrationXmlPath();
+        final Document migration = getMigrationDocument(migrationPath);
+
+        Element copyColumnDataElement = migration.createElement(SQL);
+
+        copyColumnDataElement.setTextContent(query);
+
+        return copyColumnDataElement;
     }
 
     private String getMigrationXmlPath() {

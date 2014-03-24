@@ -3,5 +3,5 @@ migration setup
 migrate new class --class ~.Order --table order
 migrate new property --class ~.Order --property orderTotal --propertyType java.lang.Integer --column order_total --columnType integer
 migrate new class --class ~.Copy --table copy
-migrate move property --property orderTotal --from ~.Order --to ~.Copy
+migrate move property --property orderTotal --from ~.Order --to ~.Copy --query xxx
 exit

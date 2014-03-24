@@ -9,35 +9,15 @@ import java.util.List;
  */
 public interface LiquibaseOperations {
 
-    /**
-     * Indicate commands should be available
-     *
-     * @return true when migration.xml exists
-     */
     boolean doesMigrationFileExist();
-
-    /**
-     * Creates migration.xml in MAIN_RESOURCES folder
-     */
     void createMigrationFile();
+    void createChangeSet(List<Element> elements, String author, String id);
 
-    Element addColumn(String table, String columnName, String columnType);
     Element createTable(String table);
-
-    Element addPrimaryKey(List<String> columnName, String tableName, String constraintName);
-
-    /**
-     * Create drop table record in migration.xml
-     */
     Element dropTable(String table, boolean cascade);
-
-    /**
-     * Create dropColumn record in migration.xml
-     * @param table
-     * @param columnName
-     */
+    Element addColumn(String table, String columnName, String columnType);
     Element dropColumn(String table, String columnName);
-
-    void createChangeSet(List<Element> elements, String user, String id);
-
+    Element copyColumnData(String tableFrom, String tableTo, String columnName, String query);
+    Element addPrimaryKey(List<String> columnName, String tableName, String constraintName);
+    Element sql(String query);
 }

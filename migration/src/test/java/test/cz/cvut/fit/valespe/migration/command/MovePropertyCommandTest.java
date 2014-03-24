@@ -14,6 +14,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +34,10 @@ public class MovePropertyCommandTest {
     private static final String COLUMN_TYPE = "column-type";
     private static final String FROM_TABLE = "from-table";
     private static final String TO_TABLE = "to-table";
+    private static final String QUERY = "query";
+    private static final String AUTHOR = "author";
+    private static final String ID = "id";
+
 
     private PropertyOperations propertyOperations = mock(PropertyOperations.class);
     private MovePropertyOperations movePropertyOperations = mock(MovePropertyOperations.class);
@@ -67,11 +74,18 @@ public class MovePropertyCommandTest {
         ClassOrInterfaceTypeDetails fromCLass = mockFromClass();
         ClassOrInterfaceTypeDetails toCLass = mockToClass();
 
-        movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY);
+        Element addColumn = mock(Element.class);
+        Element copyColumnData = mock(Element.class);
+        Element dropColumn = mock(Element.class);
+        when(liquibaseOperations.addColumn(TO_TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
+        when(liquibaseOperations.copyColumnData(FROM_TABLE, TO_TABLE, COLUMN_NAME, QUERY)).thenReturn(copyColumnData);
+        when(liquibaseOperations.dropColumn(FROM_TABLE, COLUMN_NAME)).thenReturn(dropColumn);
+
+        movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY, QUERY, AUTHOR, ID);
 
         verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, toCLass);
-        verify(movePropertyOperations, times(1)).moveColumn(COLUMN_NAME, COLUMN_TYPE, FROM_TABLE, TO_TABLE);
         verify(propertyOperations, times(1)).removeField(PROPERTY, fromCLass);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, copyColumnData, dropColumn), AUTHOR, ID);
     }
 
     private ClassOrInterfaceTypeDetails mockFromClass() {
