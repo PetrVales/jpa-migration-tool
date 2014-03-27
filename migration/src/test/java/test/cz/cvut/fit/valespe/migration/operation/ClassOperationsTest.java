@@ -4,6 +4,7 @@ import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.impl.ClassOperationsImpl;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
@@ -26,7 +27,8 @@ public class ClassOperationsTest {
     private final PathResolver pathResolver = mock(PathResolver.class);
     private final FileManager fileManager = mock(FileManager.class);
     private final TypeManagementService typeManagementService = mock(TypeManagementService.class);
-    private final ClassOperations classOperations = new ClassOperationsImpl(pathResolver, fileManager, typeManagementService);
+    private final TypeLocationService typeLocationService = mock(TypeLocationService.class);
+    private final ClassOperations classOperations = new ClassOperationsImpl(pathResolver, fileManager, typeManagementService, typeLocationService);
 
     @Test
     public void createClass() {

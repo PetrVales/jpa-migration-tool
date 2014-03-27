@@ -6,10 +6,8 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.*;
+import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -18,8 +16,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
@@ -27,19 +25,23 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 @Service
 public class ClassOperationsImpl implements ClassOperations {
 
+    private Logger log = Logger.getLogger(getClass().getName());
+
     public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
     private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
 
     @Reference private PathResolver pathResolver;
     @Reference private FileManager fileManager;
     @Reference private TypeManagementService typeManagementService;
+    @Reference private TypeLocationService typeLocationService;
 
     public ClassOperationsImpl() { }
 
-    public ClassOperationsImpl(PathResolver pathResolver, FileManager fileManager, TypeManagementService typeManagementService) {
+    public ClassOperationsImpl(PathResolver pathResolver, FileManager fileManager, TypeManagementService typeManagementService, TypeLocationService typeLocationService) {
         this.pathResolver = pathResolver;
         this.fileManager = fileManager;
         this.typeManagementService = typeManagementService;
+        this.typeLocationService = typeLocationService;
     }
 
     @Override
@@ -50,15 +52,7 @@ public class ClassOperationsImpl implements ClassOperations {
                 "Entity name '%s' must not be part of java.lang",
                 className.getSimpleTypeName());
 
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(className, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-                new ClassOrInterfaceTypeDetailsBuilder(
-                        declaredByMetadataId,
-                        Modifier.PUBLIC,
-                        className,
-                        PhysicalTypeCategory.CLASS
-                );
+        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = createClassBuilder(className);
 
         cidBuilder.setAnnotations(createAnnotations(entityName, table));
 
@@ -66,8 +60,36 @@ public class ClassOperationsImpl implements ClassOperations {
     }
 
     @Override
+    public void createClass(JavaType className) {
+        typeManagementService.createOrUpdateTypeOnDisk(createClassBuilder(className).build());
+    }
+
+    private ClassOrInterfaceTypeDetailsBuilder createClassBuilder(JavaType className) {
+        final String declaredByMetadataId = PhysicalTypeIdentifier
+                .createIdentifier(className, pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        return new ClassOrInterfaceTypeDetailsBuilder(
+                declaredByMetadataId,
+                Modifier.PUBLIC,
+                className,
+                PhysicalTypeCategory.CLASS
+        );
+    }
+
+    @Override
     public void removeClass(JavaType target) {
         fileManager.delete(pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, target));
+    }
+
+    @Override
+    public void addParentClass(JavaType target, JavaType parent) {
+        final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
+        final ClassOrInterfaceTypeDetails parentTypeDetails = typeLocationService.getTypeDetails(parent);
+        final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
+        builder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(parentTypeDetails));
+        builder.setExtendsTypes(Arrays.asList(parent));
+
+        removeClass(target);
+        typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
 
     private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {
