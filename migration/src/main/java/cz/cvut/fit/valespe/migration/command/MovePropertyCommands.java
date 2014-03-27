@@ -2,7 +2,6 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -22,7 +21,6 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.w3c.dom.Element;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,16 +34,14 @@ public class MovePropertyCommands implements CommandMarker {
     private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
     
     @Reference private PropertyOperations propertyOperations;
-    @Reference private MovePropertyOperations movePropertyOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
 
     public MovePropertyCommands() { }
 
-    public MovePropertyCommands(PropertyOperations propertyOperations, MovePropertyOperations movePropertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
+    public MovePropertyCommands(PropertyOperations propertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
         this.propertyOperations = propertyOperations;
-        this.movePropertyOperations = movePropertyOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
         this.projectOperations = projectOperations;

@@ -3,7 +3,6 @@ package test.cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.MovePropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.MovePropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -40,11 +39,10 @@ public class MovePropertyCommandTest {
 
 
     private PropertyOperations propertyOperations = mock(PropertyOperations.class);
-    private MovePropertyOperations movePropertyOperations = mock(MovePropertyOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(propertyOperations, movePropertyOperations, liquibaseOperations, typeLocationService, projectOperations);
+    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(propertyOperations, liquibaseOperations, typeLocationService, projectOperations);
 
     @Test
     public void commandMovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
