@@ -8,5 +8,6 @@ public interface ClassOperations {
     void createClass(JavaType className);
     void removeClass(JavaType target);
 
-    void addParentClass(JavaType target, JavaType parent);
+    void introduceParent(JavaType target, JavaType parent);
+    void removeParent(JavaType target);
 }

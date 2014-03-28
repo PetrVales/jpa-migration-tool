@@ -15,27 +15,24 @@ import org.springframework.roo.shell.CommandMarker;
 
 @Component
 @Service
-public class IntroduceParentCommands implements CommandMarker {
+public class RemoveParentCommans implements CommandMarker {
 
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
     @Reference private ClassOperations classOperations;
 
-    @CliAvailabilityIndicator({ "migrate introduce parent" })
+    @CliAvailabilityIndicator({ "migrate remove parent" })
     public boolean isCommandAvailable() {
         return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
 
-    @CliCommand(value = "migrate introduce parent", help = "Merge two classes into one and generate migration")
-    public void introduceParent(
+    @CliCommand(value = "migrate remove parent", help = "Merge two classes into one and generate migration")
+    public void removeParent(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
-            @CliOption(key = "parent", mandatory = true, help = "The java type to apply this annotation to") JavaType parent,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
-        if (typeLocationService.getTypeDetails(parent) == null)
-            classOperations.createClass(parent);
-        classOperations.introduceParent(target, parent);
+        classOperations.removeParent(target);
     }
 
 }

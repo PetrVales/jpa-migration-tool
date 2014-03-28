@@ -81,12 +81,22 @@ public class ClassOperationsImpl implements ClassOperations {
     }
 
     @Override
-    public void addParentClass(JavaType target, JavaType parent) {
+    public void introduceParent(JavaType target, JavaType parent) {
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
         final ClassOrInterfaceTypeDetails parentTypeDetails = typeLocationService.getTypeDetails(parent);
         final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
         builder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(parentTypeDetails));
         builder.setExtendsTypes(Arrays.asList(parent));
+
+        removeClass(target);
+        typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+    }
+
+    @Override
+    public void removeParent(JavaType target) {
+        final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
+        final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
+        builder.setExtendsTypes(Arrays.asList(JavaType.OBJECT));
 
         removeClass(target);
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());

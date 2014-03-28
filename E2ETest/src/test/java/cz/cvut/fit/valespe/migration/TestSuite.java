@@ -13,6 +13,7 @@ import java.util.Map;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        RemoveParentTest.class,
         IntroduceParentTest.class,
         RunRooScriptTest.class,
         InitProjectTest.class,
@@ -26,8 +27,8 @@ import java.util.Map;
         NewPropertyOneToManyTest.class,
         RemoveClassTest.class,
         RemovePropertyTest.class,
-        MovePropertyTest.class,
         MergeClassTest.class,
+        MovePropertyTest.class,
         SplitClassTest.class
 })
 public class TestSuite extends TestCase {
