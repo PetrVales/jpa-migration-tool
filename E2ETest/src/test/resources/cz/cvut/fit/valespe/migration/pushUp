@@ -1,0 +1,7 @@
+project --topLevelPackage cz.cvut
+migration setup
+migrate new class --class ~.Target --table target
+migrate new property --class ~.Target --property orderTotal --propertyType java.lang.Integer --column order_total --columnType integer
+migrate introduce parent --class ~.Target --parent ~.Parent
+migrate push up --class ~.Target --property orderTotal
+exit

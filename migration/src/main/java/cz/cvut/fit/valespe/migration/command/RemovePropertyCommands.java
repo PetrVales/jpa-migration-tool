@@ -27,7 +27,6 @@ import java.util.Arrays;
 @Service
 public class RemovePropertyCommands implements CommandMarker {
 
-    private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
     private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
     
     @Reference private PropertyOperations propertyOperations;
@@ -65,7 +64,7 @@ public class RemovePropertyCommands implements CommandMarker {
     }
 
     private void dropColumn(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
         FieldMetadata declaredField = javaTypeDetails.getDeclaredField(propertyName);
         AnnotationMetadata column = declaredField.getAnnotation(COLUMN_ANNOTATION);
