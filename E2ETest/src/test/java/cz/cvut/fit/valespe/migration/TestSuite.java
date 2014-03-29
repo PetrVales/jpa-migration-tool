@@ -13,6 +13,7 @@ import java.util.Map;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        PushDownTest.class,
         PullUpTest.class,
         RemoveParentTest.class,
         IntroduceParentTest.class,

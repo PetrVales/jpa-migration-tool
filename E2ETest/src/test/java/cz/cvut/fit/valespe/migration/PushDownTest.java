@@ -9,11 +9,11 @@ import java.io.IOException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PullUpTest extends E2ETest {
+public class PushDownTest extends E2ETest {
 
     @BeforeClass
     public static void init() throws Exception {
-        runTestScript("pullUp");
+        runTestScript("pushDown");
     }
 
     @Test
@@ -22,8 +22,8 @@ public class PullUpTest extends E2ETest {
         String orderClassContent = getFileContent(orderClass);
 
         assertTrue(orderClassContent.contains("public class Target extends Parent"));
-        assertFalse(orderClassContent.contains("private Integer orderTotal"));
-        assertFalse(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
+        assertTrue(orderClassContent.contains("private Integer orderTotal"));
+        assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
     }
 
     @Test
@@ -32,8 +32,8 @@ public class PullUpTest extends E2ETest {
         String orderClassContent = getFileContent(orderClass);
 
         assertTrue(orderClassContent.contains("public class Parent"));
-        assertTrue(orderClassContent.contains("private Integer orderTotal"));
-        assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
+        assertFalse(orderClassContent.contains("private Integer orderTotal"));
+        assertFalse(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
     }
 
 //    @Test
