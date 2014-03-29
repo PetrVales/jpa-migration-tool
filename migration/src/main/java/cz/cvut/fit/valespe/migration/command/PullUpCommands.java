@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 @Component
-public class PushUpCommands implements CommandMarker {
+public class PullUpCommands implements CommandMarker {
 
     private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
 
@@ -33,13 +33,13 @@ public class PushUpCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private PropertyOperations propertyOperations;
 
-    @CliAvailabilityIndicator({ "migrate push up" })
+    @CliAvailabilityIndicator({ "migrate pull up" })
     public boolean isCommandAvailable() {
         return projectOperations.isFocusedProjectAvailable() && liquibaseOperations.doesMigrationFileExist();
     }
 
-    @CliCommand(value = "migrate push up", help = "Merge two classes into one and generate migration")
-    public void introduceParent(
+    @CliCommand(value = "migrate pull up", help = "Merge two classes into one and generate migration")
+    public void pullUp(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
             @CliOption(key = "property", mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,

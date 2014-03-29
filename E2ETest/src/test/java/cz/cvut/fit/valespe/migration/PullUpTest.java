@@ -9,12 +9,12 @@ import java.io.IOException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class PushUpTest extends E2ETest {
+public class PullUpTest extends E2ETest {
 
 
     @BeforeClass
     public static void init() throws Exception {
-        runTestScript("pushUp");
+        runTestScript("pullUp");
     }
 
     @Test
