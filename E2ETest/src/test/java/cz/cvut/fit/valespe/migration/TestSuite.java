@@ -17,6 +17,7 @@ import java.util.Map;
         PullUpTest.class,
         RemoveParentTest.class,
         IntroduceParentTest.class,
+        IntroduceParentFromExistingClassTest.class,
         RunRooScriptTest.class,
         InitProjectTest.class,
         MigrationSetupTest.class,

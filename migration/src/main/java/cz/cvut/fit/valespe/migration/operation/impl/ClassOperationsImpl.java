@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -54,14 +55,10 @@ public class ClassOperationsImpl implements ClassOperations {
 
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = createClassBuilder(className);
 
-        cidBuilder.setAnnotations(createAnnotations(entityName, table));
+        cidBuilder.addAnnotation(ROO_JAVA_BEAN_BUILDER);
+        cidBuilder.addAnnotation(getEntityAnnotationBuilder(entityName, table));
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    @Override
-    public void createClass(JavaType className) {
-        typeManagementService.createOrUpdateTypeOnDisk(createClassBuilder(className).build());
     }
 
     private ClassOrInterfaceTypeDetailsBuilder createClassBuilder(JavaType className) {
@@ -84,12 +81,19 @@ public class ClassOperationsImpl implements ClassOperations {
     public void introduceParent(JavaType target, JavaType parent) {
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
         final ClassOrInterfaceTypeDetails parentTypeDetails = typeLocationService.getTypeDetails(parent);
-        final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
-        builder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(parentTypeDetails));
-        builder.setExtendsTypes(Arrays.asList(parent));
+        final ClassOrInterfaceTypeDetailsBuilder targetBuilder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
+        final ClassOrInterfaceTypeDetailsBuilder parentBuilder = new ClassOrInterfaceTypeDetailsBuilder(parentTypeDetails);
+        targetBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(parentTypeDetails));
+        targetBuilder.setExtendsTypes(Arrays.asList(parent));
+        targetBuilder.addAnnotation(getDiscriminatorValueBuilder(target.getSimpleTypeName().toUpperCase()));
+
+        parentBuilder.addAnnotation(getInheritanceTypeBuilder("JOINED"));
+        parentBuilder.addAnnotation(getDiscriminatorColumnBuilder(parent.getSimpleTypeName().toLowerCase() + "_type"));
 
         removeClass(target);
-        typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+        removeClass(parent);
+        typeManagementService.createOrUpdateTypeOnDisk(targetBuilder.build());
+        typeManagementService.createOrUpdateTypeOnDisk(parentBuilder.build());
     }
 
     @Override
@@ -102,13 +106,6 @@ public class ClassOperationsImpl implements ClassOperations {
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
 
-    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {
-        final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
-        annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
-        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table));
-        return annotationBuilder;
-    }
-
     private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table)  {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(MIGRATION_ENTITY);
 
@@ -119,6 +116,24 @@ public class ClassOperationsImpl implements ClassOperations {
             entityAnnotationBuilder.addStringAttribute("table", table);
         }
 
+        return entityAnnotationBuilder;
+    }
+
+    private AnnotationMetadataBuilder getInheritanceTypeBuilder(String strategy)  {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(JpaJavaType.INHERITANCE);
+        entityAnnotationBuilder.addEnumAttribute("strategy", JpaJavaType.INHERITANCE_TYPE, strategy);
+        return entityAnnotationBuilder;
+    }
+
+    private AnnotationMetadataBuilder getDiscriminatorColumnBuilder(String name)  {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(JpaJavaType.DISCRIMINATOR_COLUMN);
+        entityAnnotationBuilder.addStringAttribute("name", name);
+        return entityAnnotationBuilder;
+    }
+
+    private AnnotationMetadataBuilder getDiscriminatorValueBuilder(String value)  {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.DiscriminatorValue"));
+        entityAnnotationBuilder.addStringAttribute("value", value );
         return entityAnnotationBuilder;
     }
 

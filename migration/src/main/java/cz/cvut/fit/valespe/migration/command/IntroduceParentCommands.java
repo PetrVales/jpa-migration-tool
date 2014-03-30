@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,10 +32,14 @@ public class IntroduceParentCommands implements CommandMarker {
     public void introduceParent(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
             @CliOption(key = "parent", mandatory = true, help = "The java type to apply this annotation to") JavaType parent,
+            @CliOption(key = "parentTable", mandatory = false, help = "The java type to apply this annotation to") String parentTable,
+            @CliOption(key = "parentEntity", mandatory = false, help = "The java type to apply this annotation to") String parentEntity,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
-        if (typeLocationService.getTypeDetails(parent) == null)
-            classOperations.createClass(parent);
+        if (typeLocationService.getTypeDetails(parent) == null) {
+            Validate.notBlank(parentTable, "--parentTable is not specified.");
+            classOperations.createClass(parent, parentEntity == null ? parentTable : parentEntity, parentTable);
+        }
         classOperations.introduceParent(target, parent);
     }
 

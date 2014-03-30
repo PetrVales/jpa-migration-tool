@@ -6,33 +6,36 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class RemoveParentTest extends E2ETest {
+public class IntroduceParentFromExistingClassTest extends E2ETest {
 
     @BeforeClass
     public static void init() throws Exception {
-        runTestScript("removeParent");
+        runTestScript("introduceParentFromExistingClass");
     }
 
     @Test
-    public void removeExtendsType() throws IOException {
+    public void targetExtendsParent() throws IOException {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Target.java");
         String orderClassContent = getFileContent(orderClass);
 
-        assertFalse(orderClassContent.contains("public class Target extends Parent"));
-        assertTrue(orderClassContent.contains("public class Target"));
-        assertTrue(orderClassContent.contains("private Integer orderTotal"));
-        assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
+        assertTrue(orderClassContent.contains("@MigrationEntity(entityName = \"target\", table = \"target\")"));
+        assertTrue(orderClassContent.contains("@DiscriminatorValue(\"TARGET\")"));
+        assertTrue(orderClassContent.contains("public class Target extends Parent"));
     }
 
     @Test
-    public void maintainParentJavaClass() throws IOException {
-        File parentClass = new File(testDirectory, "src/main/java/cz/cvut/Parent.java");
-        String orderClassContent = getFileContent(parentClass);
+    public void createsParentJavaClass() throws IOException {
+        File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Parent.java");
+        String orderClassContent = getFileContent(orderClass);
 
+        assertTrue(orderClassContent.contains("@MigrationEntity(entityName = \"parent\", table = \"parent\")"));
+        assertTrue(orderClassContent.contains("@Inheritance(strategy = InheritanceType.JOINED)"));
+        assertTrue(orderClassContent.contains("@DiscriminatorColumn(name = \"parent_type\")"));
         assertTrue(orderClassContent.contains("public class Parent"));
+        assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
+        assertTrue(orderClassContent.contains("private Integer orderTotal"));
     }
 
 //    @Test

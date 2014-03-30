@@ -19,14 +19,14 @@ import java.util.Arrays;
 @Service
 public class NewClassCommands implements CommandMarker {
     
-    @Reference private ClassOperations newclassOperations;
+    @Reference private ClassOperations classOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
 
     public NewClassCommands() { }
 
-    public NewClassCommands(ClassOperations newclassOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations) {
-        this.newclassOperations = newclassOperations;
+    public NewClassCommands(ClassOperations classOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations) {
+        this.classOperations = classOperations;
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
     }
@@ -43,7 +43,7 @@ public class NewClassCommands implements CommandMarker {
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
-        newclassOperations.createClass(className, entityName == null ? table : entityName, table);
+        classOperations.createClass(className, entityName == null ? table : entityName, table);
         final Element element = liquibaseOperations.createTable(table);
         liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
     }
