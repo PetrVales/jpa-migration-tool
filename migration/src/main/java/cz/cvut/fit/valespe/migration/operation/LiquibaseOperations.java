@@ -20,4 +20,6 @@ public interface LiquibaseOperations {
     Element copyColumnData(String tableFrom, String tableTo, String columnName, String query);
     Element addPrimaryKey(List<String> columnName, String tableName, String constraintName);
     Element sql(String query);
+
+    Element introduceParent(String target, String parent);
 }

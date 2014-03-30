@@ -25,8 +25,6 @@ import java.util.Arrays;
 @Service
 public class RemoveClassCommands implements CommandMarker {
 
-    private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
-    
     @Reference private ClassOperations classOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
@@ -64,7 +62,7 @@ public class RemoveClassCommands implements CommandMarker {
     }
 
     private void removeTable(ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
         AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
         final Element element = liquibaseOperations.dropTable(table == null ? "" : table.getValue(), false);
         liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);

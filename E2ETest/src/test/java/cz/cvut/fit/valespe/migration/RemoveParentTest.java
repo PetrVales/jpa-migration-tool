@@ -22,6 +22,7 @@ public class RemoveParentTest extends E2ETest {
         String orderClassContent = getFileContent(orderClass);
 
         assertFalse(orderClassContent.contains("public class Target extends Parent"));
+        assertFalse(orderClassContent.contains("@DiscriminatorValue(\"TARGET\")"));
         assertTrue(orderClassContent.contains("public class Target"));
         assertTrue(orderClassContent.contains("private Integer orderTotal"));
         assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
@@ -32,6 +33,9 @@ public class RemoveParentTest extends E2ETest {
         File parentClass = new File(testDirectory, "src/main/java/cz/cvut/Parent.java");
         String orderClassContent = getFileContent(parentClass);
 
+        assertTrue(orderClassContent.contains("@MigrationEntity(entityName = \"parent\", table = \"parent\")"));
+        assertTrue(orderClassContent.contains("@Inheritance(strategy = InheritanceType.JOINED)"));
+        assertTrue(orderClassContent.contains("@DiscriminatorColumn(name = \"parent_type\")"));
         assertTrue(orderClassContent.contains("public class Parent"));
     }
 

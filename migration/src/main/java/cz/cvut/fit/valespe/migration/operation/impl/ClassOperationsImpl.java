@@ -26,6 +26,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 @Service
 public class ClassOperationsImpl implements ClassOperations {
 
+    public static final JavaType DISCRIMINATOR_VALUE = new JavaType("javax.persistence.DiscriminatorValue");
     private Logger log = Logger.getLogger(getClass().getName());
 
     public static final JavaType MIGRATION_ENTITY = new JavaType(MigrationEntity.class.getName());
@@ -100,7 +101,9 @@ public class ClassOperationsImpl implements ClassOperations {
     public void removeParent(JavaType target) {
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
         final ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(targetTypeDetails);
+
         builder.setExtendsTypes(Arrays.asList(JavaType.OBJECT));
+        builder.removeAnnotation(DISCRIMINATOR_VALUE);
 
         removeClass(target);
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
@@ -132,7 +135,7 @@ public class ClassOperationsImpl implements ClassOperations {
     }
 
     private AnnotationMetadataBuilder getDiscriminatorValueBuilder(String value)  {
-        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.DiscriminatorValue"));
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(DISCRIMINATOR_VALUE);
         entityAnnotationBuilder.addStringAttribute("value", value );
         return entityAnnotationBuilder;
     }

@@ -1,7 +1,6 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
-import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.felix.scr.annotations.Component;
@@ -19,7 +18,9 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.w3c.dom.Element;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -42,6 +43,7 @@ public class PullUpCommands implements CommandMarker {
     public void pullUp(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
             @CliOption(key = "property", mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
+            @CliOption(key = "query", mandatory = true, help = "The name used to refer to the entity in queries") final String query,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
         final ClassOrInterfaceTypeDetails targetTypeDetails = typeLocationService.getTypeDetails(target);
@@ -54,12 +56,22 @@ public class PullUpCommands implements CommandMarker {
 
         propertyOperations.addField(propertyName, propertyType, columnName, columnType, parentTypeDetails);
         propertyOperations.removeField(propertyName, targetTypeDetails);
-//
-//        final List<? extends FieldMetadata> targetDeclaredFields = targetTypeDetails.getDeclaredFields();
-//        targetDeclaredFields.remove(fieldMetadata);
-//        final List<? extends FieldMetadata> parentDeclaredFields = parentTypeDetails.getDeclaredFields();
-//        parentDeclaredFields.add(fieldMetadata);
+        pullUpColumn(columnName, columnType, targetTypeDetails, parentTypeDetails, query, author, id);
 
+    }
+
+    private void pullUpColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {
+        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
+        AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
+        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
+        AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
+
+        List<Element> elements = new LinkedList<Element>();
+        elements.add(liquibaseOperations.addColumn(toTable.getValue(), columnName, columnType));
+        elements.add(liquibaseOperations.copyColumnData(fromTable.getValue(), toTable.getValue(), columnName, query));
+        elements.add(liquibaseOperations.dropColumn(fromTable.getValue(), columnName));
+
+        liquibaseOperations.createChangeSet(elements, author, id);
     }
 
 }

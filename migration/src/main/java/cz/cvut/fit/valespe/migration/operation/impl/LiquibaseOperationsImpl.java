@@ -1,10 +1,15 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
+import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -166,6 +171,11 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         copyColumnDataElement.setTextContent(query);
 
         return copyColumnDataElement;
+    }
+
+    @Override
+    public Element introduceParent(String targetTable, String parentTable) {
+        return addColumn(parentTable, parentTable + "_type", "varchar2");
     }
 
     private String getMigrationXmlPath() {

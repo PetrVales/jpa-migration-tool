@@ -15,7 +15,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 @Component
 @Service
-public class RemoveParentCommans implements CommandMarker {
+public class RemoveParentCommands implements CommandMarker {
 
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;

@@ -36,21 +36,19 @@ public class PushDownTest extends E2ETest {
         assertFalse(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
     }
 
-//    @Test
-//    public void createsRecordInMigrationFile() throws IOException {
-//        File migration = new File(testDirectory, "src/main/resources/migration.xml");
-//        String migrationContent = getFileContent(migration);
-//
-//        assertTrue(migrationContent.contains("createTable"));
-//        assertTrue(migrationContent.contains("order"));
-//    }
-//
-//    @Test
-//    public void createsMigrationEntityAspect() throws IOException {
-//        File aspect = new File(testDirectory, "src/main/java/cz/cvut/Order_Roo_Migration_Entity.aj");
-//        String aspectContent = getFileContent(aspect);
-//
-//        assertTrue(aspectContent.contains("@Entity"));
-//        assertTrue(aspectContent.contains("@Table(name = \"order\""));
-//    }
+    @Test
+    public void createsRecordInMigrationFile() throws IOException {
+        File migration = new File(testDirectory, "src/main/resources/migration.xml");
+        String migrationContent = getFileContent(migration);
+
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <addColumn tableName=\"target\">\n" +
+                "            <column name=\"order_total\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <sql>UPDATE target SET order_total(SELECT order_total FROM parent WHERE query)</sql>\n" +
+                "        <dropColumn columnName=\"order_total\" tableName=\"parent\"/>\n" +
+                "    </changeSet>"));
+    }
+
 }

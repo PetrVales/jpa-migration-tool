@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -30,9 +31,6 @@ import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 @Service
 public class MovePropertyCommands implements CommandMarker {
 
-    private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
-    private static final JavaType COLUMN_ANNOTATION = new JavaType("javax.persistence.Column");
-    
     @Reference private PropertyOperations propertyOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
@@ -66,7 +64,7 @@ public class MovePropertyCommands implements CommandMarker {
         final ClassOrInterfaceTypeDetails toTypeDetails = typeLocationService.getTypeDetails(toType);
         Validate.notNull(toTypeDetails, "The type specified, '%s', doesn't exist", toType);
         FieldMetadata property = fromTypeDetails.getField(propertyName);
-        AnnotationMetadata column = property.getAnnotation(COLUMN_ANNOTATION);
+        AnnotationMetadata column = property.getAnnotation(JpaJavaType.COLUMN);
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
@@ -76,9 +74,9 @@ public class MovePropertyCommands implements CommandMarker {
     }
 
     private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {
-        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
         AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
-        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
+        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
         AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
 
         List<Element> elements = new LinkedList<Element>();

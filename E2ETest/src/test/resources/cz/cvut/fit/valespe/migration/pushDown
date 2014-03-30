@@ -3,5 +3,5 @@ migration setup
 migrate new class --class ~.Target --table target
 migrate introduce parent --class ~.Target --parent ~.Parent --parentTable parent
 migrate new property --class ~.Parent --property orderTotal --propertyType java.lang.Integer --column order_total --columnType integer
-migrate push down --from ~.Parent --to ~.Target --property orderTotal
+migrate push down --from ~.Parent --to ~.Target --property orderTotal --query query
 exit
