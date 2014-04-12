@@ -1,6 +1,5 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.felix.scr.annotations.Component;
@@ -13,6 +12,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -61,10 +61,10 @@ public class PullUpCommands implements CommandMarker {
     }
 
     private void pullUpColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {
-        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("table");
-        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        AnnotationAttributeValue<String> toTable = toEntity.getAttribute("table");
+        AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("name");
+        AnnotationMetadata toEntity = toTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        AnnotationAttributeValue<String> toTable = toEntity.getAttribute("name");
 
         List<Element> elements = new LinkedList<Element>();
         elements.add(liquibaseOperations.addColumn(toTable.getValue(), columnName, columnType));

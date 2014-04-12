@@ -1,6 +1,5 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.MovePropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
@@ -12,6 +11,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 
@@ -103,11 +103,11 @@ public class MovePropertyCommandTest {
         AnnotationMetadata classAnnotationMetadata = mock(AnnotationMetadata.class);
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(FROM_TABLE);
-        when(classAnnotationMetadata.getAttribute("table")).thenReturn(tableMock);
+        when(classAnnotationMetadata.getAttribute("name")).thenReturn(tableMock);
 
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getField(PROPERTY)).thenReturn(fieldMetadata);
-        when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(classAnnotationMetadata);
+        when(classOrInterfaceTypeDetails.getAnnotation(JpaJavaType.TABLE)).thenReturn(classAnnotationMetadata);
 
         when(typeLocationService.getTypeDetails(FROM_CLASS)).thenReturn(classOrInterfaceTypeDetails);
 
@@ -118,9 +118,9 @@ public class MovePropertyCommandTest {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TO_TABLE);
         AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
-        when(annotationMetadata.getAttribute("table")).thenReturn(tableMock);
+        when(annotationMetadata.getAttribute("name")).thenReturn(tableMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(annotationMetadata);
+        when(classOrInterfaceTypeDetails.getAnnotation(JpaJavaType.TABLE)).thenReturn(annotationMetadata);
         when(typeLocationService.getTypeDetails(TO_CLASS)).thenReturn(classOrInterfaceTypeDetails);
 
         return classOrInterfaceTypeDetails;

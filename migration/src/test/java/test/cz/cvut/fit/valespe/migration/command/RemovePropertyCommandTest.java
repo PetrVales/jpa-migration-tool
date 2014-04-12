@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 
@@ -65,9 +66,9 @@ public class RemovePropertyCommandTest {
         AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
         when(tableMock.getValue()).thenReturn(TABLE);
         AnnotationMetadata migrationEntityAnnotationMetadata = mock(AnnotationMetadata.class);
-        when(migrationEntityAnnotationMetadata.getAttribute("table")).thenReturn(tableMock);
+        when(migrationEntityAnnotationMetadata.getAttribute("name")).thenReturn(tableMock);
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        when(classOrInterfaceTypeDetails.getAnnotation(new JavaType(MigrationEntity.class.getName()))).thenReturn(migrationEntityAnnotationMetadata);
+        when(classOrInterfaceTypeDetails.getAnnotation(JpaJavaType.TABLE)).thenReturn(migrationEntityAnnotationMetadata);
         AnnotationAttributeValue columnMock = mock(AnnotationAttributeValue.class);
         when(columnMock.getValue()).thenReturn(COLUMN_NAME);
         AnnotationMetadata columnAnnotationMetadata = mock(AnnotationMetadata.class);

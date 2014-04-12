@@ -57,7 +57,9 @@ public class ClassOperationsImpl implements ClassOperations {
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = createClassBuilder(className);
 
         cidBuilder.addAnnotation(ROO_JAVA_BEAN_BUILDER);
-        cidBuilder.addAnnotation(getEntityAnnotationBuilder(entityName, table));
+//        cidBuilder.addAnnotation(getEntityAnnotationBuilder(entityName, table));
+        cidBuilder.addAnnotation(getEntityAnnotationBuilder(entityName));
+        cidBuilder.addAnnotation(getTableAnnotationBuilder(table));
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
@@ -109,16 +111,15 @@ public class ClassOperationsImpl implements ClassOperations {
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
 
-    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table)  {
-        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(MIGRATION_ENTITY);
+    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName)  {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(JpaJavaType.ENTITY);
+        entityAnnotationBuilder.addStringAttribute("name", entityName);
+        return entityAnnotationBuilder;
+    }
 
-        if (entityName != null) {
-            entityAnnotationBuilder.addStringAttribute("entityName", entityName);
-        }
-        if (table != null) {
-            entityAnnotationBuilder.addStringAttribute("table", table);
-        }
-
+    private AnnotationMetadataBuilder getTableAnnotationBuilder(String table)  {
+        final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(JpaJavaType.TABLE);
+        entityAnnotationBuilder.addStringAttribute("name", table);
         return entityAnnotationBuilder;
     }
 

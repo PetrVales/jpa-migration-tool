@@ -1,6 +1,5 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import org.apache.commons.lang3.Validate;
@@ -14,6 +13,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -51,7 +51,7 @@ public class RemovePropertyCommands implements CommandMarker {
     @CliCommand(value = "migrate remove property", help = "Some helpful description")
     public void removeProperty(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType typeName,
-            @CliOption(key = "property", mandatory = true, help = "The java type to apply this annotation to") JavaSymbolName propertyName,
+            @CliOption(key = {"", "property"}, mandatory = true, help = "The java type to apply this annotation to") JavaSymbolName propertyName,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
@@ -64,8 +64,8 @@ public class RemovePropertyCommands implements CommandMarker {
     }
 
     private void dropColumn(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
+        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("name");
         FieldMetadata declaredField = javaTypeDetails.getDeclaredField(propertyName);
         AnnotationMetadata column = declaredField.getAnnotation(COLUMN_ANNOTATION);
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");

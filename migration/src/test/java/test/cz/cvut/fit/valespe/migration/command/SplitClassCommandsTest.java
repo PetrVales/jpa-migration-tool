@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 import test.cz.cvut.fit.valespe.migration.MigrationTest;
@@ -93,12 +94,12 @@ public class SplitClassCommandsTest extends MigrationTest {
 
 
         final AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
-        when(annotationMetadata.getAttribute("table")).thenReturn(new AnnotationAttributeValue<Object>() {
+        when(annotationMetadata.getAttribute("name")).thenReturn(new AnnotationAttributeValue<Object>() {
             @Override public JavaSymbolName getName() { return null; }
             @Override public Object getValue() { return ORIGINAL_TABLE; }
         });
         when(originalCoitd.getDeclaredFields()).thenReturn(fields);
-        when(originalCoitd.getAnnotation(MigrationEntity.MIGRATION_ENTITY)).thenReturn(annotationMetadata);
+        when(originalCoitd.getAnnotation(JpaJavaType.TABLE)).thenReturn(annotationMetadata);
 
         when(typeLocationService.getTypeDetails(ORIGINAL_CLASS)).thenReturn(originalCoitd);
         when(typeLocationService.getTypeDetails(A_CLASS)).thenReturn(aCoitd);

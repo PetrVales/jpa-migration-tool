@@ -13,6 +13,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -54,7 +55,7 @@ public class NewPropertyCommands implements CommandMarker {
     @CliCommand(value = "migrate new property", help = "Some helpful description")
     public void newProperty(
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "property", mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
+            @CliOption(key = {"", "property"}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "propertyType", mandatory = true, help = "Type of new property") final JavaType propertyType,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "columnType", mandatory = true, help = "The JPA @Column name") final String columnType,
@@ -128,8 +129,8 @@ public class NewPropertyCommands implements CommandMarker {
     }
 
     private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails, Boolean pk, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MIGRATION_ENTITY_ANNOTATION);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
+        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("name");
         final List<Element> elements = new LinkedList<Element>();
         elements.add(liquibaseOperations.addColumn(table == null ? "" : table.getValue(), columnName, columnType));
         if (pk != null && pk)

@@ -42,6 +42,7 @@ public class MigrationSetupCommandTest {
     public void commandMigrationSetupCreatesMigrationFile() {
         command.initMigration();
 
+        verify(projectOperations, times(1)).addDependencies(anyString(), anyList());
         verify(liquibaseOperations, times(1)).createMigrationFile();
     }
 

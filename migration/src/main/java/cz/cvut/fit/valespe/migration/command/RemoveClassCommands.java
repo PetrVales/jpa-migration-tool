@@ -1,6 +1,5 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import org.apache.commons.lang3.Validate;
@@ -12,6 +11,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -50,7 +50,7 @@ public class RemoveClassCommands implements CommandMarker {
     
     @CliCommand(value = "migrate remove class", help = "Remove class and its aspects and make record in migration.xml")
     public void removeClass(
-            @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
+            @CliOption(key = {"", "class"}, mandatory = true, help = "The java type to apply this annotation to") JavaType target,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
@@ -62,8 +62,8 @@ public class RemoveClassCommands implements CommandMarker {
     }
 
     private void removeTable(ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("table");
+        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("name");
         final Element element = liquibaseOperations.dropTable(table == null ? "" : table.getValue(), false);
         liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
     }

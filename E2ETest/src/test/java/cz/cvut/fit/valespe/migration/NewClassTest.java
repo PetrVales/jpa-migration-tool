@@ -1,7 +1,5 @@
 package cz.cvut.fit.valespe.migration;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,11 +20,10 @@ public class NewClassTest extends E2ETest {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
 
-        assertTrue(orderClassContent.contains("public"));
-        assertTrue(orderClassContent.contains("class"));
-        assertTrue(orderClassContent.contains("Order"));
         assertTrue(orderClassContent.contains("@RooJavaBean")); // Is this annotation necessary?
-        assertTrue(orderClassContent.contains("@MigrationEntity"));
+        assertTrue(orderClassContent.contains("@Entity(name = \"order\")"));
+        assertTrue(orderClassContent.contains("@Table(name = \"order\")"));
+        assertTrue(orderClassContent.contains("public class Order"));
     }
 
     @Test
@@ -36,15 +33,6 @@ public class NewClassTest extends E2ETest {
 
         assertTrue(migrationContent.contains("createTable"));
         assertTrue(migrationContent.contains("order"));
-    }
-
-    @Test
-    public void createsMigrationEntityAspect() throws IOException {
-        File aspect = new File(testDirectory, "src/main/java/cz/cvut/Order_Roo_Migration_Entity.aj");
-        String aspectContent = getFileContent(aspect);
-
-        assertTrue(aspectContent.contains("@Entity"));
-        assertTrue(aspectContent.contains("@Table(name = \"order\""));
     }
 
 }

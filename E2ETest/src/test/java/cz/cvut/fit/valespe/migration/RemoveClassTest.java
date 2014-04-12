@@ -28,8 +28,11 @@ public class RemoveClassTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("dropTable"));
-        assertTrue(migrationContent.contains("order"));
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <dropTable cascadeConstraints=\"false\" tableName=\"order\"/>\n" +
+                "    </changeSet>"
+        ));
     }
 
     @Test

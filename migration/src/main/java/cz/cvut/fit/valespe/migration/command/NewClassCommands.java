@@ -38,7 +38,7 @@ public class NewClassCommands implements CommandMarker {
 
     @CliCommand(value = "migrate new class", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA and DB migration script in SRC_MAIN_RESOURCES")
     public void newClass(
-            @CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType className,
+            @CliOption(key = {"", "class"}, optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType className,
             @CliOption(key = "table", mandatory = true, help = "The JPA table name to use for this entity") final String table,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,

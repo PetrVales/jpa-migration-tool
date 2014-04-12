@@ -76,7 +76,8 @@ public class SplitClassTest extends E2ETest {
         assertTrue(classContent.contains("class"));
         assertTrue(classContent.contains("A"));
         assertTrue(classContent.contains("@RooJavaBean"));
-        assertTrue(classContent.contains("@MigrationEntity"));
+        assertTrue(classContent.contains("@Entity(name = \"a_table\")"));
+        assertTrue(classContent.contains("@Table(name = \"a_table\")"));
 
         assertTrue(classContent.contains("private Integer a"));
         assertTrue(classContent.contains("@Column(name = \"a\", columnDefinition = \"integer\")"));
@@ -94,7 +95,9 @@ public class SplitClassTest extends E2ETest {
         assertTrue(classContent.contains("class"));
         assertTrue(classContent.contains("B"));
         assertTrue(classContent.contains("@RooJavaBean"));
-        assertTrue(classContent.contains("@MigrationEntity"));
+//        assertTrue(classContent.contains("@MigrationEntity"));
+        assertTrue(classContent.contains("@Entity(name = \"b_table\")"));
+        assertTrue(classContent.contains("@Table(name = \"b_table\")"));
 
         assertTrue(classContent.contains("private Integer b"));
         assertTrue(classContent.contains("@Column(name = \"b\", columnDefinition = \"integer\")"));
@@ -105,13 +108,13 @@ public class SplitClassTest extends E2ETest {
 
     @Test
     public void createsAspectsForAClass() throws IOException {
-        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/A_Roo_Migration_Entity.aj");
+//        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/A_Roo_Migration_Entity.aj");
         File beanAspect = new File(testDirectory, "src/main/java/cz/cvut/A_Roo_JavaBean.aj");
-        String entityAspectContent = getFileContent(entityAspect);
+//        String entityAspectContent = getFileContent(entityAspect);
         String beanAspectContent = getFileContent(beanAspect);
 
-        assertTrue(entityAspectContent.contains("@Entity"));
-        assertTrue(entityAspectContent.contains("@Table(name = \"a_table\""));
+//        assertTrue(entityAspectContent.contains("@Entity"));
+//        assertTrue(entityAspectContent.contains("@Table(name = \"a_table\""));
 
         assertTrue(beanAspectContent.contains("getA"));
         assertTrue(beanAspectContent.contains("setA"));
@@ -121,13 +124,12 @@ public class SplitClassTest extends E2ETest {
 
     @Test
     public void createsAspectsForBClass() throws IOException {
-        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/B_Roo_Migration_Entity.aj");
+//        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/B_Roo_Migration_Entity.aj");
         File beanAspect = new File(testDirectory, "src/main/java/cz/cvut/B_Roo_JavaBean.aj");
-        String entityAspectContent = getFileContent(entityAspect);
+//        String entityAspectContent = getFileContent(entityAspect);
         String beanAspectContent = getFileContent(beanAspect);
 
-        assertTrue(entityAspectContent.contains("@Entity"));
-        assertTrue(entityAspectContent.contains("@Table(name = \"b_table\""));
+
 
         assertTrue(beanAspectContent.contains("getB"));
         assertTrue(beanAspectContent.contains("setB"));

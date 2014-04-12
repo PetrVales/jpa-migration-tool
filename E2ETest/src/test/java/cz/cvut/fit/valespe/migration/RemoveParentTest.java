@@ -33,7 +33,8 @@ public class RemoveParentTest extends E2ETest {
         File parentClass = new File(testDirectory, "src/main/java/cz/cvut/Parent.java");
         String orderClassContent = getFileContent(parentClass);
 
-        assertTrue(orderClassContent.contains("@MigrationEntity(entityName = \"parent\", table = \"parent\")"));
+        assertTrue(orderClassContent.contains("@Entity(name = \"parent\")"));
+        assertTrue(orderClassContent.contains("@Table(name = \"parent\")"));
         assertTrue(orderClassContent.contains("@Inheritance(strategy = InheritanceType.JOINED)"));
         assertTrue(orderClassContent.contains("@DiscriminatorColumn(name = \"parent_type\")"));
         assertTrue(orderClassContent.contains("public class Parent"));

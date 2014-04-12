@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -39,7 +40,7 @@ public class IntroduceParentCommands implements CommandMarker {
     @CliCommand(value = "migrate introduce parent", help = "Merge two classes into one and generate migration")
     public void introduceParent(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
-            @CliOption(key = "parent", mandatory = true, help = "The java type to apply this annotation to") JavaType parent,
+            @CliOption(key = {"", "parent"}, mandatory = true, help = "The java type to apply this annotation to") JavaType parent,
             @CliOption(key = "parentTable", mandatory = false, help = "The java type to apply this annotation to") String parentTable,
             @CliOption(key = "parentEntity", mandatory = false, help = "The java type to apply this annotation to") String parentEntity,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
@@ -56,11 +57,11 @@ public class IntroduceParentCommands implements CommandMarker {
 
     private void generateMigrationRecord(JavaType target, JavaType parent, String author, String id, List<Element> elements) {
         final ClassOrInterfaceTypeDetails targetDetails = typeLocationService.getTypeDetails(target);
-        AnnotationMetadata targetMigrationEntity = targetDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        String targetTable = targetMigrationEntity.<String>getAttribute("table").getValue();
+        AnnotationMetadata targetMigrationEntity = targetDetails.getAnnotation(JpaJavaType.TABLE);
+        String targetTable = targetMigrationEntity.<String>getAttribute("name").getValue();
         final ClassOrInterfaceTypeDetails parentDetails = typeLocationService.getTypeDetails(parent);
-        AnnotationMetadata parentMigrationEntity = parentDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        String realParentTable = parentMigrationEntity.<String>getAttribute("table").getValue();
+        AnnotationMetadata parentMigrationEntity = parentDetails.getAnnotation(JpaJavaType.TABLE);
+        String realParentTable = parentMigrationEntity.<String>getAttribute("name").getValue();
         elements.add(liquibaseOperations.introduceParent(targetTable, realParentTable));
         liquibaseOperations.createChangeSet(elements, author, id);
     }

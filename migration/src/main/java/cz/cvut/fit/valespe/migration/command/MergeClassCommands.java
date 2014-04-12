@@ -40,7 +40,7 @@ public class MergeClassCommands implements CommandMarker {
     
     @CliCommand(value = "migrate merge class", help = "Merge two classes into one and generate migration")
     public void mergeClass(
-            @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
+            @CliOption(key = {"", "class"}, mandatory = true, help = "The java type to apply this annotation to") JavaType target,
             @CliOption(key = "classA", mandatory = true, help = "The java type to apply this annotation to") JavaType classA,
             @CliOption(key = "classB", mandatory = true, help = "The java type to apply this annotation to") JavaType classB,
             @CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table,

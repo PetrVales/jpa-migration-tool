@@ -1,6 +1,5 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.*;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -95,8 +94,8 @@ public class SplitClassCommands implements CommandMarker {
 
         classOperations.removeClass(target);
 
-        final AnnotationMetadata annotation = classTypeDetails.getAnnotation(MigrationEntity.MIGRATION_ENTITY);
-        final AnnotationAttributeValue<String> name = annotation.getAttribute("table");
+        final AnnotationMetadata annotation = classTypeDetails.getAnnotation(JpaJavaType.TABLE);
+        final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
         elements.add(liquibaseOperations.dropTable(name.getValue(), true));
         liquibaseOperations.createChangeSet(elements, author, id);
     }
