@@ -107,7 +107,7 @@ public class SplitClassCommands implements CommandMarker {
             final AnnotationMetadata annotation = field.getAnnotation(JpaJavaType.COLUMN);
             final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
             final AnnotationAttributeValue<String> columnDefinition = annotation.getAttribute("columnDefinition");
-            propertyOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), classTypeDetails);
+            propertyOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), target);
             elements.add(liquibaseOperations.addColumn(table, name.getValue(), columnDefinition.getValue()));
         }
         return elements;

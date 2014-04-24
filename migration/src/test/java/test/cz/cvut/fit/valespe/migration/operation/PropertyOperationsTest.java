@@ -2,11 +2,12 @@ package test.cz.cvut.fit.valespe.migration.operation;
 
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
 import cz.cvut.fit.valespe.migration.operation.impl.PropertyOperationsImpl;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -32,15 +33,16 @@ public class PropertyOperationsTest {
     private static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.CLASS;
 
     private final TypeManagementService typeManagementService = mock(TypeManagementService.class);
-    private final TypeLocationService typeLocationService = mock(TypeLocationService.class);
-    private final PropertyOperations propertyOperations = new PropertyOperationsImpl(typeManagementService, typeLocationService);
+    private final ClassCommons classCommons = mock(ClassCommons.class);
+    private final PropertyOperations propertyOperations = new PropertyOperationsImpl(typeManagementService, classCommons);
 
     @Test
-    public void createClass() {
+    public void addField() {
         ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
+        when(classCommons.classDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
         when(classOrInterfaceTypeDetails.getDeclaredByMetadataId()).thenReturn(PHYSICAL_TYPE_IDENTIFIER);
 
-        propertyOperations.addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails);
+        propertyOperations.addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS);
 
         ArgumentCaptor<FieldMetadata> argument = ArgumentCaptor.forClass(FieldMetadata.class);
         verify(typeManagementService, times(1)).addField(argument.capture());
@@ -52,6 +54,8 @@ public class PropertyOperationsTest {
 
     @Test
     public void removeFieldFromClass() {
+        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
+        when(classCommons.classDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
         List fields = new ArrayList<FieldMetadata>();
         final FieldMetadata fieldMetadata1 = mock(FieldMetadata.class);
         when(fieldMetadata1.getDeclaredByMetadataId()).thenReturn(PHYSICAL_TYPE_IDENTIFIER);
@@ -63,13 +67,12 @@ public class PropertyOperationsTest {
         when(fieldMetadata2.getFieldType()).thenReturn(PROPERTY_TYPE);
         fields.add(fieldMetadata1);
         fields.add(fieldMetadata2);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
         when(classOrInterfaceTypeDetails.getDeclaredByMetadataId()).thenReturn(PHYSICAL_TYPE_IDENTIFIER);
         when(classOrInterfaceTypeDetails.getDeclaredFields()).thenReturn(fields);
         when(classOrInterfaceTypeDetails.getName()).thenReturn(CLASS);
         when(classOrInterfaceTypeDetails.getPhysicalTypeCategory()).thenReturn(PHYSICAL_TYPE_CATEGORY);
 
-        propertyOperations.removeField(PROPERTY, classOrInterfaceTypeDetails);
+        propertyOperations.removeField(PROPERTY, CLASS);
 
         ArgumentCaptor<ClassOrInterfaceTypeDetails> argument = ArgumentCaptor.forClass(ClassOrInterfaceTypeDetails.class);
         verify(typeManagementService, times(1)).createOrUpdateTypeOnDisk(argument.capture());

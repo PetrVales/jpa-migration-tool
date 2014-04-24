@@ -49,9 +49,14 @@ public class MovePropertyTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("addColumn"));
-        assertTrue(migrationContent.contains("name=\"order_total\""));
-        assertTrue(migrationContent.contains("type=\"integer\""));
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <addColumn tableName=\"copy\">\n" +
+                "            <column name=\"order_total\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <sql>UPDATE copy SET order_total (SELECT order_total FROM order WHERE xxx)</sql>\n" +
+                "        <dropColumn columnName=\"order_total\" tableName=\"order\"/>\n" +
+                "    </changeSet>"));
     }
 
 }

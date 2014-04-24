@@ -3,14 +3,11 @@ package test.cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.command.NewPropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.junit.Test;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 
@@ -51,9 +48,9 @@ public class NewPropertyCommandTest {
 
     private PropertyOperations propertyOperations = mock(PropertyOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
-    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(propertyOperations, projectOperations, typeLocationService, liquibaseOperations);
+    private ClassCommons classCommons = mock(ClassCommons.class);
+    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(propertyOperations, projectOperations, liquibaseOperations, classCommons);
 
     @Test
     public void commandNewPropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -80,95 +77,96 @@ public class NewPropertyCommandTest {
 
     @Test
     public void commandNewPropertyAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, false);
+        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void commandNewPropertyAddNewIdPropertyToClassAndGeneratesMigrationChangeSet() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         Element addPrimaryKey = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
         when(liquibaseOperations.addPrimaryKey(Arrays.asList(COLUMN_NAME), TABLE, PK)).thenReturn(addPrimaryKey);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, classOrInterfaceTypeDetails, true);
+        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
 
     @Test
     public void addIdCommandTest() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         Element addPrimaryKey = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE)).thenReturn(addColumn);
         when(liquibaseOperations.addPrimaryKey(Arrays.asList(ID_COLUMN_NAME), TABLE, ID_PK)).thenReturn(addPrimaryKey);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.addId(CLASS, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, classOrInterfaceTypeDetails, true);
+        verify(propertyOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, CLASS, true);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
 
     @Test
     public void addStringCommandTest() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, STRING_COLUMN_TYPE)).thenReturn(addColumn);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(propertyOperations, times(1)).addField(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, STRING_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void addIntegerCommandTest() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, INTEGER_COLUMN_TYPE)).thenReturn(addColumn);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(propertyOperations, times(1)).addField(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, INTEGER_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
     public void addBooleanCommandTest() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE)).thenReturn(addColumn);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mockClassWithTable();
 
         newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, classOrInterfaceTypeDetails);
+        verify(propertyOperations, times(1)).addField(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
-    }
-
-    private ClassOrInterfaceTypeDetails mockClassWithTable() {
-        AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
-        when(tableMock.getValue()).thenReturn(TABLE);
-        AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
-        when(annotationMetadata.getAttribute("name")).thenReturn(tableMock);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        when(classOrInterfaceTypeDetails.getAnnotation(JpaJavaType.TABLE)).thenReturn(annotationMetadata);
-        when(typeLocationService.getTypeDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
-        return classOrInterfaceTypeDetails;
     }
 
 }

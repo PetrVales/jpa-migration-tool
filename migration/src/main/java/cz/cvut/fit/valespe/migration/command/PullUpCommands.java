@@ -54,8 +54,8 @@ public class PullUpCommands implements CommandMarker {
         String columnName = column.<String>getAttribute("name").getValue();
         String columnType = column.<String>getAttribute("columnDefinition").getValue();
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, parentTypeDetails);
-        propertyOperations.removeField(propertyName, targetTypeDetails);
+        propertyOperations.addField(propertyName, propertyType, columnName, columnType, parentTypeDetails.getName());
+        propertyOperations.removeField(propertyName, target);
         pullUpColumn(columnName, columnType, targetTypeDetails, parentTypeDetails, query, author, id);
 
     }

@@ -30,8 +30,10 @@ public class RemovePropertyTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("dropColumn"));
-        assertTrue(migrationContent.contains("order_total"));
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <dropColumn columnName=\"order_total\" tableName=\"order\"/>\n" +
+                "    </changeSet>"));
     }
 
     @Test

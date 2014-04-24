@@ -1,19 +1,15 @@
 package cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -30,21 +26,24 @@ import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 @Component
 @Service
 public class NewPropertyCommands implements CommandMarker {
-
-    private static final JavaType MIGRATION_ENTITY_ANNOTATION = new JavaType(MigrationEntity.class.getName());
-    
     @Reference private PropertyOperations propertyOperations;
-    @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
+    @Reference private ClassCommons classCommons;
+
 
     public NewPropertyCommands() {}
 
-    public NewPropertyCommands(PropertyOperations propertyOperations, ProjectOperations projectOperations, TypeLocationService typeLocationService, LiquibaseOperations liquibaseOperations) {
+    public NewPropertyCommands(
+            PropertyOperations propertyOperations,
+            ProjectOperations projectOperations,
+            LiquibaseOperations liquibaseOperations,
+            ClassCommons classCommons
+    ) {
         this.propertyOperations = propertyOperations;
         this.projectOperations = projectOperations;
-        this.typeLocationService = typeLocationService;
         this.liquibaseOperations = liquibaseOperations;
+        this.classCommons = classCommons;
     }
 
     @CliAvailabilityIndicator({ "migrate new property" })
@@ -63,11 +62,10 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, javaTypeDetails, pk);
-        addColumn(columnName, columnType, javaTypeDetails, pk, author, id);
+        propertyOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk);
+        addColumn(typeName, columnName, columnType, pk, author, id);
     }
 
     @CliCommand(value = "migrate add id", help = "Some helpful description")
@@ -76,11 +74,10 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", javaTypeDetails, true);
-        addColumn("id", "bigint", javaTypeDetails, true, author, id);
+        propertyOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
+        addColumn(typeName, "id", "bigint", true, author, id);
     }
 
     @CliCommand(value = "migrate add string", help = "Some helpful description")
@@ -91,11 +88,10 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", javaTypeDetails);
-        addColumn(columnName, "varchar2(255)", javaTypeDetails, false, author, id);
+        propertyOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", typeName);
+        addColumn(typeName, columnName, "varchar2(255)", false, author, id);
     }
 
     @CliCommand(value = "migrate add integer", help = "Some helpful description")
@@ -106,11 +102,10 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", javaTypeDetails);
-        addColumn(columnName, "integer", javaTypeDetails, false, author, id);
+        propertyOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", typeName);
+        addColumn(typeName, columnName, "integer", false, author, id);
     }
 
     @CliCommand(value = "migrate add boolean", help = "Some helpful description")
@@ -121,20 +116,18 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(typeName);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", javaTypeDetails);
-        addColumn(columnName, "boolean", javaTypeDetails, false, author, id);
+        propertyOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", typeName);
+        addColumn(typeName, columnName, "boolean", false, author, id);
     }
 
-    private void addColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails javaTypeDetails, Boolean pk, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(JpaJavaType.TABLE);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("name");
+    private void addColumn(JavaType typeName, String columnName, String columnType, Boolean pk, String author, String id) {
+        final String tableName = classCommons.tableName(typeName);
         final List<Element> elements = new LinkedList<Element>();
-        elements.add(liquibaseOperations.addColumn(table == null ? "" : table.getValue(), columnName, columnType));
+        elements.add(liquibaseOperations.addColumn(tableName, columnName, columnType));
         if (pk != null && pk)
-            elements.add(liquibaseOperations.addPrimaryKey(Arrays.asList(columnName), table.getValue(), columnName + "_pk"));
+            elements.add(liquibaseOperations.addPrimaryKey(Arrays.asList(columnName), tableName, columnName + "_pk"));
         liquibaseOperations.createChangeSet(elements, author, id);
     }
 

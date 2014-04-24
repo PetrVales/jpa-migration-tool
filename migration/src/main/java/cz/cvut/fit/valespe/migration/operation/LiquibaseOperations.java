@@ -17,8 +17,9 @@ public interface LiquibaseOperations {
     Element dropTable(String table, boolean cascade);
     Element addColumn(String table, String columnName, String columnType);
     Element dropColumn(String table, String columnName);
-    Element copyColumnData(String tableFrom, String tableTo, String columnName, String query);
     Element addPrimaryKey(List<String> columnName, String tableName, String constraintName);
+    Element copyColumnData(String tableFrom, String tableTo, String columnName, String query);
+    Element mergeTables(String target, String tableA, String tableB, List<String> columns, String query);
     Element sql(String query);
 
     Element introduceParent(String target, String parent);

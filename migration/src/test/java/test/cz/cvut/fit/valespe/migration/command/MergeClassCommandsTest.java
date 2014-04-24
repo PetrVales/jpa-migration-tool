@@ -1,11 +1,12 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.MergeClassCommands;
+import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
+import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.junit.Test;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import test.cz.cvut.fit.valespe.migration.MigrationTest;
@@ -20,15 +21,18 @@ public class MergeClassCommandsTest extends MigrationTest {
     private static final JavaType A_CLASS = new JavaType("test.AClass");
     private static final JavaType B_CLASS = new JavaType("test.BClass");
     private static final String TABLE = "table";
-    private static final String SCHEMA = "schema";
-    private static final String CATALOG = "catalog";
-    private static final String TABLESPACE = "tablespace";
+    private static final String ENTITY = "entity";
+    private static final String AUTOR = "author";
+    private static final String ID = "id";
+    private static final String QUERY = "query";
 
-    private MergeClassOperations mergeClassOperations = mock(MergeClassOperations.class);
+    private ClassOperations classOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
-    private MergeClassCommands mergeClassCommands = new MergeClassCommands(mergeClassOperations, projectOperations, liquibaseOperations, typeLocationService);
+    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
+    private ClassCommons classCommons = mock(ClassCommons.class);
+    private FieldCommons fieldCommons = mock(FieldCommons.class);
+    private MergeClassCommands mergeClassCommands = new MergeClassCommands(classOperations, projectOperations, liquibaseOperations, propertyOperations, classCommons, fieldCommons);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -55,15 +59,13 @@ public class MergeClassCommandsTest extends MigrationTest {
 
     @Test
     public void commandMergeTwoClassesIntoOneNewClass() {
-        final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        when(typeLocationService.getTypeDetails(A_CLASS)).thenReturn(mock(ClassOrInterfaceTypeDetails.class));
-        when(typeLocationService.getTypeDetails(B_CLASS)).thenReturn(mock(ClassOrInterfaceTypeDetails.class));
-        when(typeLocationService.getTypeDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
+        when(classCommons.exist(A_CLASS)).thenReturn(true);
+        when(classCommons.exist(B_CLASS)).thenReturn(true);
 
-        mergeClassCommands.mergeClass(CLASS, A_CLASS, B_CLASS, TABLE, SCHEMA, CATALOG, TABLESPACE);
+        mergeClassCommands.mergeClass(CLASS, A_CLASS, B_CLASS, TABLE, ENTITY, QUERY, AUTOR, ID);
 
-        verify(mergeClassOperations, times(1)).mergeClasses(CLASS, A_CLASS, B_CLASS, TABLE, SCHEMA, CATALOG, TABLESPACE);
-        verify(mergeClassOperations, times(1)).createTable(classOrInterfaceTypeDetails);
+        verify(classOperations, times(1)).createClass(CLASS, ENTITY, TABLE);
+//        verify(classOperations, times(1)).createTable(classOrInterfaceTypeDetails);
     }
 
 

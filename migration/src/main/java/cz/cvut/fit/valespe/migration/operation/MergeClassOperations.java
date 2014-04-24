@@ -5,7 +5,7 @@ import org.springframework.roo.model.JavaType;
 
 public interface MergeClassOperations {
 
-    void mergeClasses(JavaType target, JavaType classA, JavaType classB, String table, String schema, String catalog, String tablespace);
+    void mergeClasses(JavaType target, JavaType classA, JavaType classB, String table);
 
     void createTable(ClassOrInterfaceTypeDetails targetTypeDetails);
 }

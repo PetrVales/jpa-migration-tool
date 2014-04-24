@@ -2,10 +2,11 @@ package cz.cvut.fit.valespe.migration.operation.impl;
 
 import cz.cvut.fit.valespe.migration.JpaFieldDetails;
 import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -24,24 +25,25 @@ import java.util.List;
 @Service
 public class PropertyOperationsImpl implements PropertyOperations {
 
-    @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
+    @Reference private ClassCommons classCommons;
 
     public PropertyOperationsImpl() { }
 
-    public PropertyOperationsImpl(TypeManagementService typeManagementService, TypeLocationService typeLocationService) {
+    public PropertyOperationsImpl(TypeManagementService typeManagementService, ClassCommons classCommons) {
         this.typeManagementService = typeManagementService;
-        this.typeLocationService = typeLocationService;
+        this.classCommons = classCommons;
     }
 
     @Override
-    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType) {
-        addField(propertyName, propertyType, columnName, columnType, classType, false);
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className) {
+        addField(propertyName, propertyType, columnName, columnType, className, false);
     }
 
     @Override
-    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, ClassOrInterfaceTypeDetails classType, boolean id) {
-        final String physicalTypeIdentifier = classType.getDeclaredByMetadataId();
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className, boolean id) {
+        final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
+        final String physicalTypeIdentifier = classDetails.getDeclaredByMetadataId();
         final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName);
         if (columnName != null) {
             fieldDetails.setColumn(columnName);
@@ -55,8 +57,9 @@ public class PropertyOperationsImpl implements PropertyOperations {
     }
 
     @Override
-    public void removeField(JavaSymbolName propertyName, ClassOrInterfaceTypeDetails javaTypeDetails) {
-        List<? extends FieldMetadata> fields = javaTypeDetails.getDeclaredFields();
+    public void removeField(JavaSymbolName propertyName, JavaType className) {
+        final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
+        List<? extends FieldMetadata> fields = classDetails.getDeclaredFields();
         List<FieldMetadataBuilder> fieldsBuilders = new ArrayList<FieldMetadataBuilder>(fields.size());
 
         for (FieldMetadata fieldMetadata : fields) {
@@ -65,7 +68,7 @@ public class PropertyOperationsImpl implements PropertyOperations {
             }
         }
 
-        ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(javaTypeDetails);
+        ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(classDetails);
         builder.setDeclaredFields(fieldsBuilders);
 
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());

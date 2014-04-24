@@ -81,8 +81,8 @@ public class MovePropertyCommandTest {
 
         movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY, QUERY, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, toCLass);
-        verify(propertyOperations, times(1)).removeField(PROPERTY, fromCLass);
+        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, TO_CLASS);
+        verify(propertyOperations, times(1)).removeField(PROPERTY, FROM_CLASS);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, copyColumnData, dropColumn), AUTHOR, ID);
     }
 

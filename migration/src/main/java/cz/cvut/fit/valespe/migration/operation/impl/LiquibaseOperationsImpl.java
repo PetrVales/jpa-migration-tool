@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration.operation.impl;
 
 import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -158,7 +159,15 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
 
     @Override
     public Element copyColumnData(String tableFrom, String tableTo, String columnName, String query) {
-        return sql("UPDATE " + tableTo + " SET " + columnName + "(SELECT " + columnName + " FROM " + tableFrom + " WHERE " + query + ")");
+        return sql("UPDATE " + tableTo + " SET " + columnName +
+                    " (SELECT " + columnName + " FROM " + tableFrom + " WHERE " + query + ")");
+    }
+
+    @Override
+    public Element mergeTables(String target, String tableA, String tableB, List<String> columns, String query) {
+        String columnList = StringUtils.join(columns, ", ");
+        return sql("INSERT INTO " + target + "(" + columnList + ") " +
+                    "(SELECT " + columnList + " FROM " + tableA + " JOIN " + tableB + " ON " + query + ")");
     }
 
     @Override

@@ -58,8 +58,8 @@ public class PushDownCommands implements CommandMarker {
         String columnName = column.<String>getAttribute("name").getValue();
         String columnType = column.<String>getAttribute("columnDefinition").getValue();
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, toTypeDetails);
-        propertyOperations.removeField(propertyName, fromTypeDetails);
+        propertyOperations.addField(propertyName, propertyType, columnName, columnType, to);
+        propertyOperations.removeField(propertyName, from);
 
         pushDownColumn(columnName, columnType, fromTypeDetails, toTypeDetails, query, author, id);
     }

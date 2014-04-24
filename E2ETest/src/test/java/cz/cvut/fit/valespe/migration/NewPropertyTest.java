@@ -20,8 +20,8 @@ public class NewPropertyTest extends E2ETest {
         File orderClass = new File(testDirectory, "src/main/java/cz/cvut/Order.java");
         String orderClassContent = getFileContent(orderClass);
 
-        assertTrue(orderClassContent.contains("private Integer orderTotal"));
         assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
+        assertTrue(orderClassContent.contains("private Integer orderTotal"));
     }
 
     @Test
@@ -38,9 +38,10 @@ public class NewPropertyTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("addColumn"));
-        assertTrue(migrationContent.contains("name=\"order_total\""));
-        assertTrue(migrationContent.contains("type=\"integer\""));
+        assertTrue(migrationContent.contains(
+                "        <addColumn tableName=\"order\">\n" +
+                "            <column name=\"order_total\" type=\"integer\"/>\n" +
+                "        </addColumn>"));
     }
 
 }

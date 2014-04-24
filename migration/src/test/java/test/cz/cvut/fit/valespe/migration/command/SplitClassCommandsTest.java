@@ -127,10 +127,10 @@ public class SplitClassCommandsTest extends MigrationTest {
         verify(classOperations, times(1)).createClass(A_CLASS, A_TABLE, A_TABLE);
         verify(classOperations, times(1)).createClass(B_CLASS, B_TABLE, B_TABLE);
 
-        verify(propertyOperations, times(1)).addField(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, aCoitd);
-        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, aCoitd);
-        verify(propertyOperations, times(1)).addField(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, bCoitd);
-        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, bCoitd);
+        verify(propertyOperations, times(1)).addField(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
+        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
+        verify(propertyOperations, times(1)).addField(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
+        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
 
 
         verify(classOperations, times(1)).removeClass(ORIGINAL_CLASS);

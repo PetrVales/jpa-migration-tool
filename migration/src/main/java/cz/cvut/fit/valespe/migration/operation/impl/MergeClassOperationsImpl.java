@@ -39,7 +39,7 @@ public class MergeClassOperationsImpl implements MergeClassOperations {
     @Reference private PathResolver pathResolver;
 
     @Override
-    public void mergeClasses(JavaType target, JavaType classA, JavaType classB, String table, String schema, String catalog, String tablespace) {
+    public void mergeClasses(JavaType target, JavaType classA, JavaType classB, String table) {
         final ClassOrInterfaceTypeDetails classATypeDetails = typeLocationService.getTypeDetails(classA);
         final ClassOrInterfaceTypeDetails classBTypeDetails = typeLocationService.getTypeDetails(classB);
 
@@ -54,10 +54,7 @@ public class MergeClassOperationsImpl implements MergeClassOperations {
                         PhysicalTypeCategory.CLASS
                 );
         builder.setDeclaredFields(getDeclaredFields(classATypeDetails, classBTypeDetails));
-        builder.setDeclaredMethods(getDeclaredMethods(classATypeDetails, classBTypeDetails));
-        builder.setDeclaredInnerTypes(getDeclaredInnerTypes(classATypeDetails, classBTypeDetails));
-        builder.setEnumConstants(getEnums(classATypeDetails, classBTypeDetails));
-        builder.setAnnotations(createAnnotations(target.getSimpleTypeName(), table, schema, catalog));
+        builder.setAnnotations(createAnnotations(target.getSimpleTypeName(), table));
 
         typeManagementService.createOrUpdateTypeOnDisk(builder.build());
     }
@@ -77,62 +74,14 @@ public class MergeClassOperationsImpl implements MergeClassOperations {
         return fieldsBuilders;
     }
 
-    private Collection<? extends MethodMetadataBuilder> getDeclaredMethods(ClassOrInterfaceTypeDetails classATypeDetails, ClassOrInterfaceTypeDetails classBTypeDetails) {
-        List<? extends MethodMetadata> fieldsA = classATypeDetails.getDeclaredMethods();
-        List<? extends MethodMetadata> fieldsB = classBTypeDetails.getDeclaredMethods();
-        List<MethodMetadataBuilder> methodBuilders = new ArrayList<MethodMetadataBuilder>(fieldsA.size() + fieldsB.size());
-
-        for (MethodMetadata methodMetadata : fieldsA) {
-            methodBuilders.add(new MethodMetadataBuilder(methodMetadata));
-        }
-        for (MethodMetadata methodMetadata : fieldsB) {
-            methodBuilders.add(new MethodMetadataBuilder(methodMetadata));
-        }
-
-        return methodBuilders;
-    }
-
-    private Collection<? extends ClassOrInterfaceTypeDetailsBuilder> getDeclaredInnerTypes(ClassOrInterfaceTypeDetails classATypeDetails, ClassOrInterfaceTypeDetails classBTypeDetails) {
-        List<? extends ClassOrInterfaceTypeDetails> innersA = classATypeDetails.getDeclaredInnerTypes();
-        List<? extends ClassOrInterfaceTypeDetails> innersB = classBTypeDetails.getDeclaredInnerTypes();
-        List<ClassOrInterfaceTypeDetailsBuilder> innerBuilders = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>(innersA.size() + innersB.size());
-
-        for (ClassOrInterfaceTypeDetails inner : innersA) {
-            innerBuilders.add(new ClassOrInterfaceTypeDetailsBuilder(inner));
-        }
-        for (ClassOrInterfaceTypeDetails inner : innersB) {
-            innerBuilders.add(new ClassOrInterfaceTypeDetailsBuilder(inner));
-        }
-
-        return innerBuilders;
-    }
-
-    private Collection<? extends JavaSymbolName> getEnums(ClassOrInterfaceTypeDetails classATypeDetails, ClassOrInterfaceTypeDetails classBTypeDetails) {
-        List<? extends JavaSymbolName> enumsA = classATypeDetails.getEnumConstants();
-        List<? extends JavaSymbolName> enumsB = classBTypeDetails.getEnumConstants();
-        List<JavaSymbolName> enums = new ArrayList<JavaSymbolName>(enumsA.size() + enumsB.size());
-        enums.addAll(enumsA);
-        enums.addAll(enumsB);
-        return enums;
-    }
-
-    private Collection<? extends JavaType> getInterfaces(ClassOrInterfaceTypeDetails classATypeDetails, ClassOrInterfaceTypeDetails classBTypeDetails) {
-        List<? extends JavaType> interfacesA = classATypeDetails.getImplementsTypes();
-        List<? extends JavaType> interfacesB = classBTypeDetails.getImplementsTypes();
-        List<JavaType> interfaces = new ArrayList<JavaType>(interfacesA.size() + interfacesB.size());
-        interfaces.addAll(interfacesA);
-        interfaces.addAll(interfacesB);
-        return interfaces;
-    }
-
-    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table, String schema, String catalog) {
+    private List<AnnotationMetadataBuilder> createAnnotations(String entityName, String table) {
         final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
         annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
-        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table, schema, catalog));
+        annotationBuilder.add(getEntityAnnotationBuilder(entityName, table));
         return annotationBuilder;
     }
 
-    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table, String schema, String catalog)  {
+    private AnnotationMetadataBuilder getEntityAnnotationBuilder(String entityName, String table)  {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(MIGRATION_ENTITY);
 
         if (entityName != null) {
@@ -140,12 +89,6 @@ public class MergeClassOperationsImpl implements MergeClassOperations {
         }
         if (table != null) {
             entityAnnotationBuilder.addStringAttribute("table", table);
-        }
-        if (schema != null) {
-            entityAnnotationBuilder.addStringAttribute("schema", schema);
-        }
-        if (catalog != null) {
-            entityAnnotationBuilder.addStringAttribute("catalog", catalog);
         }
 
         return entityAnnotationBuilder;

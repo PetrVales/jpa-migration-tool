@@ -67,9 +67,9 @@ public class MovePropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
-        propertyOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toTypeDetails);
+        propertyOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toType);
         moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails, query, author, id);
-        propertyOperations.removeField(propertyName, fromTypeDetails);
+        propertyOperations.removeField(propertyName, fromType);
     }
 
     private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {

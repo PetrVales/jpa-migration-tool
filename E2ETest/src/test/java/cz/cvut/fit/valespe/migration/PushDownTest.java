@@ -46,7 +46,7 @@ public class PushDownTest extends E2ETest {
                 "        <addColumn tableName=\"target\">\n" +
                 "            <column name=\"order_total\" type=\"integer\"/>\n" +
                 "        </addColumn>\n" +
-                "        <sql>UPDATE target SET order_total(SELECT order_total FROM parent WHERE query)</sql>\n" +
+                "        <sql>UPDATE target SET order_total (SELECT order_total FROM parent WHERE query)</sql>\n" +
                 "        <dropColumn columnName=\"order_total\" tableName=\"parent\"/>\n" +
                 "    </changeSet>"));
     }
