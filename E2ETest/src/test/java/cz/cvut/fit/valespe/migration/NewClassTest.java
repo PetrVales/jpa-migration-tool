@@ -31,8 +31,10 @@ public class NewClassTest extends E2ETest {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
         String migrationContent = getFileContent(migration);
 
-        assertTrue(migrationContent.contains("createTable"));
-        assertTrue(migrationContent.contains("order"));
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <createTable tableName=\"order\"/>\n" +
+                "    </changeSet>"));
     }
 
 }

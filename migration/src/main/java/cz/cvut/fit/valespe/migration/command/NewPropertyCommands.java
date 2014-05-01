@@ -1,9 +1,8 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
-import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -26,7 +25,7 @@ import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 @Component
 @Service
 public class NewPropertyCommands implements CommandMarker {
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassCommons classCommons;
@@ -35,12 +34,12 @@ public class NewPropertyCommands implements CommandMarker {
     public NewPropertyCommands() {}
 
     public NewPropertyCommands(
-            PropertyOperations propertyOperations,
+            FieldOperations fieldOperations,
             ProjectOperations projectOperations,
             LiquibaseOperations liquibaseOperations,
             ClassCommons classCommons
     ) {
-        this.propertyOperations = propertyOperations;
+        this.fieldOperations = fieldOperations;
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.classCommons = classCommons;
@@ -64,7 +63,7 @@ public class NewPropertyCommands implements CommandMarker {
     ) {
         Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk);
+        fieldOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk);
         addColumn(typeName, columnName, columnType, pk, author, id);
     }
 
@@ -76,7 +75,7 @@ public class NewPropertyCommands implements CommandMarker {
     ) {
         Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
+        fieldOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
         addColumn(typeName, "id", "bigint", true, author, id);
     }
 
@@ -90,7 +89,7 @@ public class NewPropertyCommands implements CommandMarker {
     ) {
         Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", typeName);
+        fieldOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", typeName);
         addColumn(typeName, columnName, "varchar2(255)", false, author, id);
     }
 
@@ -104,7 +103,7 @@ public class NewPropertyCommands implements CommandMarker {
     ) {
         Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", typeName);
+        fieldOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", typeName);
         addColumn(typeName, columnName, "integer", false, author, id);
     }
 
@@ -118,7 +117,7 @@ public class NewPropertyCommands implements CommandMarker {
     ) {
         Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
 
-        propertyOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", typeName);
+        fieldOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", typeName);
         addColumn(typeName, columnName, "boolean", false, author, id);
     }
 

@@ -1,6 +1,5 @@
 package test.cz.cvut.fit.valespe.migration.command;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.command.SplitClassCommands;
 import cz.cvut.fit.valespe.migration.operation.*;
 import org.junit.Test;
@@ -55,8 +54,8 @@ public class SplitClassCommandsTest extends MigrationTest {
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ClassOperations classOperations = mock(ClassOperations.class);
-    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
-    private SplitClassCommands splitClassCommands = new SplitClassCommands(classOperations, propertyOperations, projectOperations, liquibaseOperations, typeLocationService);
+    private FieldOperations fieldOperations = mock(FieldOperations.class);
+    private SplitClassCommands splitClassCommands = new SplitClassCommands(classOperations, fieldOperations, projectOperations, liquibaseOperations, typeLocationService);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -127,10 +126,10 @@ public class SplitClassCommandsTest extends MigrationTest {
         verify(classOperations, times(1)).createClass(A_CLASS, A_TABLE, A_TABLE);
         verify(classOperations, times(1)).createClass(B_CLASS, B_TABLE, B_TABLE);
 
-        verify(propertyOperations, times(1)).addField(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
-        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
-        verify(propertyOperations, times(1)).addField(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
-        verify(propertyOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
+        verify(fieldOperations, times(1)).addField(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
+        verify(fieldOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, A_CLASS);
+        verify(fieldOperations, times(1)).addField(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
+        verify(fieldOperations, times(1)).addField(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE, B_CLASS);
 
 
         verify(classOperations, times(1)).removeClass(ORIGINAL_CLASS);

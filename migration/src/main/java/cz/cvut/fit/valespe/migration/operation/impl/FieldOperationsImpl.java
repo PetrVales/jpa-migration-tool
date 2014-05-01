@@ -1,9 +1,8 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
 import cz.cvut.fit.valespe.migration.JpaFieldDetails;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
-import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -23,14 +22,14 @@ import java.util.List;
 
 @Component
 @Service
-public class PropertyOperationsImpl implements PropertyOperations {
+public class FieldOperationsImpl implements FieldOperations {
 
     @Reference private TypeManagementService typeManagementService;
     @Reference private ClassCommons classCommons;
 
-    public PropertyOperationsImpl() { }
+    public FieldOperationsImpl() { }
 
-    public PropertyOperationsImpl(TypeManagementService typeManagementService, ClassCommons classCommons) {
+    public FieldOperationsImpl(TypeManagementService typeManagementService, ClassCommons classCommons) {
         this.typeManagementService = typeManagementService;
         this.classCommons = classCommons;
     }

@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -35,7 +35,7 @@ public class PushDownCommands implements CommandMarker {
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
 
     @CliAvailabilityIndicator({ "migrate push down" })
     public boolean isCommandAvailable() {
@@ -58,8 +58,8 @@ public class PushDownCommands implements CommandMarker {
         String columnName = column.<String>getAttribute("name").getValue();
         String columnType = column.<String>getAttribute("columnDefinition").getValue();
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, to);
-        propertyOperations.removeField(propertyName, from);
+        fieldOperations.addField(propertyName, propertyType, columnName, columnType, to);
+        fieldOperations.removeField(propertyName, from);
 
         pushDownColumn(columnName, columnType, fromTypeDetails, toTypeDetails, query, author, id);
     }

@@ -23,6 +23,8 @@ public class RemoveParentTest extends E2ETest {
 
         assertFalse(orderClassContent.contains("public class Target extends Parent"));
         assertFalse(orderClassContent.contains("@DiscriminatorValue(\"TARGET\")"));
+        assertTrue(orderClassContent.contains("@Entity(name = \"target\")"));
+        assertTrue(orderClassContent.contains("@Table(name = \"target\")"));
         assertTrue(orderClassContent.contains("public class Target"));
         assertTrue(orderClassContent.contains("private Integer orderTotal"));
         assertTrue(orderClassContent.contains("@Column(name = \"order_total\", columnDefinition = \"integer\")"));
@@ -39,23 +41,5 @@ public class RemoveParentTest extends E2ETest {
         assertTrue(orderClassContent.contains("@DiscriminatorColumn(name = \"parent_type\")"));
         assertTrue(orderClassContent.contains("public class Parent"));
     }
-
-//    @Test
-//    public void createsRecordInMigrationFile() throws IOException {
-//        File migration = new File(testDirectory, "src/main/resources/migration.xml");
-//        String migrationContent = getFileContent(migration);
-//
-//        assertTrue(migrationContent.contains("createTable"));
-//        assertTrue(migrationContent.contains("order"));
-//    }
-//
-//    @Test
-//    public void createsMigrationEntityAspect() throws IOException {
-//        File aspect = new File(testDirectory, "src/main/java/cz/cvut/Order_Roo_Migration_Entity.aj");
-//        String aspectContent = getFileContent(aspect);
-//
-//        assertTrue(aspectContent.contains("@Entity"));
-//        assertTrue(aspectContent.contains("@Table(name = \"order\""));
-//    }
 
 }

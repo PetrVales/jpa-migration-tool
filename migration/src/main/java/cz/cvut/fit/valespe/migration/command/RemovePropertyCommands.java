@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
 import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.apache.commons.lang3.Validate;
@@ -26,7 +26,7 @@ public class RemovePropertyCommands implements CommandMarker {
     private static final String REMOVE_PROPERTY = "migrate remove property";
     private static final String REMOVE_PROPERTY_HELP = "Remove field from class. Generate related liquibase change set.";
 
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private FieldCommons fieldCommons;
@@ -35,13 +35,13 @@ public class RemovePropertyCommands implements CommandMarker {
     public RemovePropertyCommands() { }
 
     public RemovePropertyCommands(
-            PropertyOperations propertyOperations,
+            FieldOperations fieldOperations,
             ProjectOperations projectOperations,
             LiquibaseOperations liquibaseOperations,
             FieldCommons fieldCommons,
             ClassCommons classCommons
     ) {
-        this.propertyOperations = propertyOperations;
+        this.fieldOperations = fieldOperations;
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.fieldCommons = fieldCommons;
@@ -66,7 +66,7 @@ public class RemovePropertyCommands implements CommandMarker {
         String tableName = classCommons.tableName(typeName);
         FieldMetadata field = classCommons.field(typeName, propertyName);
         String columnName = fieldCommons.columnName(field);
-        propertyOperations.removeField(propertyName, typeName);
+        fieldOperations.removeField(propertyName, typeName);
         liquibaseOperations.createChangeSet(
                 Arrays.asList(
                         liquibaseOperations.dropColumn(tableName, columnName)

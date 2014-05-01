@@ -3,7 +3,7 @@ package cz.cvut.fit.valespe.migration.operation;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
-public interface PropertyOperations {
+public interface FieldOperations {
 
     /**
      * Add filed with specified name and type to given class.

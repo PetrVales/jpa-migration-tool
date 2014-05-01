@@ -3,7 +3,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.command.MergeClassCommands;
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
 import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.junit.Test;
@@ -29,10 +29,10 @@ public class MergeClassCommandsTest extends MigrationTest {
     private ClassOperations classOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
-    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
+    private FieldOperations fieldOperations = mock(FieldOperations.class);
     private ClassCommons classCommons = mock(ClassCommons.class);
     private FieldCommons fieldCommons = mock(FieldCommons.class);
-    private MergeClassCommands mergeClassCommands = new MergeClassCommands(classOperations, projectOperations, liquibaseOperations, propertyOperations, classCommons, fieldCommons);
+    private MergeClassCommands mergeClassCommands = new MergeClassCommands(classOperations, projectOperations, liquibaseOperations, fieldOperations, classCommons, fieldCommons);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {

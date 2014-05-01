@@ -30,16 +30,16 @@ public class SplitClassCommands implements CommandMarker {
     @Reference private TypeLocationService typeLocationService;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassOperations classOperations;
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
 
     public SplitClassCommands() { }
 
-    public SplitClassCommands(ClassOperations classOperations, PropertyOperations propertyOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
+    public SplitClassCommands(ClassOperations classOperations, FieldOperations fieldOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
         this.classOperations = classOperations;
-        this.propertyOperations = propertyOperations;
+        this.fieldOperations = fieldOperations;
     }
 
     @CliAvailabilityIndicator({ "migrate split class" })
@@ -107,7 +107,7 @@ public class SplitClassCommands implements CommandMarker {
             final AnnotationMetadata annotation = field.getAnnotation(JpaJavaType.COLUMN);
             final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
             final AnnotationAttributeValue<String> columnDefinition = annotation.getAttribute("columnDefinition");
-            propertyOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), target);
+            fieldOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), target);
             elements.add(liquibaseOperations.addColumn(table, name.getValue(), columnDefinition.getValue()));
         }
         return elements;

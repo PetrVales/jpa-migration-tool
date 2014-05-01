@@ -2,9 +2,8 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.NewPropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
-import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.junit.Test;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -46,11 +45,11 @@ public class NewPropertyCommandTest {
     private static final JavaType BOOLEAN_PROPERTY_TYPE = new JavaType("java.lang.Boolean");
     private static final String BOOLEAN_COLUMN_TYPE = "boolean";
 
-    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
+    private FieldOperations fieldOperations = mock(FieldOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private ClassCommons classCommons = mock(ClassCommons.class);
-    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(propertyOperations, projectOperations, liquibaseOperations, classCommons);
+    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(fieldOperations, projectOperations, liquibaseOperations, classCommons);
 
     @Test
     public void commandNewPropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -85,7 +84,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false);
+        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
@@ -102,7 +101,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true);
+        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
@@ -119,7 +118,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addId(CLASS, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, CLASS, true);
+        verify(fieldOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, CLASS, true);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }
@@ -134,7 +133,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addString(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, CLASS);
+        verify(fieldOperations, times(1)).addField(PROPERTY, STRING_PROPERTY_TYPE, COLUMN_NAME, STRING_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, STRING_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
@@ -149,7 +148,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addInteger(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, CLASS);
+        verify(fieldOperations, times(1)).addField(PROPERTY, INTEGER_PROPERTY_TYPE, COLUMN_NAME, INTEGER_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, INTEGER_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
@@ -164,7 +163,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addBoolean(PROPERTY, CLASS, COLUMN_NAME, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, CLASS);
+        verify(fieldOperations, times(1)).addField(PROPERTY, BOOLEAN_PROPERTY_TYPE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE, CLASS);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, BOOLEAN_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }

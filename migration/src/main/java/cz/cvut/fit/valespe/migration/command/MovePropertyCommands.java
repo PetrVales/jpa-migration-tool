@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -30,15 +30,15 @@ import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 @Service
 public class MovePropertyCommands implements CommandMarker {
 
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
 
     public MovePropertyCommands() { }
 
-    public MovePropertyCommands(PropertyOperations propertyOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
-        this.propertyOperations = propertyOperations;
+    public MovePropertyCommands(FieldOperations fieldOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService, ProjectOperations projectOperations) {
+        this.fieldOperations = fieldOperations;
         this.liquibaseOperations = liquibaseOperations;
         this.typeLocationService = typeLocationService;
         this.projectOperations = projectOperations;
@@ -67,9 +67,9 @@ public class MovePropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
-        propertyOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toType);
+        fieldOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toType);
         moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails, query, author, id);
-        propertyOperations.removeField(propertyName, fromType);
+        fieldOperations.removeField(propertyName, fromType);
     }
 
     private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {

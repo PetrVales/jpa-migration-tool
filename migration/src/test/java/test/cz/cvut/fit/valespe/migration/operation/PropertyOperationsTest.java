@@ -1,9 +1,8 @@
 package test.cz.cvut.fit.valespe.migration.operation;
 
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
-import cz.cvut.fit.valespe.migration.operation.impl.PropertyOperationsImpl;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
+import cz.cvut.fit.valespe.migration.operation.impl.FieldOperationsImpl;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
-import cz.cvut.fit.valespe.migration.util.impl.ClassCommonsImpl;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -34,7 +33,7 @@ public class PropertyOperationsTest {
 
     private final TypeManagementService typeManagementService = mock(TypeManagementService.class);
     private final ClassCommons classCommons = mock(ClassCommons.class);
-    private final PropertyOperations propertyOperations = new PropertyOperationsImpl(typeManagementService, classCommons);
+    private final FieldOperations fieldOperations = new FieldOperationsImpl(typeManagementService, classCommons);
 
     @Test
     public void addField() {
@@ -42,7 +41,7 @@ public class PropertyOperationsTest {
         when(classCommons.classDetails(CLASS)).thenReturn(classOrInterfaceTypeDetails);
         when(classOrInterfaceTypeDetails.getDeclaredByMetadataId()).thenReturn(PHYSICAL_TYPE_IDENTIFIER);
 
-        propertyOperations.addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS);
+        fieldOperations.addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS);
 
         ArgumentCaptor<FieldMetadata> argument = ArgumentCaptor.forClass(FieldMetadata.class);
         verify(typeManagementService, times(1)).addField(argument.capture());
@@ -72,7 +71,7 @@ public class PropertyOperationsTest {
         when(classOrInterfaceTypeDetails.getName()).thenReturn(CLASS);
         when(classOrInterfaceTypeDetails.getPhysicalTypeCategory()).thenReturn(PHYSICAL_TYPE_CATEGORY);
 
-        propertyOperations.removeField(PROPERTY, CLASS);
+        fieldOperations.removeField(PROPERTY, CLASS);
 
         ArgumentCaptor<ClassOrInterfaceTypeDetails> argument = ArgumentCaptor.forClass(ClassOrInterfaceTypeDetails.class);
         verify(typeManagementService, times(1)).createOrUpdateTypeOnDisk(argument.capture());

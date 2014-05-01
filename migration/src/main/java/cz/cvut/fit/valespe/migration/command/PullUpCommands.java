@@ -1,7 +1,7 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -32,7 +32,7 @@ public class PullUpCommands implements CommandMarker {
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private ProjectOperations projectOperations;
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
 
     @CliAvailabilityIndicator({ "migrate pull up" })
     public boolean isCommandAvailable() {
@@ -54,8 +54,8 @@ public class PullUpCommands implements CommandMarker {
         String columnName = column.<String>getAttribute("name").getValue();
         String columnType = column.<String>getAttribute("columnDefinition").getValue();
 
-        propertyOperations.addField(propertyName, propertyType, columnName, columnType, parentTypeDetails.getName());
-        propertyOperations.removeField(propertyName, target);
+        fieldOperations.addField(propertyName, propertyType, columnName, columnType, parentTypeDetails.getName());
+        fieldOperations.removeField(propertyName, target);
         pullUpColumn(columnName, columnType, targetTypeDetails, parentTypeDetails, query, author, id);
 
     }

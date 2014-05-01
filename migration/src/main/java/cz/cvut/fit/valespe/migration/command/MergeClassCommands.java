@@ -2,18 +2,14 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.MergeClassOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
 import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
@@ -32,7 +28,7 @@ public class MergeClassCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassOperations classOperations;
-    @Reference private PropertyOperations propertyOperations;
+    @Reference private FieldOperations fieldOperations;
     @Reference private ClassCommons classCommons;
     @Reference private FieldCommons fieldCommons;
 
@@ -42,14 +38,14 @@ public class MergeClassCommands implements CommandMarker {
             ClassOperations classOperations,
             ProjectOperations projectOperations,
             LiquibaseOperations liquibaseOperations,
-            PropertyOperations propertyOperations,
+            FieldOperations fieldOperations,
             ClassCommons classCommons,
             FieldCommons fieldCommons
     ) {
         this.classOperations = classOperations;
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
-        this.propertyOperations = propertyOperations;
+        this.fieldOperations = fieldOperations;
         this.classCommons = classCommons;
         this.fieldCommons = fieldCommons;
     }
@@ -102,7 +98,7 @@ public class MergeClassCommands implements CommandMarker {
         elements.add(liquibaseOperations.createTable(table));
         for (Map.Entry<JavaSymbolName, JavaType> field :  types.entrySet()) {
             String[] column = columns.get(field.getKey());
-            propertyOperations.addField(field.getKey(), field.getValue(), column[0], column[1], target);
+            fieldOperations.addField(field.getKey(), field.getValue(), column[0], column[1], target);
             elements.add(
                     liquibaseOperations.addColumn(table, column[0], column[1])
             );

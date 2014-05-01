@@ -23,7 +23,10 @@ public class MigrationSetupTest extends E2ETest {
         String migrationContent = getFileContent(migration);
 
         assertTrue(migration.exists());
-        assertTrue(migrationContent.contains("databaseChangeLog"));
+        assertTrue(migrationContent.contains(
+                "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
+                "\n" +
+                "</databaseChangeLog>"));
     }
 
 }

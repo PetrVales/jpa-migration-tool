@@ -40,10 +40,10 @@ public class NewClassCommands implements CommandMarker {
     public void newClass(
             @CliOption(key = {"", "class"}, optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType className,
             @CliOption(key = "table", mandatory = true, help = "The JPA table name to use for this entity") final String table,
-            @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
+            @CliOption(key = "entity", mandatory = false, help = "The name used to refer to the entity in queries") final String entity,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
-        classOperations.createClass(className, entityName == null ? table : entityName, table);
+        classOperations.createClass(className, entity == null ? table : entity, table);
         final Element element = liquibaseOperations.createTable(table);
         liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
     }

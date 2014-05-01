@@ -2,7 +2,7 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.MovePropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
-import cz.cvut.fit.valespe.migration.operation.PropertyOperations;
+import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -38,11 +38,11 @@ public class MovePropertyCommandTest {
     private static final String ID = "id";
 
 
-    private PropertyOperations propertyOperations = mock(PropertyOperations.class);
+    private FieldOperations fieldOperations = mock(FieldOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(propertyOperations, liquibaseOperations, typeLocationService, projectOperations);
+    private MovePropertyCommands movePropertyCommands = new MovePropertyCommands(fieldOperations, liquibaseOperations, typeLocationService, projectOperations);
 
     @Test
     public void commandMovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -81,8 +81,8 @@ public class MovePropertyCommandTest {
 
         movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY, QUERY, AUTHOR, ID);
 
-        verify(propertyOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, TO_CLASS);
-        verify(propertyOperations, times(1)).removeField(PROPERTY, FROM_CLASS);
+        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, TO_CLASS);
+        verify(fieldOperations, times(1)).removeField(PROPERTY, FROM_CLASS);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, copyColumnData, dropColumn), AUTHOR, ID);
     }
 
