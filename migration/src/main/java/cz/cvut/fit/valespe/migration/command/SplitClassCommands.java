@@ -1,6 +1,9 @@
 package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.*;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.FieldCommons;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -27,19 +30,21 @@ import java.util.List;
 public class SplitClassCommands implements CommandMarker {
 
     @Reference private ProjectOperations projectOperations;
-    @Reference private TypeLocationService typeLocationService;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassOperations classOperations;
     @Reference private FieldOperations fieldOperations;
+    @Reference private ClassCommons classCommons;
+    @Reference private FieldCommons fieldCommons;
 
     public SplitClassCommands() { }
 
-    public SplitClassCommands(ClassOperations classOperations, FieldOperations fieldOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, TypeLocationService typeLocationService) {
+    public SplitClassCommands(ClassOperations classOperations, FieldOperations fieldOperations, ProjectOperations projectOperations, LiquibaseOperations liquibaseOperations, ClassCommons classCommons, FieldCommons fieldCommons) {
         this.projectOperations = projectOperations;
         this.liquibaseOperations = liquibaseOperations;
-        this.typeLocationService = typeLocationService;
         this.classOperations = classOperations;
         this.fieldOperations = fieldOperations;
+        this.classCommons = classCommons;
+        this.fieldCommons = fieldCommons;
     }
 
     @CliAvailabilityIndicator({ "migrate split class" })
@@ -58,26 +63,35 @@ public class SplitClassCommands implements CommandMarker {
             @CliOption(key = "entityB", mandatory = false, help = "The java type to apply this annotation to") final String entityB,
             @CliOption(key = "propertiesA", mandatory = true, help = "The name of the field to add") final String propertiesAText,
             @CliOption(key = "propertiesB", mandatory = true, help = "The name of the field to add") final String propertiesBText,
+            @CliOption(key = "queryA", mandatory = true, help = "The name of the field to add") final String queryA,
+            @CliOption(key = "queryB", mandatory = true, help = "The name of the field to add") final String queryB,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails classTypeDetails = typeLocationService.getTypeDetails(target);
+        Validate.isTrue(classCommons.exist(target), "The specified class, '%s', doesn't exist", target);
+        Validate.isTrue(!classCommons.exist(targetA), "The specified class, '%s', already exists", targetA);
+        Validate.isTrue(!classCommons.exist(targetB), "The specified class, '%s', already exists", targetB);
+        final String table = classCommons.tableName(target);
 
         String[] propertyNamesA = propertiesAText.split(",");
         String[] propertyNamesB = propertiesBText.split(",");
 
         List<FieldMetadata> propertiesA = new ArrayList<FieldMetadata>();
+        List<String> columnsA = new ArrayList<String>();
         List<FieldMetadata> propertiesB = new ArrayList<FieldMetadata>();
+        List<String> columnsB = new ArrayList<String>();
 
-        for (FieldMetadata field : classTypeDetails.getDeclaredFields()) {
+        for (FieldMetadata field : classCommons.fields(target)) {
             for (String fieldName : propertyNamesA) {
-                if (field.getFieldName().getSymbolName().equals(fieldName)) {
+                if (fieldCommons.fieldName(field).getSymbolName().equals(fieldName)) {
                     propertiesA.add(field);
+                    columnsA.add(fieldCommons.columnName(field));
                 }
             }
             for (String fieldName : propertyNamesB) {
-                if (field.getFieldName().getSymbolName().equals(fieldName)) {
+                if (fieldCommons.fieldName(field).getSymbolName().equals(fieldName)) {
                     propertiesB.add(field);
+                    columnsB.add(fieldCommons.columnName(field));
                 }
             }
         }
@@ -92,23 +106,22 @@ public class SplitClassCommands implements CommandMarker {
         elements.addAll(addPropertiesToClass(targetA, tableA, propertiesA));
         elements.addAll(addPropertiesToClass(targetB, tableB, propertiesB));
 
-        classOperations.removeClass(target);
+        elements.add(liquibaseOperations.copyData(table, tableA, columnsA, queryA));
+        elements.add(liquibaseOperations.copyData(table, tableB, columnsB, queryB));
 
-        final AnnotationMetadata annotation = classTypeDetails.getAnnotation(JpaJavaType.TABLE);
-        final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
-        elements.add(liquibaseOperations.dropTable(name.getValue(), true));
+        classOperations.removeClass(target);
+        elements.add(liquibaseOperations.dropTable(table, true));
+
         liquibaseOperations.createChangeSet(elements, author, id);
     }
 
     private List<Element> addPropertiesToClass(JavaType target, String table, List<FieldMetadata> properties) {
         List<Element> elements = new LinkedList<Element>();
         for (FieldMetadata field : properties) {
-            final ClassOrInterfaceTypeDetails classTypeDetails = typeLocationService.getTypeDetails(target);
-            final AnnotationMetadata annotation = field.getAnnotation(JpaJavaType.COLUMN);
-            final AnnotationAttributeValue<String> name = annotation.getAttribute("name");
-            final AnnotationAttributeValue<String> columnDefinition = annotation.getAttribute("columnDefinition");
-            fieldOperations.addField(field.getFieldName(), field.getFieldType(), name.getValue(), columnDefinition.getValue(), target);
-            elements.add(liquibaseOperations.addColumn(table, name.getValue(), columnDefinition.getValue()));
+            final String name = fieldCommons.columnName(field);
+            final String type = fieldCommons.columnType(field);
+            fieldOperations.addField(field.getFieldName(), field.getFieldType(), name, type, target);
+            elements.add(liquibaseOperations.addColumn(table, name, type));
         }
         return elements;
     }

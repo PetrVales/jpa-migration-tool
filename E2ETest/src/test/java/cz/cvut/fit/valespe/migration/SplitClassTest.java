@@ -1,7 +1,5 @@
 package cz.cvut.fit.valespe.migration;
 
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -10,50 +8,8 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class SplitClassTest extends E2ETest {
-
-    private final String expectedMigrationContent =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-            "<databaseChangeLog xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\" xmlns:ext=\"http://www.liquibase.org/xml/ns/dbchangelog-ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd                             http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd\">\n" +
-            "\n" +
-            "    <changeSet>\n" +
-            "        <createTable tableName=\"original\"/>\n" +
-            "    </changeSet>\n" +
-            "    <changeSet>\n" +
-            "        <addColumn tableName=\"original\">\n" +
-            "            <column name=\"a\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "    </changeSet>\n" +
-            "    <changeSet>\n" +
-            "        <addColumn tableName=\"original\">\n" +
-            "            <column name=\"b\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "    </changeSet>\n" +
-            "    <changeSet>\n" +
-            "        <addColumn tableName=\"original\">\n" +
-            "            <column name=\"common\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "    </changeSet>\n" +
-            "    <changeSet>\n" +
-            "        <createTable tableName=\"a_table\"/>\n" +
-            "        <createTable tableName=\"b_table\"/>\n" +
-            "        <addColumn tableName=\"a_table\">\n" +
-            "            <column name=\"a\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "        <addColumn tableName=\"a_table\">\n" +
-            "            <column name=\"common\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "        <addColumn tableName=\"b_table\">\n" +
-            "            <column name=\"b\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "        <addColumn tableName=\"b_table\">\n" +
-            "            <column name=\"common\" type=\"integer\"/>\n" +
-            "        </addColumn>\n" +
-            "        <dropTable cascadeConstraints=\"true\" tableName=\"original\"/>\n" +
-            "    </changeSet>\n" +
-            "</databaseChangeLog>";
 
     @BeforeClass
     public static void init() throws Exception {
@@ -95,7 +51,6 @@ public class SplitClassTest extends E2ETest {
         assertTrue(classContent.contains("class"));
         assertTrue(classContent.contains("B"));
         assertTrue(classContent.contains("@RooJavaBean"));
-//        assertTrue(classContent.contains("@MigrationEntity"));
         assertTrue(classContent.contains("@Entity(name = \"b_table\")"));
         assertTrue(classContent.contains("@Table(name = \"b_table\")"));
 
@@ -108,13 +63,8 @@ public class SplitClassTest extends E2ETest {
 
     @Test
     public void createsAspectsForAClass() throws IOException {
-//        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/A_Roo_Migration_Entity.aj");
         File beanAspect = new File(testDirectory, "src/main/java/cz/cvut/A_Roo_JavaBean.aj");
-//        String entityAspectContent = getFileContent(entityAspect);
         String beanAspectContent = getFileContent(beanAspect);
-
-//        assertTrue(entityAspectContent.contains("@Entity"));
-//        assertTrue(entityAspectContent.contains("@Table(name = \"a_table\""));
 
         assertTrue(beanAspectContent.contains("getA"));
         assertTrue(beanAspectContent.contains("setA"));
@@ -124,12 +74,8 @@ public class SplitClassTest extends E2ETest {
 
     @Test
     public void createsAspectsForBClass() throws IOException {
-//        File entityAspect = new File(testDirectory, "src/main/java/cz/cvut/B_Roo_Migration_Entity.aj");
         File beanAspect = new File(testDirectory, "src/main/java/cz/cvut/B_Roo_JavaBean.aj");
-//        String entityAspectContent = getFileContent(entityAspect);
         String beanAspectContent = getFileContent(beanAspect);
-
-
 
         assertTrue(beanAspectContent.contains("getB"));
         assertTrue(beanAspectContent.contains("setB"));
@@ -140,13 +86,28 @@ public class SplitClassTest extends E2ETest {
     @Test
     public void createsRecordsInMigrationFile() throws IOException, SAXException {
         File migration = new File(testDirectory, "src/main/resources/migration.xml");
-        String actualMigrationContent = getFileContent(migration);
+        String migrationContent = getFileContent(migration);
 
-        Diff diff = XMLUnit.compareXML(expectedMigrationContent, actualMigrationContent);
-        if (diff.similar()) {
-            System.err.println(diff.toString());
-            fail();
-        }
+        assertTrue(migrationContent.contains(
+                    "<changeSet>\n" +
+                "        <createTable tableName=\"a_table\"/>\n" +
+                "        <createTable tableName=\"b_table\"/>\n" +
+                "        <addColumn tableName=\"a_table\">\n" +
+                "            <column name=\"a\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <addColumn tableName=\"a_table\">\n" +
+                "            <column name=\"common\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <addColumn tableName=\"b_table\">\n" +
+                "            <column name=\"b\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <addColumn tableName=\"b_table\">\n" +
+                "            <column name=\"common\" type=\"integer\"/>\n" +
+                "        </addColumn>\n" +
+                "        <sql>INSERT INTO a_table(a, common) (SELECT a, common FROM original WHERE queryA)</sql>\n" +
+                "        <sql>INSERT INTO b_table(b, common) (SELECT b, common FROM original WHERE queryB)</sql>\n" +
+                "        <dropTable cascadeConstraints=\"true\" tableName=\"original\"/>\n" +
+                "    </changeSet>"));
     }
 
 }

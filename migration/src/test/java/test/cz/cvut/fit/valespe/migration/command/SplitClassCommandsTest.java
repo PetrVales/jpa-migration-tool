@@ -2,6 +2,8 @@ package test.cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.command.SplitClassCommands;
 import cz.cvut.fit.valespe.migration.operation.*;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.junit.Test;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -47,15 +49,18 @@ public class SplitClassCommandsTest extends MigrationTest {
     private static final String B_TABLE = "bTable";
     private static final String A_PROPERTIES = COMMON_PROPERTY_NAME + "," + A_PROPERTY_NAME;
     private static final String B_PROPERTIES = COMMON_PROPERTY_NAME + "," + B_PROPERTY_NAME;
+    private static final String A_QUERY = "aQuery";
+    private static final String B_QUERY = "bQuery";
     public static final String AUTHOR = "author";
     public static final String ID = "id";
 
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
-    private TypeLocationService typeLocationService = mock(TypeLocationService.class);
     private ClassOperations classOperations = mock(ClassOperations.class);
     private FieldOperations fieldOperations = mock(FieldOperations.class);
-    private SplitClassCommands splitClassCommands = new SplitClassCommands(classOperations, fieldOperations, projectOperations, liquibaseOperations, typeLocationService);
+    private ClassCommons classCommons = mock(ClassCommons.class);
+    private FieldCommons fieldCommons = mock(FieldCommons.class);
+    private SplitClassCommands splitClassCommands = new SplitClassCommands(classOperations, fieldOperations, projectOperations, liquibaseOperations, classCommons, fieldCommons);
 
     @Test
     public void commandRemovePropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -82,27 +87,33 @@ public class SplitClassCommandsTest extends MigrationTest {
 
     @Test
     public void commandSplitsOriginalClassIntoTwoNewClasses() {
-        ClassOrInterfaceTypeDetails originalCoitd = mock(ClassOrInterfaceTypeDetails.class);
-        ClassOrInterfaceTypeDetails aCoitd = mock(ClassOrInterfaceTypeDetails.class);
-        ClassOrInterfaceTypeDetails bCoitd = mock(ClassOrInterfaceTypeDetails.class);
+        when(classCommons.exist(ORIGINAL_CLASS)).thenReturn(true);
+        when(classCommons.exist(A_CLASS)).thenReturn(false);
+        when(classCommons.exist(B_CLASS)).thenReturn(false);
 
         List fields = new ArrayList<FieldMetadata>(3);
-        fields.add(mockProperty(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE));
-        fields.add(mockProperty(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE));
-        fields.add(mockProperty(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE));
+        final FieldMetadata common = mockProperty(COMMON_PROPERTY, PROPERTY_TYPE, COMMON_COLUMN_NAME, COLUMN_TYPE);
+        final FieldMetadata a = mockProperty(A_PROPERTY, PROPERTY_TYPE, A_COLUMN_NAME, COLUMN_TYPE);
+        final FieldMetadata b = mockProperty(B_PROPERTY, PROPERTY_TYPE, B_COLUMN_NAME, COLUMN_TYPE);
+        fields.add(common);
+        fields.add(a);
+        fields.add(b);
 
+        when(classCommons.fields(ORIGINAL_CLASS)).thenReturn(fields);
 
-        final AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
-        when(annotationMetadata.getAttribute("name")).thenReturn(new AnnotationAttributeValue<Object>() {
-            @Override public JavaSymbolName getName() { return null; }
-            @Override public Object getValue() { return ORIGINAL_TABLE; }
-        });
-        when(originalCoitd.getDeclaredFields()).thenReturn(fields);
-        when(originalCoitd.getAnnotation(JpaJavaType.TABLE)).thenReturn(annotationMetadata);
+        when(fieldCommons.fieldName(common)).thenReturn(COMMON_PROPERTY);
+        when(fieldCommons.fieldName(a)).thenReturn(A_PROPERTY);
+        when(fieldCommons.fieldName(b)).thenReturn(B_PROPERTY);
 
-        when(typeLocationService.getTypeDetails(ORIGINAL_CLASS)).thenReturn(originalCoitd);
-        when(typeLocationService.getTypeDetails(A_CLASS)).thenReturn(aCoitd);
-        when(typeLocationService.getTypeDetails(B_CLASS)).thenReturn(bCoitd);
+        when(fieldCommons.columnName(common)).thenReturn(COMMON_COLUMN_NAME);
+        when(fieldCommons.columnName(a)).thenReturn(A_COLUMN_NAME);
+        when(fieldCommons.columnName(b)).thenReturn(B_COLUMN_NAME);
+
+        when(fieldCommons.columnType(common)).thenReturn(COLUMN_TYPE);
+        when(fieldCommons.columnType(a)).thenReturn(COLUMN_TYPE);
+        when(fieldCommons.columnType(b)).thenReturn(COLUMN_TYPE);
+
+        when(classCommons.tableName(ORIGINAL_CLASS)).thenReturn(ORIGINAL_TABLE);
 
         Element createTableA = mock(Element.class);
         when(liquibaseOperations.createTable(A_TABLE)).thenReturn(createTableA);
@@ -118,10 +129,12 @@ public class SplitClassCommandsTest extends MigrationTest {
         when(liquibaseOperations.addColumn(B_TABLE, B_COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumnB);
         Element dropTable = mock(Element.class);
         when(liquibaseOperations.dropTable(ORIGINAL_TABLE, true)).thenReturn(dropTable);
+        Element copyA = mock(Element.class);
+        when(liquibaseOperations.copyData(ORIGINAL_TABLE, A_TABLE, Arrays.asList(COMMON_COLUMN_NAME, A_COLUMN_NAME), A_QUERY)).thenReturn(copyA);
+        Element copyB = mock(Element.class);
+        when(liquibaseOperations.copyData(ORIGINAL_TABLE, B_TABLE, Arrays.asList(COMMON_COLUMN_NAME, B_COLUMN_NAME), B_QUERY)).thenReturn(copyB);
 
-
-
-        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, AUTHOR, ID);
+        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, A_QUERY, B_QUERY, AUTHOR, ID);
 
         verify(classOperations, times(1)).createClass(A_CLASS, A_TABLE, A_TABLE);
         verify(classOperations, times(1)).createClass(B_CLASS, B_TABLE, B_TABLE);
@@ -134,7 +147,7 @@ public class SplitClassCommandsTest extends MigrationTest {
 
         verify(classOperations, times(1)).removeClass(ORIGINAL_CLASS);
         verify(liquibaseOperations, times(1)).dropTable(ORIGINAL_TABLE, true);
-        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTableA, createTableB, addColumnACommon, addColumnA, addColumnBCommon, addColumnB, dropTable), AUTHOR, ID);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(createTableA, createTableB, addColumnACommon, addColumnA, addColumnBCommon, addColumnB, copyA, copyB, dropTable), AUTHOR, ID);
     }
 
 }

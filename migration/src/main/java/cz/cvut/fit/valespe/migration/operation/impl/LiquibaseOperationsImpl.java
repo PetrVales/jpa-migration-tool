@@ -171,6 +171,13 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     }
 
     @Override
+    public Element copyData(String origin, String target, List<String> columns, String query) {
+        String columnList = StringUtils.join(columns, ", ");
+        return sql("INSERT INTO " + target + "(" + columnList + ") " +
+                    "(SELECT " + columnList + " FROM " + origin + " WHERE " + query + ")");
+    }
+
+    @Override
     public Element sql(String query) {
         final String migrationPath = getMigrationXmlPath();
         final Document migration = getMigrationDocument(migrationPath);
