@@ -74,15 +74,25 @@ public class NewPropertyCommandTest {
         assertFalse(newPropertyCommands.isCommandAvailable());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void validationFailWhenPropertyAlreadyExistsInClass() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(true);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, AUTHOR, ID);
+    }
+
     @Test
     public void commandNewPropertyAddNewPropertyToClassAndGeneratesMigrationChangeSet() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, AUTHOR, ID);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, AUTHOR, ID);
 
         verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
@@ -92,6 +102,7 @@ public class NewPropertyCommandTest {
     @Test
     public void commandNewPropertyAddNewIdPropertyToClassAndGeneratesMigrationChangeSet() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);
@@ -99,7 +110,7 @@ public class NewPropertyCommandTest {
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
         when(liquibaseOperations.addPrimaryKey(Arrays.asList(COLUMN_NAME), TABLE, PK)).thenReturn(addPrimaryKey);
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, AUTHOR, ID);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, false, false, false, false, AUTHOR, ID);
 
         verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
@@ -109,6 +120,7 @@ public class NewPropertyCommandTest {
     @Test
     public void addIdCommandTest() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, ID_PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);
@@ -126,6 +138,7 @@ public class NewPropertyCommandTest {
     @Test
     public void addStringCommandTest() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);
@@ -141,6 +154,7 @@ public class NewPropertyCommandTest {
     @Test
     public void addIntegerCommandTest() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);
@@ -156,6 +170,7 @@ public class NewPropertyCommandTest {
     @Test
     public void addBooleanCommandTest() {
         when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
         Element addColumn = mock(Element.class);

@@ -30,7 +30,6 @@ public class NewPropertyCommands implements CommandMarker {
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassCommons classCommons;
 
-
     public NewPropertyCommands() {}
 
     public NewPropertyCommands(
@@ -58,10 +57,14 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "columnType", mandatory = true, help = "The JPA @Column name") final String columnType,
             @CliOption(key = "pk", mandatory = false, help = "@Id", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean pk,
+            @CliOption(key = "oneToOne", mandatory = false, help = "@OneToOne", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean oneToOne,
+            @CliOption(key = "oneToMany", mandatory = false, help = "@OneToMany", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean oneToMany,
+            @CliOption(key = "manyToOne", mandatory = false, help = "@ManyToOne", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean manyToOne,
+            @CliOption(key = "manyToMany", mandatory = false, help = "@ManyToMany", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean manyToMany,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        validate(typeName, propertyName);
 
         fieldOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk);
         addColumn(typeName, columnName, columnType, pk, author, id);
@@ -73,51 +76,52 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        final JavaSymbolName propertyName = new JavaSymbolName("id");
+        validate(typeName, propertyName);
 
-        fieldOperations.addField(new JavaSymbolName("id"), new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
+        fieldOperations.addField(propertyName, new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
         addColumn(typeName, "id", "bigint", true, author, id);
     }
 
     @CliCommand(value = "migrate add string", help = "Some helpful description")
     public void addString(
-            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
+            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        validate(typeName, propertyName);
 
-        fieldOperations.addField(field, new JavaType("java.lang.String"), columnName, "varchar2(255)", typeName);
+        fieldOperations.addField(propertyName, new JavaType("java.lang.String"), columnName, "varchar2(255)", typeName);
         addColumn(typeName, columnName, "varchar2(255)", false, author, id);
     }
 
     @CliCommand(value = "migrate add integer", help = "Some helpful description")
     public void addInteger(
-            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
+            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        validate(typeName, propertyName);
 
-        fieldOperations.addField(field, new JavaType("java.lang.Integer"), columnName, "integer", typeName);
+        fieldOperations.addField(propertyName, new JavaType("java.lang.Integer"), columnName, "integer", typeName);
         addColumn(typeName, columnName, "integer", false, author, id);
     }
 
     @CliCommand(value = "migrate add boolean", help = "Some helpful description")
     public void addBoolean(
-            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName field,
+            @CliOption(key = {"field", ""}, mandatory = true, help = "The name of the field to newProperty") final JavaSymbolName propertyName,
             @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String columnName,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        validate(typeName, propertyName);
 
-        fieldOperations.addField(field, new JavaType("java.lang.Boolean"), columnName, "boolean", typeName);
+        fieldOperations.addField(propertyName, new JavaType("java.lang.Boolean"), columnName, "boolean", typeName);
         addColumn(typeName, columnName, "boolean", false, author, id);
     }
 
@@ -128,6 +132,12 @@ public class NewPropertyCommands implements CommandMarker {
         if (pk != null && pk)
             elements.add(liquibaseOperations.addPrimaryKey(Arrays.asList(columnName), tableName, columnName + "_pk"));
         liquibaseOperations.createChangeSet(elements, author, id);
+    }
+
+    private void validate(JavaType typeName, JavaSymbolName propertyName) {
+        Validate.isTrue(classCommons.exist(typeName), "Specified class, '%s', doesn't exist", typeName);
+        if (classCommons.hasField(typeName, propertyName))
+            Validate.isTrue(!classCommons.hasField(typeName, propertyName), "Specified class, '%s' has property %s already", typeName, propertyName);
     }
 
 }
