@@ -49,6 +49,9 @@ public class LiquibaseOperationsTest {
             "    </changeSet>\n" +
             "</databaseChangeLog>\n";
     public static final String PK_CONSTRAINT_NAME = "PK";
+    private static final String REF_TABLE = "ref-table";
+    private static final String REF_COLUMN = "ref-column";
+    private static final String FK_CONSTRAINT_NAME = "fk";
 
 
     private final PathResolver pathResolver = mock(PathResolver.class);
@@ -95,6 +98,20 @@ public class LiquibaseOperationsTest {
         assertEquals(TABLE, element.getAttribute("tableName"));
         assertEquals(PK_CONSTRAINT_NAME, element.getAttribute("constraintName"));
         assertEquals("a, b, c", element.getAttribute("columnNames"));
+    }
+
+    @Test
+    public void addForeignKey() {
+        when(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, MIGRATION_XML)).thenReturn(MOCKED_MIGRATION_PATH);
+        when(fileManager.getInputStream(MOCKED_MIGRATION_PATH)).thenReturn(new StringBufferInputStream(MIGRATION_FILE_BEFORE));
+
+        final Element element = liquibaseOperations.addForeignKey(TABLE, COLUMN_NAME, REF_TABLE, REF_COLUMN, FK_CONSTRAINT_NAME);
+
+        assertEquals(TABLE, element.getAttribute("baseTableName"));
+        assertEquals(COLUMN_NAME, element.getAttribute("baseColumnNames"));
+        assertEquals(REF_TABLE, element.getAttribute("referencedTableName"));
+        assertEquals(REF_COLUMN, element.getAttribute("referencedColumnNames"));
+        assertEquals(FK_CONSTRAINT_NAME, element.getAttribute("constraintName"));
     }
 
     @Test

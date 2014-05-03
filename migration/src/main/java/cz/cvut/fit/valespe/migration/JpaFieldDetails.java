@@ -17,6 +17,9 @@ public class JpaFieldDetails extends org.springframework.roo.classpath.operation
     private boolean id;
     private boolean oneToOne;
     private String mappedBy;
+    private boolean oneToMany;
+    private boolean manyToOne;
+    private boolean manyToMany;
 
     public JpaFieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, String columnName, String columnDefinition) {
         super(physicalTypeIdentifier, fieldType, fieldName);
@@ -26,7 +29,7 @@ public class JpaFieldDetails extends org.springframework.roo.classpath.operation
 
     @Override
     public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
-        if (!oneToOne)
+        if (!oneToOne && !manyToOne && !oneToMany)
             annotateColumn(annotations);
         if (id)
             annotateId(annotations);
@@ -34,6 +37,13 @@ public class JpaFieldDetails extends org.springframework.roo.classpath.operation
             annotateOneToOne(annotations);
             if (mappedBy == null)
                 annotateJoinColumn(annotations);
+        }
+        if (oneToMany) {
+            annotateOneToMany(annotations);
+        }
+        if (manyToOne) {
+            annotateManyToOne(annotations);
+            annotateJoinColumn(annotations);
         }
     }
 
@@ -67,6 +77,24 @@ public class JpaFieldDetails extends org.springframework.roo.classpath.operation
         annotations.add(columnBuilder);
     }
 
+    private void annotateOneToMany(List<AnnotationMetadataBuilder> annotations) {
+        final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+        if (getMappedBy() != null)
+            attrs.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), getMappedBy()));
+        AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(ONE_TO_MANY, attrs);
+        annotations.add(columnBuilder);
+    }
+
+    private void annotateManyToOne(List<AnnotationMetadataBuilder> annotations) {
+        final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+        AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(MANY_TO_ONE, attrs);
+        annotations.add(columnBuilder);
+    }
+
+    private void annotateManyToMany(List<AnnotationMetadataBuilder> annotations) {
+        throw new IllegalStateException("Not implemented, yet.");
+    }
+
     public String getColumnDefinition() {
         return columnDefinition;
     }
@@ -97,5 +125,29 @@ public class JpaFieldDetails extends org.springframework.roo.classpath.operation
 
     public void setMappedBy(String mappedBy) {
         this.mappedBy = mappedBy;
+    }
+
+    public void setOneToMany(boolean oneToMany) {
+        this.oneToMany = oneToMany;
+    }
+
+    public boolean isOneToMany() {
+        return oneToMany;
+    }
+
+    public void setManyToOne(boolean manyToOne) {
+        this.manyToOne = manyToOne;
+    }
+
+    public boolean isManyToOne() {
+        return manyToOne;
+    }
+
+    public void setManyToMany(boolean manyToMany) {
+        this.manyToMany = manyToMany;
+    }
+
+    public boolean isManyToMany() {
+        return manyToMany;
     }
 }

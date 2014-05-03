@@ -1,7 +1,0 @@
-project --topLevelPackage cz.cvut
-migration setup
-migrate new class --class ~.Order --table order
-migrate new class --class ~.Address --table address
-migrate add oneToOne --field address --class ~.Order --ref ~.Address
-migrate add oneToOne --field xxx --class ~.Order --ref ~.Address --mappedBy xxx
-exit

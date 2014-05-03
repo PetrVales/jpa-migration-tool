@@ -1,0 +1,6 @@
+project --topLevelPackage cz.cvut
+migration setup
+migrate new class --class ~.Order --table order
+migrate new class --class ~.Address --table address
+migrate new property --class ~.Order --property address --propertyType ~.Address --column address_id --columnType int --manyToOne --refColumn ref
+exit

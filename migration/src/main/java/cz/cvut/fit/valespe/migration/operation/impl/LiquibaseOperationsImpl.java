@@ -1,16 +1,11 @@
 package cz.cvut.fit.valespe.migration.operation.impl;
 
-import cz.cvut.fit.valespe.migration.MigrationEntity;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -20,9 +15,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,6 +31,7 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     private static final String DROP_TABLE = "dropTable";
     private static final String DROP_COLUMN = "dropColumn";
     private static final String ADD_PRIMARY_KEY = "addPrimaryKey";
+    private static final String ADD_FOREIGN_KEY = "addForeignKeyConstraint";
     private static final String SQL = "sql";
 
     @Reference
@@ -100,12 +93,12 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
     }
 
     @Override
-    public Element addPrimaryKey(List<String> columnName, String tableName, String constraintName) {
+    public Element addPrimaryKey(List<String> columnNames, String tableName, String constraintName) {
         final String migrationPath = getMigrationXmlPath();
         final Document migration = getMigrationDocument(migrationPath);
 
         StringBuilder builder = new StringBuilder();
-        final Iterator<String> iterator = columnName.iterator();
+        final Iterator<String> iterator = columnNames.iterator();
         while (iterator.hasNext()) {
             builder.append(iterator.next());
             if (iterator.hasNext())
@@ -116,6 +109,21 @@ public class LiquibaseOperationsImpl implements LiquibaseOperations {
         setAttribute(addPrimaryKey, "columnNames", builder.toString());
         setAttribute(addPrimaryKey, "constraintName", constraintName);
         setAttribute(addPrimaryKey, "tableName", tableName);
+
+        return addPrimaryKey;
+    }
+
+    @Override
+    public Element addForeignKey(String table, String columnName, String referencedTable, String referencedColumn, String name) {
+        final String migrationPath = getMigrationXmlPath();
+        final Document migration = getMigrationDocument(migrationPath);
+
+        Element addPrimaryKey = migration.createElement(ADD_FOREIGN_KEY);
+        setAttribute(addPrimaryKey, "baseTableName", table);
+        setAttribute(addPrimaryKey, "baseColumnNames", columnName);
+        setAttribute(addPrimaryKey, "referencedTableName", referencedTable);
+        setAttribute(addPrimaryKey, "referencedColumnNames", referencedColumn);
+        setAttribute(addPrimaryKey, "constraintName", name);
 
         return addPrimaryKey;
     }

@@ -39,17 +39,20 @@ public class FieldOperationsImpl implements FieldOperations {
 
     @Override
     public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className) {
-        addField(propertyName, propertyType, columnName, columnType, className, false, false, null);
+        addField(propertyName, propertyType, columnName, columnType, className, false, false, false, false, false, null);
     }
 
     @Override
-    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className, boolean id, boolean oneToOne, String mappedBy) {
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className, boolean id, boolean oneToOne, boolean oneToMany, boolean manyToOne, boolean manyToMany, String mappedBy) {
         final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
         final String physicalTypeIdentifier = classDetails.getDeclaredByMetadataId();
         final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName, columnName, columnType);
 
         fieldDetails.setId(id);
         fieldDetails.setOneToOne(oneToOne);
+        fieldDetails.setOneToMany(oneToMany);
+        fieldDetails.setManyToOne(manyToOne);
+        fieldDetails.setManyToMany(manyToMany);
         fieldDetails.setMappedBy(mappedBy);
 
         insertField(fieldDetails);
@@ -86,13 +89,6 @@ public class FieldOperationsImpl implements FieldOperations {
 
     @Override
     public void makeFieldId(JavaType className, JavaSymbolName fieldName) {
-//        final FieldMetadata field = classCommons.field(className, fieldName);
-//        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-//
-//        removeField(fieldName, className);
-//        fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(JpaJavaType.ID));
-//        typeManagementService.addField(fieldBuilder.build());
-
         final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
         List<? extends FieldMetadata> fields = classDetails.getDeclaredFields();
         List<FieldMetadataBuilder> fieldsBuilders = new ArrayList<FieldMetadataBuilder>(fields.size());

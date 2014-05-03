@@ -4,7 +4,9 @@ import cz.cvut.fit.valespe.migration.command.NewPropertyCommands;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
 import cz.cvut.fit.valespe.migration.operation.FieldOperations;
 import cz.cvut.fit.valespe.migration.util.ClassCommons;
+import cz.cvut.fit.valespe.migration.util.FieldCommons;
 import org.junit.Test;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
@@ -27,15 +29,21 @@ public class NewPropertyCommandTest {
     private static final String AUTHOR = "author";
     private static final String ID = "id";
     private static final String PK_SUFFIX = "_pk";
-    private static final String PK = COLUMN_NAME + PK_SUFFIX;
+    private static final String PK = TABLE + PK_SUFFIX;
     private static final Boolean DONT_SKIP = false;
+
+    private static final JavaType REF_CLASS = new JavaType("test.RefClass");
+    private static final String REF_TABLE = "ref-table";
+    private static final String REF_COLUMN = "ref-column";
+    private static final String MAPPED_BY = "refProperty";
+    private static final String FK = TABLE + "_" + REF_TABLE + "_fk";
 
 
     private static final JavaSymbolName ID_PROPERTY = new JavaSymbolName("id");
     private static final JavaType ID_PROPERTY_TYPE = new JavaType("java.lang.Long");
     private static final String ID_COLUMN_NAME = "id";
     private static final String ID_COLUMN_TYPE = "bigint";
-    private static final String ID_PK = ID_COLUMN_NAME + PK_SUFFIX;
+    private static final String ID_PK = TABLE + PK_SUFFIX;
 
     private static final JavaType STRING_PROPERTY_TYPE = new JavaType("java.lang.String");
     private static final String STRING_COLUMN_TYPE = "varchar2(255)";
@@ -50,7 +58,8 @@ public class NewPropertyCommandTest {
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private ClassCommons classCommons = mock(ClassCommons.class);
-    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(fieldOperations, projectOperations, liquibaseOperations, classCommons);
+    private FieldCommons fieldCommons = mock(FieldCommons.class);
+    private NewPropertyCommands newPropertyCommands = new NewPropertyCommands(fieldOperations, projectOperations, liquibaseOperations, classCommons, fieldCommons);
 
     @Test
     public void commandNewPropertyIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -81,7 +90,7 @@ public class NewPropertyCommandTest {
         when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(true);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, null, DONT_SKIP, AUTHOR, ID);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, null, null, DONT_SKIP, AUTHOR, ID);
     }
 
     @Test
@@ -93,15 +102,15 @@ public class NewPropertyCommandTest {
         Element addColumn = mock(Element.class);
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, null, DONT_SKIP, AUTHOR, ID);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, false, false, false, false, false, null, null, DONT_SKIP, AUTHOR, ID);
 
-        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false, false, null);
+        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, false, false, false, false, false, null);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn), AUTHOR, ID);
     }
 
     @Test
-    public void commandNewPropertyAddNewIdPropertyToClassAndGeneratesMigrationChangeSet() {
+    public void addIdProperty() {
         when(classCommons.exist(CLASS)).thenReturn(true);
         when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
         when(classCommons.tableName(CLASS)).thenReturn(TABLE);
@@ -111,11 +120,51 @@ public class NewPropertyCommandTest {
         when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
         when(liquibaseOperations.addPrimaryKey(Arrays.asList(COLUMN_NAME), TABLE, PK)).thenReturn(addPrimaryKey);
 
-        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, false, false, false, false, null, DONT_SKIP, AUTHOR, ID);
+        newPropertyCommands.newProperty(CLASS, PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, true, false, false, false, false, null, null, DONT_SKIP, AUTHOR, ID);
 
-        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true, false, null);
+        verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, CLASS, true, false, false, false, false, null);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
+    }
+
+    @Test
+    public void addOneToOneProperty() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+        when(classCommons.tableName(REF_CLASS)).thenReturn(REF_TABLE);
+
+        Element addColumn = mock(Element.class);
+        Element addForeignKey = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
+        when(liquibaseOperations.addForeignKey(TABLE, COLUMN_NAME, REF_TABLE, REF_COLUMN, FK)).thenReturn(addForeignKey);
+
+        newPropertyCommands.newProperty(CLASS, PROPERTY, REF_CLASS, COLUMN_NAME, COLUMN_TYPE, false, true, false, false, false, null, REF_COLUMN, DONT_SKIP, AUTHOR, ID);
+
+        verify(fieldOperations, times(1)).addField(PROPERTY, REF_CLASS, COLUMN_NAME, COLUMN_TYPE, CLASS, false, true, false, false, false, null);
+        verify(liquibaseOperations, times(1)).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addForeignKey), AUTHOR, ID);
+    }
+
+    @Test
+    public void addOneToOnePropertyMappedBy() {
+        when(classCommons.exist(CLASS)).thenReturn(true);
+        when(classCommons.hasField(CLASS, PROPERTY)).thenReturn(false);
+        when(classCommons.tableName(CLASS)).thenReturn(TABLE);
+        when(classCommons.tableName(REF_CLASS)).thenReturn(REF_TABLE);
+        FieldMetadata fieldMetadata = mock(FieldMetadata.class);
+        when(classCommons.field(REF_CLASS, new JavaSymbolName(MAPPED_BY))).thenReturn(fieldMetadata);
+
+        Element addColumn = mock(Element.class);
+        Element addForeignKey = mock(Element.class);
+        when(liquibaseOperations.addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE)).thenReturn(addColumn);
+        when(liquibaseOperations.addForeignKey(TABLE, COLUMN_NAME, REF_TABLE, REF_COLUMN, FK)).thenReturn(addForeignKey);
+
+        newPropertyCommands.newProperty(CLASS, PROPERTY, REF_CLASS, COLUMN_NAME, COLUMN_TYPE, false, true, false, false, false, MAPPED_BY, null, DONT_SKIP, AUTHOR, ID);
+
+        verify(fieldOperations, times(1)).addField(PROPERTY, REF_CLASS, COLUMN_NAME, COLUMN_TYPE, CLASS, false, true, false, false, false, MAPPED_BY);
+        verify(liquibaseOperations, never()).addColumn(TABLE, COLUMN_NAME, COLUMN_TYPE);
+        verify(liquibaseOperations, times(1)).createChangeSet(Arrays.<Element>asList(), AUTHOR, ID);
     }
 
     @Test
@@ -131,7 +180,7 @@ public class NewPropertyCommandTest {
 
         newPropertyCommands.addId(CLASS, AUTHOR, ID);
 
-        verify(fieldOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, CLASS, true, false, null);
+        verify(fieldOperations, times(1)).addField(ID_PROPERTY, ID_PROPERTY_TYPE, ID_COLUMN_NAME, ID_COLUMN_TYPE, CLASS, true, false, false, false, false, null);
         verify(liquibaseOperations, times(1)).addColumn(TABLE, ID_COLUMN_NAME, ID_COLUMN_TYPE);
         verify(liquibaseOperations, times(1)).createChangeSet(Arrays.asList(addColumn, addPrimaryKey), AUTHOR, ID);
     }

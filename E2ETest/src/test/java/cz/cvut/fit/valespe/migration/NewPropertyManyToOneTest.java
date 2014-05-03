@@ -8,11 +8,11 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
-public class NewPropertyOneToOneTest extends E2ETest {
+public class NewPropertyManyToOneTest extends E2ETest {
 
     @BeforeClass
     public static void init() throws Exception {
-        runTestScript("newPropertyOneToOne");
+        runTestScript("newPropertyManyToOne");
     }
 
     @Test
@@ -21,12 +21,9 @@ public class NewPropertyOneToOneTest extends E2ETest {
         String orderClassContent = getFileContent(orderClass);
 
         assertTrue(orderClassContent.contains(
-                    "@OneToOne\n" +
+                    "@ManyToOne\n" +
                 "    @JoinColumn(columnDefinition = \"int\", name = \"address_id\")\n" +
                 "    private Address address;"));
-        assertTrue(orderClassContent.contains(
-                    "@OneToOne(mappedBy = \"order\")\n" +
-                "    private Address address2;"));
     }
 
     @Test
@@ -44,12 +41,12 @@ public class NewPropertyOneToOneTest extends E2ETest {
         String migrationContent = getFileContent(migration);
 
         assertTrue(migrationContent.contains(
-                    "<changeSet>\n" +
-                "        <addColumn tableName=\"order\">\n" +
-                "            <column name=\"address_id\" type=\"int\"/>\n" +
-                "        </addColumn>\n" +
-                "        <addForeignKeyConstraint baseColumnNames=\"address_id\" baseTableName=\"order\" constraintName=\"order_address_fk\" referencedColumnNames=\"ref\" referencedTableName=\"address\"/>\n" +
-                "    </changeSet>"));
+                        "<changeSet>\n" +
+                    "        <addColumn tableName=\"order\">\n" +
+                    "            <column name=\"address_id\" type=\"int\"/>\n" +
+                    "        </addColumn>\n" +
+                    "        <addForeignKeyConstraint baseColumnNames=\"address_id\" baseTableName=\"order\" constraintName=\"order_address_fk\" referencedColumnNames=\"ref\" referencedTableName=\"address\"/>\n" +
+                    "    </changeSet>"));
     }
 
 }

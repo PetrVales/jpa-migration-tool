@@ -33,6 +33,9 @@ public interface FieldOperations {
      * @param className name of class where field is added
      * @param id field is id of given class
      * @param oneToOne field is one to one reference
+     * @param oneToMany
+     * @param manyToOne
+     * @param manyToMany
      * @param mappedBy
      */
     void addField(
@@ -42,7 +45,7 @@ public interface FieldOperations {
             String columnType,
             JavaType className,
             boolean id,
-            boolean oneToOne, String mappedBy);
+            boolean oneToOne, boolean oneToMany, boolean manyToOne, boolean manyToMany, String mappedBy);
 
     /**
      * Remove specified field from given class

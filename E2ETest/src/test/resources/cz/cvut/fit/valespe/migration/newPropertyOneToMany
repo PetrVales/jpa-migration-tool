@@ -2,6 +2,5 @@ project --topLevelPackage cz.cvut
 migration setup
 migrate new class --class ~.Order --table order
 migrate new class --class ~.Address --table address
-migrate add oneToMany --field address --class ~.Order --ref ~.Address
-migrate add oneToMany --field xxx --class ~.Order --ref ~.Address --mappedBy xxx
+migrate new property --class ~.Order --property address2 --propertyType ~.Address --column address_id --columnType int --oneToMany --mappedBy order
 exit

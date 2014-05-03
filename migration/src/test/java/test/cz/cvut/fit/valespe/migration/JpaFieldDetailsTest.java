@@ -11,9 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.roo.model.JpaJavaType.ID;
-import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
-import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.*;
 
 public class JpaFieldDetailsTest {
 
@@ -62,7 +60,7 @@ public class JpaFieldDetailsTest {
     }
 
     @Test
-    public void annotatesWithOneToOneWithouMappedBy() {
+    public void annotatesWithOneToOneWithoutMappedBy() {
         JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
         jpaFieldDetails.setOneToOne(true);
 
@@ -74,6 +72,32 @@ public class JpaFieldDetailsTest {
         assertEquals(JOIN_COLUMN, annotations.get(1).getAnnotationType());
         assertEquals(COLUMN_NAME_VALUE, annotations.get(1).getAttributes().get("name").getValue());
         assertEquals(COLUMN_DEFINITION_VALUE, annotations.get(1).getAttributes().get("columnDefinition").getValue());
+    }
+
+    @Test
+    public void annotatesWithManyToOne() {
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
+        jpaFieldDetails.setManyToOne(true);
+
+
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        jpaFieldDetails.decorateAnnotationsList(annotations);
+
+        assertEquals(MANY_TO_ONE, annotations.get(0).getAnnotationType());
+    }
+
+    @Test
+    public void annotatesWithOneToMany() {
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
+        jpaFieldDetails.setOneToMany(true);
+        jpaFieldDetails.setMappedBy(MAPPED_BY_VALES);
+
+
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        jpaFieldDetails.decorateAnnotationsList(annotations);
+
+        assertEquals(ONE_TO_MANY, annotations.get(0).getAnnotationType());
+        assertEquals(MAPPED_BY_VALES, annotations.get(0).getAttributes().get("mappedBy").getValue());
     }
 
 }

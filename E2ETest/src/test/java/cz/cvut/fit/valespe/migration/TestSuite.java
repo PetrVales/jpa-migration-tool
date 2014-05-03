@@ -13,6 +13,8 @@ import java.util.Map;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        NewPropertyManyToOneTest.class,
+        NewPropertyOneToManyTest.class,
         MakeIdTest.class,
         NewPropertyOneToOneTest.class,
         SplitClassTest.class,
