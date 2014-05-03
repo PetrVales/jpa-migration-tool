@@ -63,6 +63,7 @@ public class MergeClassCommands implements CommandMarker {
             @CliOption(key = "table", mandatory = true, help = "The JPA table name to use for this entity") final String table,
             @CliOption(key = "entity", mandatory = false, help = "The JPA table name to use for this entity") final String entity,
             @CliOption(key = "query", mandatory = true, help = "The JPA table name to use for this entity") final String query,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "Change set author") final String author,
             @CliOption(key = "id", mandatory = false, help = "Change set id") final String id) {
         Validate.isTrue(classCommons.exist(classA), "The specified class, '%s', doesn't exist", classA);
@@ -85,10 +86,11 @@ public class MergeClassCommands implements CommandMarker {
         }
 
         for (FieldMetadata field : fieldsB) {
-            if (types.containsKey(fieldCommons.fieldName(field)))
+            final JavaSymbolName fieldName = fieldCommons.fieldName(field);
+            if (types.containsKey(fieldName) && !types.get(fieldName).equals(fieldCommons.fieldType(field)))
                 Validate.isTrue(false, "Fields conflict. Both merged classed contains field %s", fieldCommons.fieldName(field));
-            types.put(fieldCommons.fieldName(field), fieldCommons.fieldType(field));
-            columns.put(fieldCommons.fieldName(field), new String[] {
+            types.put(fieldName, fieldCommons.fieldType(field));
+            columns.put(fieldName, new String[] {
                     fieldCommons.columnName(field), fieldCommons.columnType(field)
             });
             columnNames.add(fieldCommons.columnName(field));
@@ -111,8 +113,10 @@ public class MergeClassCommands implements CommandMarker {
                 columnNames,
                 query
         ));
-        elements.add(liquibaseOperations.dropTable(classCommons.tableName(classA), false));
-        elements.add(liquibaseOperations.dropTable(classCommons.tableName(classB), false));
+        if (!skipDrop) {
+            elements.add(liquibaseOperations.dropTable(classCommons.tableName(classA), false));
+            elements.add(liquibaseOperations.dropTable(classCommons.tableName(classB), false));
+        }
         liquibaseOperations.createChangeSet(elements, author, id);
 
         classOperations.removeClass(classA);

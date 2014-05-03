@@ -55,6 +55,7 @@ public class MovePropertyCommands implements CommandMarker {
             @CliOption(key = "to", mandatory = true, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType toType,
             @CliOption(key = {"", "property"}, mandatory = true, help = "The name of the field to moveProperty") final JavaSymbolName propertyName,
             @CliOption(key = "query", mandatory = true, help = "Query") final String query,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id
         ) {
@@ -68,11 +69,11 @@ public class MovePropertyCommands implements CommandMarker {
         AnnotationAttributeValue<String> columnType = column.getAttribute("columnDefinition");
 
         fieldOperations.addField(propertyName, property.getFieldType(), columnName.getValue(), columnType.getValue(), toType);
-        moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails, query, author, id);
+        moveColumn(columnName.getValue(), columnType.getValue(), fromTypeDetails, toTypeDetails, query, skipDrop, author, id);
         fieldOperations.removeField(propertyName, fromType);
     }
 
-    private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, String author, String id) {
+    private void moveColumn(String columnName, String columnType, ClassOrInterfaceTypeDetails fromTypeDetails, ClassOrInterfaceTypeDetails toTypeDetails, String query, Boolean skipDrop, String author, String id) {
         AnnotationMetadata fromEntity = fromTypeDetails.getAnnotation(JpaJavaType.TABLE);
         AnnotationAttributeValue<String> fromTable = fromEntity.getAttribute("name");
         AnnotationMetadata toEntity = toTypeDetails.getAnnotation(JpaJavaType.TABLE);
@@ -81,7 +82,8 @@ public class MovePropertyCommands implements CommandMarker {
         List<Element> elements = new LinkedList<Element>();
         elements.add(liquibaseOperations.addColumn(toTable.getValue(), columnName, columnType));
         elements.add(liquibaseOperations.copyColumnData(fromTable.getValue(), toTable.getValue(), columnName, query));
-        elements.add(liquibaseOperations.dropColumn(fromTable.getValue(), columnName));
+        if (!skipDrop)
+            elements.add(liquibaseOperations.dropColumn(fromTable.getValue(), columnName));
 
         liquibaseOperations.createChangeSet(elements, author, id);
     }

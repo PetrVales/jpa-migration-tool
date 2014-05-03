@@ -30,6 +30,7 @@ public class RemoveParentCommands implements CommandMarker {
     @CliCommand(value = "migrate remove parent", help = "Merge two classes into one and generate migration")
     public void removeParent(
             @CliOption(key = "class", mandatory = true, help = "The java type to apply this annotation to") JavaType target,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
         classOperations.removeParent(target);

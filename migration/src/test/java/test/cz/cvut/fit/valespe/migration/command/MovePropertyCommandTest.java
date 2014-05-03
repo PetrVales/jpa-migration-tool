@@ -36,6 +36,7 @@ public class MovePropertyCommandTest {
     private static final String QUERY = "query";
     private static final String AUTHOR = "author";
     private static final String ID = "id";
+    private static final Boolean DONT_SKIP = false;
 
 
     private FieldOperations fieldOperations = mock(FieldOperations.class);
@@ -79,7 +80,7 @@ public class MovePropertyCommandTest {
         when(liquibaseOperations.copyColumnData(FROM_TABLE, TO_TABLE, COLUMN_NAME, QUERY)).thenReturn(copyColumnData);
         when(liquibaseOperations.dropColumn(FROM_TABLE, COLUMN_NAME)).thenReturn(dropColumn);
 
-        movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY, QUERY, AUTHOR, ID);
+        movePropertyCommands.moveProperty(FROM_CLASS, TO_CLASS, PROPERTY, QUERY, DONT_SKIP, AUTHOR, ID);
 
         verify(fieldOperations, times(1)).addField(PROPERTY, PROPERTY_TYPE, COLUMN_NAME, COLUMN_TYPE, TO_CLASS);
         verify(fieldOperations, times(1)).removeField(PROPERTY, FROM_CLASS);

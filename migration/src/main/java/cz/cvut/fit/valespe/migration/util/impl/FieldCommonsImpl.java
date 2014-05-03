@@ -23,15 +23,23 @@ public class FieldCommonsImpl implements FieldCommons {
     }
 
     public String columnName(FieldMetadata field) {
-        AnnotationMetadata column = field.getAnnotation(JpaJavaType.COLUMN);
+        AnnotationMetadata column = getAnootation(field);
         AnnotationAttributeValue<String> columnName = column.getAttribute("name");
         return columnName.getValue();
     }
 
     public String columnType(FieldMetadata field) {
-        AnnotationMetadata column = field.getAnnotation(JpaJavaType.COLUMN);
+        AnnotationMetadata column = getAnootation(field);
         AnnotationAttributeValue<String> columnName = column.getAttribute("columnDefinition");
         return columnName.getValue();
+    }
+
+    private AnnotationMetadata getAnootation(FieldMetadata field) {
+        AnnotationMetadata column = field.getAnnotation(JpaJavaType.COLUMN);
+        if (column != null)
+            return column;
+        else
+            return field.getAnnotation(JpaJavaType.JOIN_COLUMN);
     }
 
 }

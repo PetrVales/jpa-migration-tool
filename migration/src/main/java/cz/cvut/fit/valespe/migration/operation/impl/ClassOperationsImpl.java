@@ -90,8 +90,10 @@ public class ClassOperationsImpl implements ClassOperations {
         targetBuilder.setExtendsTypes(Arrays.asList(parent));
         targetBuilder.addAnnotation(getDiscriminatorValueBuilder(target.getSimpleTypeName().toUpperCase()));
 
-        parentBuilder.addAnnotation(getInheritanceTypeBuilder("JOINED"));
-        parentBuilder.addAnnotation(getDiscriminatorColumnBuilder(parent.getSimpleTypeName().toLowerCase() + "_type"));
+        if (parentBuilder.getDeclaredTypeAnnotation(JpaJavaType.INHERITANCE) == null)
+            parentBuilder.addAnnotation(getInheritanceTypeBuilder("JOINED"));
+        if (parentBuilder.getDeclaredTypeAnnotation(JpaJavaType.DISCRIMINATOR_COLUMN) == null)
+            parentBuilder.addAnnotation(getDiscriminatorColumnBuilder(parent.getSimpleTypeName().toLowerCase() + "_type"));
 
         removeClass(target);
         removeClass(parent);

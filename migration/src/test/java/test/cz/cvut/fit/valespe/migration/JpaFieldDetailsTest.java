@@ -11,23 +11,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.roo.model.JpaJavaType.ID;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 
 public class JpaFieldDetailsTest {
 
     private static final String PHYSICAL_TYPE_IDENTIFIER = "MID:" + PhysicalTypeIdentifier.class.getName() + "#?";
     private static final JavaType FIELD_TYPE = new JavaType("java.lang.Integer");
     private static final JavaSymbolName FIELD_NAME = new JavaSymbolName("fieldName");
-    private static final String COLUMN_DEFINITION = "column-definition";
+    private static final String COLUMN_NAME_VALUE = "column-name-value";
+    private static final String COLUMN_DEFINITION_VALUE = "column-definition-value";
+    private static final String MAPPED_BY_VALES = "mapped-by-value";
 
     @Test
     public void annotatesWithColumnDefinitionAttr() {
-        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME);
-        jpaFieldDetails.setColumnDefinition(COLUMN_DEFINITION);
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
 
         List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         jpaFieldDetails.decorateAnnotationsList(annotations);
 
-        assertEquals(COLUMN_DEFINITION, annotations.get(0).getAttributes().get("columnDefinition").getValue());
+        assertEquals(COLUMN_NAME_VALUE, annotations.get(0).getAttributes().get("name").getValue());
+        assertEquals(COLUMN_DEFINITION_VALUE, annotations.get(0).getAttributes().get("columnDefinition").getValue());
+    }
+
+    @Test
+    public void annotatesWithId() {
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
+        jpaFieldDetails.setId(true);
+
+
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        jpaFieldDetails.decorateAnnotationsList(annotations);
+
+        assertEquals(ID, annotations.get(1).getAnnotationType());
+    }
+
+    @Test
+    public void annotatesWithOneToOne() {
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
+        jpaFieldDetails.setOneToOne(true);
+        jpaFieldDetails.setMappedBy(MAPPED_BY_VALES);
+
+
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        jpaFieldDetails.decorateAnnotationsList(annotations);
+
+        assertEquals(ONE_TO_ONE, annotations.get(0).getAnnotationType());
+        assertEquals(MAPPED_BY_VALES, annotations.get(0).getAttributes().get("mappedBy").getValue());
+    }
+
+    @Test
+    public void annotatesWithOneToOneWithouMappedBy() {
+        JpaFieldDetails jpaFieldDetails = new JpaFieldDetails(PHYSICAL_TYPE_IDENTIFIER, FIELD_TYPE, FIELD_NAME, COLUMN_NAME_VALUE, COLUMN_DEFINITION_VALUE);
+        jpaFieldDetails.setOneToOne(true);
+
+
+        List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        jpaFieldDetails.decorateAnnotationsList(annotations);
+
+        assertEquals(ONE_TO_ONE, annotations.get(0).getAnnotationType());
+        assertEquals(JOIN_COLUMN, annotations.get(1).getAnnotationType());
+        assertEquals(COLUMN_NAME_VALUE, annotations.get(1).getAttributes().get("name").getValue());
+        assertEquals(COLUMN_DEFINITION_VALUE, annotations.get(1).getAttributes().get("columnDefinition").getValue());
     }
 
 }

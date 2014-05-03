@@ -2,6 +2,7 @@ package cz.cvut.fit.valespe.migration.command;
 
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,7 +28,7 @@ public class RemoveClassCommands implements CommandMarker {
 
     @Reference private ClassOperations classOperations;
     @Reference private ProjectOperations projectOperations;
-    @Reference private TypeLocationService typeLocationService;
+    @Reference private ClassCommons classCommons;
     @Reference private LiquibaseOperations liquibaseOperations;
 
     public RemoveClassCommands() { }
@@ -35,11 +36,11 @@ public class RemoveClassCommands implements CommandMarker {
     public RemoveClassCommands(
             ClassOperations classOperations,
             ProjectOperations projectOperations,
-            TypeLocationService typeLocationService,
+            ClassCommons classCommons,
             LiquibaseOperations liquibaseOperations) {
         this.classOperations = classOperations;
         this.projectOperations = projectOperations;
-        this.typeLocationService = typeLocationService;
+        this.classCommons = classCommons;
         this.liquibaseOperations = liquibaseOperations;
     }
 
@@ -51,21 +52,17 @@ public class RemoveClassCommands implements CommandMarker {
     @CliCommand(value = "migrate remove class", help = "Remove class and its aspects and make record in migration.xml")
     public void removeClass(
             @CliOption(key = {"", "class"}, mandatory = true, help = "The java type to apply this annotation to") JavaType target,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(target);
-        Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", target.getSimpleTypeName());
+        Validate.notNull(classCommons.exist(target), "The type specified, '%s', doesn't exist", target.getSimpleTypeName());
 
         classOperations.removeClass(target);
-        removeTable(javaTypeDetails, author, id);
-    }
-
-    private void removeTable(ClassOrInterfaceTypeDetails javaTypeDetails, String author, String id) {
-        AnnotationMetadata migrationEntity = javaTypeDetails.getAnnotation(JpaJavaType.TABLE);
-        AnnotationAttributeValue<String> table = migrationEntity.getAttribute("name");
-        final Element element = liquibaseOperations.dropTable(table == null ? "" : table.getValue(), false);
-        liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
+        if (!skipDrop) {
+            final Element element = liquibaseOperations.dropTable(classCommons.tableName(target), false);
+            liquibaseOperations.createChangeSet(Arrays.asList(element), author, id);
+        }
     }
 
 }

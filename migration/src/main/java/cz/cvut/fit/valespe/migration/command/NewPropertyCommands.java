@@ -19,6 +19,7 @@ import org.w3c.dom.Element;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
@@ -29,6 +30,9 @@ public class NewPropertyCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private LiquibaseOperations liquibaseOperations;
     @Reference private ClassCommons classCommons;
+
+    private final Logger log =
+            Logger.getLogger(getClass().getName());
 
     public NewPropertyCommands() {}
 
@@ -61,12 +65,14 @@ public class NewPropertyCommands implements CommandMarker {
             @CliOption(key = "oneToMany", mandatory = false, help = "@OneToMany", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean oneToMany,
             @CliOption(key = "manyToOne", mandatory = false, help = "@ManyToOne", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean manyToOne,
             @CliOption(key = "manyToMany", mandatory = false, help = "@ManyToMany", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean manyToMany,
+            @CliOption(key = "mappedBy", mandatory = false, help = "Reference mappedBy values") final String mappedBy,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
         validate(typeName, propertyName);
 
-        fieldOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk);
+        fieldOperations.addField(propertyName, propertyType, columnName, columnType, typeName, pk, oneToOne, mappedBy);
         addColumn(typeName, columnName, columnType, pk, author, id);
     }
 
@@ -79,7 +85,7 @@ public class NewPropertyCommands implements CommandMarker {
         final JavaSymbolName propertyName = new JavaSymbolName("id");
         validate(typeName, propertyName);
 
-        fieldOperations.addField(propertyName, new JavaType("java.lang.Long"), "id", "bigint", typeName, true);
+        fieldOperations.addField(propertyName, new JavaType("java.lang.Long"), "id", "bigint", typeName, true, false, null);
         addColumn(typeName, "id", "bigint", true, author, id);
     }
 

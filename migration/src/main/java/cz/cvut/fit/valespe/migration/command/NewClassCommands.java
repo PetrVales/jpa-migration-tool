@@ -41,6 +41,7 @@ public class NewClassCommands implements CommandMarker {
             @CliOption(key = {"", "class"}, optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType className,
             @CliOption(key = "table", mandatory = true, help = "The JPA table name to use for this entity") final String table,
             @CliOption(key = "entity", mandatory = false, help = "The name used to refer to the entity in queries") final String entity,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "The name used to refer to the entity in queries") final String author,
             @CliOption(key = "id", mandatory = false, help = "The name used to refer to the entity in queries") final String id) {
         classOperations.createClass(className, entity == null ? table : entity, table);

@@ -25,6 +25,7 @@ public class MergeClassCommandsTest extends MigrationTest {
     private static final String AUTOR = "author";
     private static final String ID = "id";
     private static final String QUERY = "query";
+    private static final Boolean DONT_SKIP = false;
 
     private ClassOperations classOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -62,7 +63,7 @@ public class MergeClassCommandsTest extends MigrationTest {
         when(classCommons.exist(A_CLASS)).thenReturn(true);
         when(classCommons.exist(B_CLASS)).thenReturn(true);
 
-        mergeClassCommands.mergeClass(CLASS, A_CLASS, B_CLASS, TABLE, ENTITY, QUERY, AUTOR, ID);
+        mergeClassCommands.mergeClass(CLASS, A_CLASS, B_CLASS, TABLE, ENTITY, QUERY, DONT_SKIP, AUTOR, ID);
 
         verify(classOperations, times(1)).createClass(CLASS, ENTITY, TABLE);
 //        verify(classOperations, times(1)).createTable(classOrInterfaceTypeDetails);

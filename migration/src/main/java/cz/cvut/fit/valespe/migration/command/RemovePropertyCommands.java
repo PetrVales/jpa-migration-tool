@@ -57,6 +57,7 @@ public class RemovePropertyCommands implements CommandMarker {
     public void removeProperty(
             @CliOption(key = "class", mandatory = true, help = "Name of type where field should be removed") JavaType typeName,
             @CliOption(key = {"", "property"}, mandatory = true, help = "Name of field to remove") JavaSymbolName propertyName,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "Change set author") final String author,
             @CliOption(key = "id", mandatory = false, help = "Change set id") final String id
     ) {
@@ -67,10 +68,11 @@ public class RemovePropertyCommands implements CommandMarker {
         FieldMetadata field = classCommons.field(typeName, propertyName);
         String columnName = fieldCommons.columnName(field);
         fieldOperations.removeField(propertyName, typeName);
-        liquibaseOperations.createChangeSet(
-                Arrays.asList(
-                        liquibaseOperations.dropColumn(tableName, columnName)
-                ), author, id);
+        if (!skipDrop)
+            liquibaseOperations.createChangeSet(
+                    Arrays.asList(
+                            liquibaseOperations.dropColumn(tableName, columnName)
+                    ), author, id);
     }
 
 }

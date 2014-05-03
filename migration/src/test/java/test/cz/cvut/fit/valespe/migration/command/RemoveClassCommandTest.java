@@ -3,13 +3,9 @@ package test.cz.cvut.fit.valespe.migration.command;
 import cz.cvut.fit.valespe.migration.command.RemoveClassCommands;
 import cz.cvut.fit.valespe.migration.operation.ClassOperations;
 import cz.cvut.fit.valespe.migration.operation.LiquibaseOperations;
+import cz.cvut.fit.valespe.migration.util.ClassCommons;
 import org.junit.Test;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.w3c.dom.Element;
 
@@ -26,13 +22,14 @@ public class RemoveClassCommandTest {
     private static final String TABLE = "table";
     private static final String AUTHOR = "author";
     private static final String ID = "ID";
+    private static final Boolean DONT_SKIP = false;
 
     private ClassOperations classOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
-    private TypeLocationService typeLocationService = mock(TypeLocationService.class);
+    private ClassCommons classCommons = mock(ClassCommons.class);
     private LiquibaseOperations liquibaseOperations = mock(LiquibaseOperations.class);
     private RemoveClassCommands removeClassCommand =
-            new RemoveClassCommands(classOperations, projectOperations, typeLocationService, liquibaseOperations);
+            new RemoveClassCommands(classOperations, projectOperations, classCommons, liquibaseOperations);
 
     @Test
     public void commandRemoveClassIsAvailableWhenProjectAndMigrationFileAreCreated() {
@@ -59,17 +56,13 @@ public class RemoveClassCommandTest {
 
     @Test
     public void commandRemoveClassRemovesClassAndGeneratesMigrationChangeSet() {
-        AnnotationAttributeValue tableMock = mock(AnnotationAttributeValue.class);
-        when(tableMock.getValue()).thenReturn(TABLE);
-        AnnotationMetadata annotationMetadata = mock(AnnotationMetadata.class);
-        when(annotationMetadata.getAttribute("name")).thenReturn(tableMock);
-        ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        when(classOrInterfaceTypeDetails.getAnnotation(JpaJavaType.TABLE)).thenReturn(annotationMetadata);
-        when(typeLocationService.getTypeDetails(CLASS_TO_REMOVE)).thenReturn(classOrInterfaceTypeDetails);
+        when(classCommons.exist(CLASS_TO_REMOVE)).thenReturn(true);
+        when(classCommons.tableName(CLASS_TO_REMOVE)).thenReturn(TABLE);
+
         Element dropTable = mock(Element.class);
         when(liquibaseOperations.dropTable(TABLE, false)).thenReturn(dropTable);
 
-        removeClassCommand.removeClass(CLASS_TO_REMOVE, AUTHOR, ID);
+        removeClassCommand.removeClass(CLASS_TO_REMOVE, DONT_SKIP, AUTHOR, ID);
 
         verify(classOperations, times(1)).removeClass(CLASS_TO_REMOVE);
         verify(liquibaseOperations, times(1)).dropTable(TABLE, false);

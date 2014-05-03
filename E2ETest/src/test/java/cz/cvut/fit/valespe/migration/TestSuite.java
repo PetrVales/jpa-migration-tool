@@ -13,6 +13,8 @@ import java.util.Map;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        MakeIdTest.class,
+        NewPropertyOneToOneTest.class,
         SplitClassTest.class,
         PushDownTest.class,
         PullUpTest.class,
@@ -28,7 +30,7 @@ import java.util.Map;
         AddStringField.class,
         AddIntegerField.class,
         AddBooleanField.class,
-        NewPropertyOneToManyTest.class,
+        NewPropertyOneToOneTest.class,
         RemoveClassTest.class,
         RemovePropertyTest.class,
         MergeClassTest.class,

@@ -31,4 +31,6 @@ public interface ClassCommons {
     public boolean exist(JavaType typeName);
 
     public boolean hasField(JavaType typeName, JavaSymbolName fieldName);
+
+    public JavaType getParentType(JavaType target);
 }

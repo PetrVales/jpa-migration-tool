@@ -22,6 +22,7 @@ public class NewClassCommandsTest {
     private static final String TABLE = "table";
     private static final String AUTHOR = "author";
     private static final String ID = "id";
+    private static final Boolean DONT_SKIP = false;
 
     private ClassOperations newclassOperations = mock(ClassOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -56,7 +57,7 @@ public class NewClassCommandsTest {
         Element createTable = mock(Element.class);
         when(liquibaseOperations.createTable(TABLE)).thenReturn(createTable);
 
-        newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME, AUTHOR, ID);
+        newclassCommands.newClass(CLASS, TABLE, ENTITY_NAME, DONT_SKIP, AUTHOR, ID);
 
         verify(newclassOperations, times(1)).createClass(CLASS, ENTITY_NAME, TABLE);
         verify(liquibaseOperations, times(1)).createTable(TABLE);
@@ -68,7 +69,7 @@ public class NewClassCommandsTest {
         Element createTable = mock(Element.class);
         when(liquibaseOperations.createTable(TABLE)).thenReturn(createTable);
 
-        newclassCommands.newClass(CLASS, TABLE, null, AUTHOR, ID);
+        newclassCommands.newClass(CLASS, TABLE, null, DONT_SKIP, AUTHOR, ID);
 
         verify(newclassOperations, times(1)).createClass(CLASS, TABLE, TABLE);
         verify(liquibaseOperations, times(1)).createTable(TABLE);

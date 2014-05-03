@@ -26,6 +26,7 @@ public class RemovePropertyCommandTest {
     private static final String TABLE = "table";
     public static final String AUTHOR = "author";
     public static final String ID = "id";
+    private static final Boolean DONT_SKIP = false;
 
     private FieldOperations fieldOperations = mock(FieldOperations.class);
     private ProjectOperations projectOperations = mock(ProjectOperations.class);
@@ -69,7 +70,7 @@ public class RemovePropertyCommandTest {
         when(fieldCommons.columnName(fieldMock)).thenReturn(COLUMN_NAME);
         when(liquibaseOperations.dropColumn(TABLE, COLUMN_NAME)).thenReturn(dropColumn);
 
-        removePropertyCommands.removeProperty(CLASS, PROPERTY, AUTHOR, ID);
+        removePropertyCommands.removeProperty(CLASS, PROPERTY, DONT_SKIP, AUTHOR, ID);
 
         verify(fieldOperations, times(1)).removeField(PROPERTY, CLASS);
         verify(liquibaseOperations, times(1)).dropColumn(TABLE, COLUMN_NAME);

@@ -30,6 +30,12 @@ public class ClassCommonsImpl implements ClassCommons {
         return typeLocationService.getTypeDetails(typeName);
     }
 
+    @Override
+    public JavaType getParentType(JavaType target) {
+        final ClassOrInterfaceTypeDetails targetDetails = classDetails(target);
+        return targetDetails.getSuperclass().getName();
+    }
+
     public String tableName(JavaType typeName) {
         return tableName(classDetails(typeName));
     }

@@ -1,8 +1,0 @@
-project --topLevelPackage cz.cvut
-migration setup
-migrate new class --class ~.Address --table address
-migrate new property --class ~.Address --property id --propertyType java.lang.Long --column id --columnType integer
-migrate new class --class ~.Order --table order
-migrate new property --class ~.Order --property orderTotal --propertyType java.lang.Integer --column order_total --columnType integer
-migrate new property --class ~.Order --property address --propertyType ~.Address --column address_id --columnType integer
-exit

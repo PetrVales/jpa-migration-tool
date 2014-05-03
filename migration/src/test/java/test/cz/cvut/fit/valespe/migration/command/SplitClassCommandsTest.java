@@ -42,6 +42,7 @@ public class SplitClassCommandsTest extends MigrationTest {
     private static final String B_COLUMN_NAME = "b";
     private static final JavaType PROPERTY_TYPE = new JavaType("test.Type");
     private static final String COLUMN_TYPE = "column-type";
+    private static final Boolean DONT_SKIP = false;
 
     private static final JavaType A_CLASS = new JavaType("test.AClass");
     private static final JavaType B_CLASS = new JavaType("test.BClass");
@@ -134,7 +135,7 @@ public class SplitClassCommandsTest extends MigrationTest {
         Element copyB = mock(Element.class);
         when(liquibaseOperations.copyData(ORIGINAL_TABLE, B_TABLE, Arrays.asList(COMMON_COLUMN_NAME, B_COLUMN_NAME), B_QUERY)).thenReturn(copyB);
 
-        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, A_QUERY, B_QUERY, AUTHOR, ID);
+        splitClassCommands.splitClass(ORIGINAL_CLASS, A_CLASS, B_CLASS, A_TABLE, B_TABLE, null, null, A_PROPERTIES, B_PROPERTIES, A_QUERY, B_QUERY, DONT_SKIP, AUTHOR, ID);
 
         verify(classOperations, times(1)).createClass(A_CLASS, A_TABLE, A_TABLE);
         verify(classOperations, times(1)).createClass(B_CLASS, B_TABLE, B_TABLE);

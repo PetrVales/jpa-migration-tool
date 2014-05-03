@@ -15,6 +15,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.process.manager.FileManager;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.List;
 public class FieldOperationsImpl implements FieldOperations {
 
     @Reference private TypeManagementService typeManagementService;
+    @Reference private FileManager fileManager;
     @Reference private ClassCommons classCommons;
 
     public FieldOperationsImpl() { }
@@ -36,21 +39,18 @@ public class FieldOperationsImpl implements FieldOperations {
 
     @Override
     public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className) {
-        addField(propertyName, propertyType, columnName, columnType, className, false);
+        addField(propertyName, propertyType, columnName, columnType, className, false, false, null);
     }
 
     @Override
-    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className, boolean id) {
+    public void addField(JavaSymbolName propertyName, JavaType propertyType, String columnName, String columnType, JavaType className, boolean id, boolean oneToOne, String mappedBy) {
         final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
         final String physicalTypeIdentifier = classDetails.getDeclaredByMetadataId();
-        final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName);
-        if (columnName != null) {
-            fieldDetails.setColumn(columnName);
-        }
-        if (columnType != null) {
-            fieldDetails.setColumnDefinition(columnType);
-        }
+        final JpaFieldDetails fieldDetails = new JpaFieldDetails(physicalTypeIdentifier, propertyType, propertyName, columnName, columnType);
+
         fieldDetails.setId(id);
+        fieldDetails.setOneToOne(oneToOne);
+        fieldDetails.setMappedBy(mappedBy);
 
         insertField(fieldDetails);
     }
@@ -84,4 +84,32 @@ public class FieldOperationsImpl implements FieldOperations {
         typeManagementService.addField(fieldBuilder.build());
     }
 
+    @Override
+    public void makeFieldId(JavaType className, JavaSymbolName fieldName) {
+//        final FieldMetadata field = classCommons.field(className, fieldName);
+//        final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+//
+//        removeField(fieldName, className);
+//        fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(JpaJavaType.ID));
+//        typeManagementService.addField(fieldBuilder.build());
+
+        final ClassOrInterfaceTypeDetails classDetails = classCommons.classDetails(className);
+        List<? extends FieldMetadata> fields = classDetails.getDeclaredFields();
+        List<FieldMetadataBuilder> fieldsBuilders = new ArrayList<FieldMetadataBuilder>(fields.size());
+
+        for (FieldMetadata fieldMetadata : fields) {
+            if (fieldMetadata.getFieldName().compareTo(fieldName) != 0) {
+                fieldsBuilders.add(new FieldMetadataBuilder(fieldMetadata));
+            } else {
+                final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldMetadata);
+                fieldBuilder.addAnnotation(new AnnotationMetadataBuilder(JpaJavaType.ID));
+                fieldsBuilders.add(fieldBuilder);
+            }
+        }
+
+        ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(classDetails);
+        builder.setDeclaredFields(fieldsBuilders);
+
+        typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+    }
 }

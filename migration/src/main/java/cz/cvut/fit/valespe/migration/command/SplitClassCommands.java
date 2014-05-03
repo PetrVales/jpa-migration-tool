@@ -65,6 +65,7 @@ public class SplitClassCommands implements CommandMarker {
             @CliOption(key = "propertiesB", mandatory = true, help = "The name of the field to add") final String propertiesBText,
             @CliOption(key = "queryA", mandatory = true, help = "The name of the field to add") final String queryA,
             @CliOption(key = "queryB", mandatory = true, help = "The name of the field to add") final String queryB,
+            @CliOption(key = "skipDrop", mandatory = false, help = "skip dropping any data", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") final Boolean skipDrop,
             @CliOption(key = "author", mandatory = false, help = "author") final String author,
             @CliOption(key = "id", mandatory = false, help = "id") final String id
     ) {
@@ -110,7 +111,8 @@ public class SplitClassCommands implements CommandMarker {
         elements.add(liquibaseOperations.copyData(table, tableB, columnsB, queryB));
 
         classOperations.removeClass(target);
-        elements.add(liquibaseOperations.dropTable(table, true));
+        if (!skipDrop)
+            elements.add(liquibaseOperations.dropTable(table, true));
 
         liquibaseOperations.createChangeSet(elements, author, id);
     }

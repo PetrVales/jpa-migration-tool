@@ -32,6 +32,8 @@ public interface FieldOperations {
      * @param columnType type of column
      * @param className name of class where field is added
      * @param id field is id of given class
+     * @param oneToOne field is one to one reference
+     * @param mappedBy
      */
     void addField(
             JavaSymbolName propertyName,
@@ -39,8 +41,8 @@ public interface FieldOperations {
             String columnName,
             String columnType,
             JavaType className,
-            boolean id
-    );
+            boolean id,
+            boolean oneToOne, String mappedBy);
 
     /**
      * Remove specified field from given class
@@ -52,4 +54,13 @@ public interface FieldOperations {
             JavaType className
     );
 
+    /**
+     * Make field id, annotated it with @Id
+     * @param typeName
+     * @param propertyName
+     */
+    void makeFieldId(
+            JavaType typeName,
+            JavaSymbolName propertyName
+    );
 }

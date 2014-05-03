@@ -104,8 +104,8 @@ public class SplitClassTest extends E2ETest {
                 "        <addColumn tableName=\"b_table\">\n" +
                 "            <column name=\"common\" type=\"integer\"/>\n" +
                 "        </addColumn>\n" +
-                "        <sql>INSERT INTO a_table(a, common) (SELECT a, common FROM original WHERE queryA)</sql>\n" +
-                "        <sql>INSERT INTO b_table(b, common) (SELECT b, common FROM original WHERE queryB)</sql>\n" +
+                "        <sql>INSERT INTO a_table(a, common) (SELECT a, common FROM original WHERE 1 = 1)</sql>\n" +
+                "        <sql>INSERT INTO b_table(b, common) (SELECT b, common FROM original WHERE 1 = 1)</sql>\n" +
                 "        <dropTable cascadeConstraints=\"true\" tableName=\"original\"/>\n" +
                 "    </changeSet>"));
     }
